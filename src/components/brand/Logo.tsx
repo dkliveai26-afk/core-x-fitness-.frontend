@@ -11,9 +11,9 @@ export function Logo({ className = '' }: LogoProps) {
       <Image
         src="/gymlogo1.png"
         alt="CORE X FITNESS"
-        width={260}
-        height={80}
-        className="w-[140px] sm:w-[180px] lg:w-[210px] h-auto object-contain transition-transform duration-300 hover:scale-[1.02] filter drop-shadow-md"
+        width={320}
+        height={90}
+        className="w-[200px] sm:w-[250px] lg:w-[290px] h-auto object-contain transition-transform duration-300 hover:scale-[1.02] filter drop-shadow-lg"
         priority
       />
     </div>

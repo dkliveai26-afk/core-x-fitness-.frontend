@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
@@ -31,14 +31,13 @@ const disciplines = [
 
 export function TrainingDisciplinesSection() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeIdx, setActiveIdx] = useState(0);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start end', 'end start'],
   });
 
-  const headingY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
+  const headingY = useTransform(scrollYProgress, [0, 1], [-20, 20]);
 
   return (
     <section
@@ -48,12 +47,19 @@ export function TrainingDisciplinesSection() {
     >
       <div className="max-w-7xl mx-auto space-y-20 z-10 relative">
         {/* Section Header */}
-        <motion.div style={{ y: headingY }} className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/10">
+        <motion.div
+          style={{ y: headingY }}
+          initial={{ opacity: 0, x: -60 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/10"
+        >
           <div className="space-y-3">
             <span className="text-xs font-mono tracking-[0.35em] text-core-red uppercase font-bold">
               02 / TRAINING DISCIPLINES
             </span>
-            <h2 className="font-display font-black text-4xl sm:text-6xl uppercase tracking-wider text-white">
+            <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white max-w-full break-words">
               ENGINEERED FOR <span className="text-core-red">PERFORMANCE</span>
             </h2>
           </div>
@@ -68,10 +74,10 @@ export function TrainingDisciplinesSection() {
             return (
               <motion.div
                 key={item.id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-100px' }}
-                transition={{ duration: 0.7, delay: idx * 0.15 }}
+                initial={{ opacity: 0, x: -70 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.85, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
                 className="group relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-8 border-b border-white/10"
               >
                 {/* Discipline Info */}
@@ -85,7 +91,7 @@ export function TrainingDisciplinesSection() {
                     </span>
                   </div>
 
-                  <h3 className="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-wider text-white group-hover:text-core-red transition-colors duration-500">
+                  <h3 className="font-display font-extrabold text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white group-hover:text-core-red transition-colors duration-500 max-w-full break-words">
                     {item.title}
                   </h3>
 
@@ -104,7 +110,7 @@ export function TrainingDisciplinesSection() {
 
                 {/* Editorial Visual Frame */}
                 <div className="lg:col-span-6">
-                  <div className="relative h-[320px] sm:h-[400px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:border-core-red/40 transition-colors duration-500">
+                  <div className="relative h-[300px] sm:h-[380px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:border-core-red/40 transition-colors duration-500">
                     <Image
                       src={item.image}
                       alt={item.title}

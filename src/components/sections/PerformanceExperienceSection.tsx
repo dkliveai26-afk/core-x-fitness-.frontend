@@ -19,7 +19,7 @@ export function PerformanceExperienceSection() {
     offset: ['start end', 'end start'],
   });
 
-  const bgY = useTransform(scrollYProgress, [0, 1], [-80, 80]);
+  const bgY = useTransform(scrollYProgress, [0, 1], [-60, 60]);
 
   return (
     <section
@@ -39,35 +39,41 @@ export function PerformanceExperienceSection() {
       </motion.div>
 
       <div className="max-w-7xl mx-auto w-full z-10 space-y-24">
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
+        {/* Section Header with Left Entrance */}
+        <motion.div
+          initial={{ opacity: 0, x: -60 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center sm:text-left max-w-3xl space-y-4"
+        >
           <span className="text-xs font-mono tracking-[0.4em] text-core-red uppercase font-bold">
             03 / PERFORMANCE ARCHITECTURE
           </span>
-          <h2 className="font-display font-black text-4xl sm:text-6xl md:text-7xl uppercase tracking-wider text-white">
+          <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-7xl uppercase tracking-tight text-white break-words max-w-full">
             THE ATHLETIC <span className="text-core-red">ATMOSPHERE</span>
           </h2>
           <p className="text-xs font-mono text-core-muted tracking-widest uppercase">
             CRAFTED FOR UNFORGIVING DISCIPLINE AND ABSOLUTE FOCUS
           </p>
-        </div>
+        </motion.div>
 
-        {/* Metrics Grid (Minimal Editorial Typography) */}
+        {/* Metrics Grid (Minimal Cards with Staggered Left Entrance) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {performanceMetrics.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="p-8 rounded-2xl bg-core-dark/60 backdrop-blur-xl border border-white/10 hover:border-core-red/40 transition-all duration-500 flex flex-col justify-between group"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.75, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              className="p-8 rounded-2xl bg-core-dark/60 backdrop-blur-xl border border-white/10 hover:border-core-red/40 transition-all duration-500 flex flex-col justify-between group shadow-xl"
             >
               <div>
                 <span className="text-[10px] font-mono tracking-[0.3em] text-core-muted uppercase block mb-4">
                   METRIC 0{index + 1}
                 </span>
-                <div className="font-display font-black text-5xl sm:text-6xl text-white tracking-wider group-hover:text-core-red transition-colors duration-300">
+                <div className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight group-hover:text-core-red transition-colors duration-300">
                   {stat.value}
                 </div>
                 <div className="text-xs font-mono text-core-red tracking-widest uppercase font-bold mt-1">

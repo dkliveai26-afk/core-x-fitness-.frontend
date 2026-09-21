@@ -12,13 +12,13 @@ export function HeroVideo() {
   const currentTimeRef = useRef<number>(0);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Track scroll progress through the 350vh section container
+  // Track scroll progress through the 480vh section container for generous full-video scroll distance
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   });
 
-  // Setup video metadata and smooth LERP scrubbing loop
+  // Setup video metadata and smooth LERP scrubbing loop for the new videoclip.mp4
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -37,17 +37,17 @@ export function HeroVideo() {
       video.addEventListener('loadedmetadata', handleLoadedMetadata);
     }
 
-    // Smooth RAF loop with LERP interpolation for 100% stutter-free scrubbing
+    // Ultra-smooth RAF loop with LERP interpolation for buttery motion without frame jumps
     const updateVideoTime = () => {
       if (videoRef.current && videoDuration > 0) {
         const diff = targetTimeRef.current - currentTimeRef.current;
         if (Math.abs(diff) > 0.001) {
-          currentTimeRef.current += diff * 0.15; // Smooth lerp speed
+          currentTimeRef.current += diff * 0.12; // Smooth lerp coefficient
           const safeTime = Math.max(0, Math.min(videoDuration - 0.02, currentTimeRef.current));
           try {
             videoRef.current.currentTime = safeTime;
           } catch (e) {
-            // Ignore seek errors during initial DOM mount
+            // Ignore seek errors during mount
           }
         }
       }
@@ -64,50 +64,49 @@ export function HeroVideo() {
     };
   }, [videoDuration]);
 
-  // PHASE 1: Map 0.00 -> 0.65 scroll range to 0% -> 100% of video duration
-  // This guarantees the complete MP4 plays from frame 0 to its final frame during scroll
+  // PHASE 1 (0.00 -> 0.70 scroll): Map scroll 100% to the full video duration (frame 0 -> final frame)
   useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-    const videoProgress = Math.max(0, Math.min(1, latest / 0.65));
+    const videoProgress = Math.max(0, Math.min(1, latest / 0.70));
     targetTimeRef.current = videoProgress * videoDuration;
   });
 
-  // PHASE 2: Text Reveal (Appears ONLY AFTER video reaches final frame at > 0.65 scroll)
-  const textOpacity = useTransform(scrollYProgress, [0.65, 0.75, 0.90, 0.98], [0, 1, 1, 0]);
-  const textY = useTransform(scrollYProgress, [0.65, 0.78, 0.95], [40, 0, -20]);
-  const textScale = useTransform(scrollYProgress, [0.65, 0.78], [0.96, 1]);
+  // PHASE 2 (>0.72 scroll): Text Reveal AFTER 100% video completion with left-side entrance animation
+  const textOpacity = useTransform(scrollYProgress, [0.70, 0.80, 0.92, 0.98], [0, 1, 1, 0]);
+  const textX = useTransform(scrollYProgress, [0.70, 0.82], [-60, 0]);
+  const textScale = useTransform(scrollYProgress, [0.70, 0.82], [0.97, 1]);
 
-  // Scroll Hint Indicator (visible only at the very start 0 -> 0.12 scroll)
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
+  // Scroll Hint Indicator (visible only at the very start 0 -> 0.10 scroll)
+  const hintOpacity = useTransform(scrollYProgress, [0, 0.10], [1, 0]);
 
   return (
     <section
       id="hero"
       ref={containerRef}
-      className="relative h-[360vh] w-full bg-core-void select-none"
+      className="relative h-[480vh] w-full bg-core-void select-none"
     >
-      {/* Sticky Fullscreen Viewport Container */}
+      {/* Sticky Fullscreen Viewport Frame */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-core-void">
         
-        {/* Full-bleed Crisp MP4 Video Container */}
+        {/* Crisp Full-bleed Video Frame (New Unwatermarked videoclip.mp4) */}
         <div className="relative w-full h-full flex items-center justify-center z-0">
           <video
             ref={videoRef}
-            src="/gym_video2.mp4"
+            src="/videoclip.mp4"
             muted
             playsInline
             preload="auto"
             className="w-full h-full object-contain md:object-cover object-center pointer-events-none filter brightness-105 contrast-105"
           />
 
-          {/* Minimal top and bottom subtle gradients for seamless black background blending */}
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-core-void via-core-void/40 to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-core-void via-core-void/60 to-transparent pointer-events-none z-10" />
+          {/* Minimal top and bottom gradient fades to cleanly blend video edges into black background without blur */}
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-core-void via-core-void/30 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-core-void via-core-void/50 to-transparent pointer-events-none z-10" />
         </div>
 
-        {/* Minimal Initial Scroll Hint (Fades out immediately as scroll begins) */}
+        {/* Minimal Initial Scroll Hint (Fades out immediately as user starts scrolling) */}
         <motion.div
           style={{ opacity: hintOpacity }}
-          className="absolute bottom-10 inset-x-0 flex flex-col items-center justify-center gap-2 z-20 pointer-events-none"
+          className="absolute bottom-8 inset-x-0 flex flex-col items-center justify-center gap-2 z-20 pointer-events-none"
         >
           <span className="text-[11px] font-mono tracking-[0.35em] text-core-muted/90 uppercase">
             SCROLL TO CONTROL ANIMATION
@@ -116,14 +115,15 @@ export function HeroVideo() {
         </motion.div>
 
         {/* TEXT REVEAL CONTAINER — Appears ONLY AFTER the video completes 100% of its frames */}
+        {/* Left-side entrance animation (textX) + smooth opacity fade */}
         <motion.div
-          style={{ opacity: textOpacity, y: textY, scale: textScale }}
+          style={{ opacity: textOpacity, x: textX, scale: textScale }}
           className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-8 text-center z-30 pointer-events-none max-w-5xl mx-auto"
         >
-          <div className="space-y-6">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-xs font-mono tracking-[0.3em] text-core-red uppercase font-bold">
+          <div className="space-y-6 text-left sm:text-center w-full">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-xs font-mono tracking-[0.3em] text-core-red uppercase font-bold">
               ATHLETIC EXCELLENCE REIMAGINED
-            </span>
+            </div>
 
             <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white leading-[1.05] drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)] max-w-4xl mx-auto break-words">
               FORGED IN <span className="text-core-red">DISCIPLINE.</span>

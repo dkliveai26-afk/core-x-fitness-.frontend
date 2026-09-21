@@ -12,9 +12,8 @@ export function BrandIntroSection() {
     offset: ['start end', 'end start'],
   });
 
-  const imageY = useTransform(scrollYProgress, [0, 1], [-60, 60]);
-  const textY = useTransform(scrollYProgress, [0, 1], [40, -40]);
-  const clipProgress = useTransform(scrollYProgress, [0.1, 0.4], ['inset(20% 10% 20% 10% rounded 24px)', 'inset(0% 0% 0% 0% rounded 0px)']);
+  const imageY = useTransform(scrollYProgress, [0, 1], [-40, 40]);
+  const clipProgress = useTransform(scrollYProgress, [0.1, 0.4], ['inset(15% 8% 15% 8% rounded 24px)', 'inset(0% 0% 0% 0% rounded 0px)']);
 
   return (
     <section
@@ -26,34 +25,50 @@ export function BrandIntroSection() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center z-10">
-        {/* Left Column: Kinetic Minimal Typography */}
-        <motion.div style={{ y: textY }} className="lg:col-span-7 space-y-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/10 border border-core-red/30 text-[11px] font-mono tracking-[0.3em] text-core-red uppercase">
+        {/* Left Column: Kinetic Minimal Typography with Left Entrance Reveal */}
+        <motion.div
+          initial={{ opacity: 0, x: -70 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="lg:col-span-7 space-y-8"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/10 border border-core-red/30 text-[11px] font-mono tracking-[0.3em] text-core-red uppercase font-bold">
             BRAND ARCHITECTURE
           </div>
 
-          <h2 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl uppercase tracking-wider text-white leading-[0.95]">
+          <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-[1.02] break-words max-w-full">
             REDEFINING THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-core-muted">LIMITS OF</span> HUMAN POTENTIAL<span className="text-core-red">.</span>
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-4 border-t border-white/10">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            >
               <span className="text-xs font-mono tracking-[0.3em] text-core-red uppercase block mb-2 font-bold">
                 01 / ARCHITECTURE
               </span>
               <p className="text-sm font-sans text-core-muted leading-relaxed font-light">
                 An 18,500 sq ft sanctuary designed with industrial titanium, dark acoustic dampening, and precision illumination.
               </p>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
               <span className="text-xs font-mono tracking-[0.3em] text-core-red uppercase block mb-2 font-bold">
                 02 / METHODOLOGY
               </span>
               <p className="text-sm font-sans text-core-muted leading-relaxed font-light">
                 Biometric tracking, custom Eleiko resistance apparatus, and Olympic coaching directives.
               </p>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
 
@@ -61,7 +76,11 @@ export function BrandIntroSection() {
         <div className="lg:col-span-5 relative">
           <motion.div
             style={{ clipPath: clipProgress, y: imageY }}
-            className="relative h-[480px] sm:h-[560px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="relative h-[420px] sm:h-[520px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
           >
             <Image
               src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1400&auto=format&fit=crop"
