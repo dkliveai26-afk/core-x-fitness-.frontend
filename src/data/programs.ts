@@ -1,0 +1,68 @@
+import { ProgramItem } from '@/types';
+
+export const programsData: ProgramItem[] = [
+  {
+    id: 'prog-1',
+    slug: 'olympic-performance',
+    title: 'OLYMPIC PERFORMANCE & VELOCITY',
+    tagline: 'Speed-strength calibration on certified Eleiko platforms.',
+    category: 'Strength',
+    description: 'Master the snatch and clean & jerk under the direct guidance of national-level weightlifting coaches with high-speed bar velocity telemetry.',
+    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80',
+    intensity: 'Elite',
+    duration: '75 MINS',
+    features: ['VBT Bar Velocity Tracking', 'Custom Chalk & Platform Pods', 'Mobility Screening'],
+    metrics: [
+      { label: 'POWER OUTPUT', value: '+28%' },
+      { label: 'COACH RATIO', value: '1:3' },
+    ],
+  },
+  {
+    id: 'prog-2',
+    slug: 'hypertrophy-mechanics',
+    title: 'HYPERTROPHY & FORCE MECHANICS',
+    tagline: 'Targeted muscle recruitment using Prime and Arsenal strength machinery.',
+    category: 'Strength',
+    description: 'Scientifically engineered progressive overload protocols utilizing variable resistance curves for maximum muscular development and joint longevity.',
+    image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80',
+    intensity: 'High',
+    duration: '60 MINS',
+    features: ['Custom Load Curves', 'Lactate Threshold Monitoring', 'Intra-Workout Amino Bar'],
+    metrics: [
+      { label: 'LEAN MASS', value: 'Optimum' },
+      { label: 'INTENSITY', value: 'Zone 4/5' },
+    ],
+  },
+  {
+    id: 'prog-3',
+    slug: 'metabolic-conditioning',
+    title: 'ANAEROBIC THRESHOLD SPRINT',
+    tagline: 'High-intensity conditioning combining air-runners, skiergs, and torque sleds.',
+    category: 'Conditioning',
+    description: 'Shatter physical plateaus with interval programming designed to elevate VO2 max and burn metabolic reserves long after the session concludes.',
+    image: 'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=800&auto=format&fit=crop&q=80',
+    intensity: 'Elite',
+    duration: '50 MINS',
+    features: ['Polar H10 Live Heart Telemetry', 'Hypoxic Chamber Option', 'Cold Plunge Immersion'],
+    metrics: [
+      { label: 'VO2 MAX GAIN', value: '+14%' },
+      { label: 'CALORIC BURN', value: '850+ kcal' },
+    ],
+  },
+  {
+    id: 'prog-4',
+    slug: 'functional-athleticism',
+    title: '3D FUNCTIONAL ATHLETICISM',
+    tagline: 'Multi-planar agility, kinetic chain resilience, and rotational power.',
+    category: 'Functional',
+    description: 'Built for sports performance and real-world durability. Develop explosive deceleration, rotational power, and bulletproof joint integrity.',
+    image: 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=800&auto=format&fit=crop&q=80',
+    intensity: 'High',
+    duration: '60 MINS',
+    features: ['Turf Agility Track', 'Keiser Pneumatic Stations', 'Postural Analysis'],
+    metrics: [
+      { label: 'REACTION SPEED', value: '-0.18s' },
+      { label: 'CORE STABILITY', value: 'Maximum' },
+    ],
+  },
+];

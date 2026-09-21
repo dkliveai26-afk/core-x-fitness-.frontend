@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Syne:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-syne: 'Syne', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+  background-color: #050607;
+}
+
+body {
+  background-color: #050607;
+  color: #F8FAFC;
+  font-family: var(--font-inter);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Luxury Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070809;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E232D;
+  border-radius: 4px;
+  border: 2px solid #070809;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF2A2A;
+}
+
+/* Custom Text Selection Highlight */
+::selection {
+  background-color: #FF2A2A;
+  color: #FFFFFF;
+}
+
+/* Accessible focus visible ring */
+*:focus-visible {
+  outline: 2px solid #FF2A2A;
+  outline-offset: 2px;
+}
+
+/* Canvas styling for smooth 3D rendering */
+canvas {
+  touch-action: none;
+}
+
+/* Smooth motion utility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
