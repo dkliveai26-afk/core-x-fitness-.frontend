@@ -75,26 +75,17 @@ export function Navbar() {
           </nav>
 
           {/* Right Action Cluster */}
-          <div className="hidden md:flex items-center gap-4">
-            {/* Live Facility Badge */}
-            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-full bg-core-surface/60 border border-white/10 text-[11px] font-mono font-medium text-core-muted">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>FACILITY OPEN</span>
-              <span className="text-white/30">|</span>
-              <span className="text-white/80">NYC METROPOLIS</span>
-            </div>
-
-            {/* Primary CTA */}
+          <div className="hidden md:flex items-center">
             <Button
               variant="primary"
               size="md"
               rightIcon={<ArrowUpRight className="w-4 h-4" />}
               onClick={() => {
-                const target = document.querySelector('#memberships');
+                const target = document.querySelector('#contact');
                 target?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              Claim Pass
+              Get Access
             </Button>
           </div>
 
@@ -104,11 +95,11 @@ export function Navbar() {
               variant="primary"
               size="sm"
               onClick={() => {
-                const target = document.querySelector('#memberships');
+                const target = document.querySelector('#contact');
                 target?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              Pass
+              Access
             </Button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -175,11 +166,11 @@ export function Navbar() {
                 rightIcon={<ArrowUpRight className="w-5 h-5" />}
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  const target = document.querySelector('#memberships');
+                  const target = document.querySelector('#contact');
                   target?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Claim Guest Pass
+                Get Access
               </Button>
               <div className="text-center text-xs font-mono text-core-muted uppercase tracking-widest">
                 24/7 Biometric Access • 740 Grand Avenue

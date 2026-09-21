@@ -24,13 +24,11 @@ export const siteConfig = {
 };
 
 export const navigationItems: NavItem[] = [
-  { label: 'Philosophy', href: '#philosophy' },
+  { label: 'Home', href: '#hero' },
+  { label: 'About', href: '#about' },
   { label: 'Programs', href: '#programs' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'Performance', href: '#performance' },
   { label: 'Trainers', href: '#trainers' },
-  { label: 'Facility', href: '#facility' },
-  { label: 'Memberships', href: '#memberships' },
+  { label: 'Contact', href: '#contact' },
 ];
 
 export const heroStats: StatItem[] = [

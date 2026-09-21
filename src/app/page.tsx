@@ -1,35 +1,27 @@
 import React from 'react';
-import { Hero } from '@/components/sections/Hero';
-import { PhilosophyTeaser } from '@/components/sections/PhilosophyTeaser';
-import { ProgramsSection } from '@/components/sections/ProgramsSection';
-import { ExperienceSection } from '@/components/sections/ExperienceSection';
-import { TrainersSection } from '@/components/sections/TrainersSection';
-import { MembershipSection } from '@/components/sections/MembershipSection';
-import { FinalCTASection } from '@/components/sections/FinalCTASection';
+import { HeroVideo } from '@/components/sections/HeroVideo';
+import { BrandIntroSection } from '@/components/sections/BrandIntroSection';
+import { TrainingDisciplinesSection } from '@/components/sections/TrainingDisciplinesSection';
+import { PerformanceExperienceSection } from '@/components/sections/PerformanceExperienceSection';
+import { ClosingCTASection } from '@/components/sections/ClosingCTASection';
 
 export default function HomePage() {
   return (
     <div className="w-full flex flex-col bg-core-void min-h-screen">
-      {/* 1. Cinematic 3D Hero Experience */}
-      <Hero />
+      {/* 1. Scroll-Controlled MP4 Animation Hero */}
+      <HeroVideo />
 
-      {/* 2. Brand Ethos & Human Potential Manifesto */}
-      <PhilosophyTeaser />
+      {/* 2. Brand Architecture & Kinetic Intro */}
+      <BrandIntroSection />
 
-      {/* 3. Calibrated Athletic Programs & Disciplines */}
-      <ProgramsSection />
+      {/* 3. High-Performance Training Disciplines */}
+      <TrainingDisciplinesSection />
 
-      {/* 4. 18,500 SQ FT Architectural Gym Experience */}
-      <ExperienceSection />
+      {/* 4. Architectural Gym Experience & Metrics */}
+      <PerformanceExperienceSection />
 
-      {/* 5. World-Class Master Coaching Directors */}
-      <TrainersSection />
-
-      {/* 6. Membership Tiers & VIP Access Protocol */}
-      <MembershipSection />
-
-      {/* 7. Cinematic Threshold Final CTA */}
-      <FinalCTASection />
+      {/* 5. Uncompromising Closing Threshold & Pass Request */}
+      <ClosingCTASection />
     </div>
   );
 }

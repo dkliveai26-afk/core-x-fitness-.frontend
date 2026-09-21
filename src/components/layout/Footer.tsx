@@ -89,31 +89,30 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links 1: Programs */}
+          {/* Quick Links 1: Navigation */}
+          <div>
+            <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-white font-bold mb-4">
+              Navigation
+            </h4>
+            <ul className="space-y-2.5 text-sm font-sans text-core-muted">
+              <li><a href="#hero" className="hover:text-white transition-colors">Home</a></li>
+              <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
+              <li><a href="#programs" className="hover:text-white transition-colors">Programs</a></li>
+              <li><a href="#trainers" className="hover:text-white transition-colors">Trainers</a></li>
+              <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
+            </ul>
+          </div>
+
+          {/* Quick Links 2: Disciplines */}
           <div>
             <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-white font-bold mb-4">
               Disciplines
             </h4>
             <ul className="space-y-2.5 text-sm font-sans text-core-muted">
-              <li><a href="#programs" className="hover:text-white transition-colors">Olympic Weightlifting</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Power & Hypertrophy</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Functional Athleticism</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Anaerobic Conditioning</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Neuro-Mobility Protocol</a></li>
-            </ul>
-          </div>
-
-          {/* Quick Links 2: Facility */}
-          <div>
-            <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-white font-bold mb-4">
-              Facility & Lab
-            </h4>
-            <ul className="space-y-2.5 text-sm font-sans text-core-muted">
-              <li><a href="#facility" className="hover:text-white transition-colors">Main Strength Floor</a></li>
-              <li><a href="#facility" className="hover:text-white transition-colors">Cryotherapy Chamber</a></li>
-              <li><a href="#facility" className="hover:text-white transition-colors">Hyperbaric Oxygen Suite</a></li>
-              <li><a href="#facility" className="hover:text-white transition-colors">Infrared Sauna & Plunge</a></li>
-              <li><a href="#facility" className="hover:text-white transition-colors">Executive Locker Suites</a></li>
+              <li><a href="#programs" className="hover:text-white transition-colors">Hypertrophy & Power</a></li>
+              <li><a href="#programs" className="hover:text-white transition-colors">Athletic Conditioning</a></li>
+              <li><a href="#programs" className="hover:text-white transition-colors">Biometric Recovery</a></li>
+              <li><a href="#programs" className="hover:text-white transition-colors">Olympic Barbell Protocol</a></li>
             </ul>
           </div>
 
@@ -134,14 +133,6 @@ export function Footer() {
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-core-red shrink-0" />
                 <span>{siteConfig.contact.email}</span>
-              </li>
-              <li className="flex items-start gap-2 pt-1">
-                <Clock className="w-4 h-4 text-core-red shrink-0 mt-0.5" />
-                <div>
-                  <p>M-F: {siteConfig.hours.weekdays}</p>
-                  <p>S-S: {siteConfig.hours.weekends}</p>
-                  <p className="text-white/80 font-bold mt-0.5">24/7 Keycard for Black Tier</p>
-                </div>
               </li>
             </ul>
           </div>

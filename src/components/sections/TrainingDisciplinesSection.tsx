@@ -1,0 +1,128 @@
+'use client';
+
+import React, { useRef, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import Image from 'next/image';
+import { ArrowUpRight } from 'lucide-react';
+
+const disciplines = [
+  {
+    id: '01',
+    title: 'HYPERTROPHY & POWER',
+    subtitle: 'HEAVY LOAD & MECHANICAL TENSION',
+    image: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1200&auto=format&fit=crop',
+    tags: ['ELEIKO RACKS', 'PRIME FITNESS', 'KEYCARD ACCESS'],
+  },
+  {
+    id: '02',
+    title: 'ATHLETIC CONDITIONING',
+    subtitle: 'METABOLIC THRESHOLD & SPEED',
+    image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1200&auto=format&fit=crop',
+    tags: ['SPRINT TURF', 'CONCEPT2 ERGS', 'HEART-RATE TELEMETRY'],
+  },
+  {
+    id: '03',
+    title: 'BIOMETRIC RECOVERY',
+    subtitle: 'HYPERBARIC & CRYO REGENERATION',
+    image: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=1200&auto=format&fit=crop',
+    tags: ['CRYO PLUNGE', 'INFRARED SAUNA', 'COMPRESSION LAB'],
+  },
+];
+
+export function TrainingDisciplinesSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  });
+
+  const headingY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
+
+  return (
+    <section
+      id="programs"
+      ref={containerRef}
+      className="relative min-h-screen w-full bg-core-void py-32 px-6 sm:px-12 border-t border-white/5 overflow-hidden"
+    >
+      <div className="max-w-7xl mx-auto space-y-20 z-10 relative">
+        {/* Section Header */}
+        <motion.div style={{ y: headingY }} className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/10">
+          <div className="space-y-3">
+            <span className="text-xs font-mono tracking-[0.35em] text-core-red uppercase font-bold">
+              02 / TRAINING DISCIPLINES
+            </span>
+            <h2 className="font-display font-black text-4xl sm:text-6xl uppercase tracking-wider text-white">
+              ENGINEERED FOR <span className="text-core-red">PERFORMANCE</span>
+            </h2>
+          </div>
+          <p className="text-xs font-mono text-core-muted tracking-widest uppercase max-w-xs">
+            NO CAROUSELS • NO GENERIC CLASSES • ONLY CALIBRATED DISCIPLINE
+          </p>
+        </motion.div>
+
+        {/* Editorial Discipline List (Interactive Full-Width Layout) */}
+        <div className="space-y-16">
+          {disciplines.map((item, idx) => {
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.7, delay: idx * 0.15 }}
+                className="group relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-8 border-b border-white/10"
+              >
+                {/* Discipline Info */}
+                <div className="lg:col-span-6 space-y-6">
+                  <div className="flex items-baseline gap-4">
+                    <span className="font-display font-black text-4xl sm:text-6xl text-core-red tracking-wider">
+                      {item.id}
+                    </span>
+                    <span className="text-xs font-mono text-core-muted tracking-[0.3em] uppercase">
+                      {item.subtitle}
+                    </span>
+                  </div>
+
+                  <h3 className="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-wider text-white group-hover:text-core-red transition-colors duration-500">
+                    {item.title}
+                  </h3>
+
+                  {/* Minimal Tags */}
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {item.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono tracking-widest text-core-muted uppercase"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Editorial Visual Frame */}
+                <div className="lg:col-span-6">
+                  <div className="relative h-[320px] sm:h-[400px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:border-core-red/40 transition-colors duration-500">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover filter grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-core-void/90 via-transparent to-transparent" />
+
+                    <div className="absolute bottom-6 right-6 p-3 rounded-full bg-core-void/80 backdrop-blur-md border border-white/20 text-white group-hover:bg-core-red group-hover:border-core-red transition-colors duration-300">
+                      <ArrowUpRight className="w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
