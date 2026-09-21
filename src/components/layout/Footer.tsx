@@ -53,7 +53,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 pb-16 border-b border-white/10">
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-5">
-            <Logo size="lg" />
+            <Logo />
             <p className="text-sm text-core-muted max-w-sm font-sans leading-relaxed">
               {siteConfig.description}
             </p>

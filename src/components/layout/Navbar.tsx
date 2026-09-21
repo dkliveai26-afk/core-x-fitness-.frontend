@@ -37,7 +37,7 @@ export function Navbar() {
             className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-core-red rounded-lg"
             aria-label="Core X Fitness Home"
           >
-            <Logo size="md" />
+            <Logo />
           </Link>
 
           {/* Center Navigation Capsule */}
