@@ -191,7 +191,7 @@ export function PlansPricingCards() {
                 viewport={{ once: true, margin: '-60px' }}
                 variants={entranceVariants}
                 whileHover={{ y: -8, transition: { duration: 0.3, ease: 'easeOut' } }}
-                className={`relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-500 backdrop-blur-xl ${
+                className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-500 backdrop-blur-xl ${
                   isThirdOnTablet ? 'md:col-span-2 lg:col-span-1 md:max-w-md md:mx-auto md:w-full lg:max-w-none' : ''
                 } ${
                   tier.highlighted
@@ -202,7 +202,7 @@ export function PlansPricingCards() {
                 {/* Popular Pill Marker for Middle Plan */}
                 {tier.highlighted && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20">
-                    <span className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-red-gradient text-[10px] font-mono tracking-[0.25em] text-white uppercase font-bold shadow-glow-red">
+                    <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-0.5 sm:py-1 rounded-full bg-red-gradient text-[9px] sm:text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.25em] text-white uppercase font-bold shadow-glow-red whitespace-nowrap">
                       <Sparkles className="w-3 h-3 text-white" />
                       MOST SOUGHT AFTER
                     </span>
@@ -211,16 +211,16 @@ export function PlansPricingCards() {
 
                 {/* Top Section matching reference layout */}
                 <div
-                  className={`rounded-2xl p-6 sm:p-7 mb-8 transition-all ${
+                  className={`rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-7 mb-4 sm:mb-6 lg:mb-8 transition-all ${
                     tier.highlighted
                       ? 'bg-gradient-to-br from-[#260E12]/90 to-[#12151B]/95 border border-core-red/30'
                       : 'bg-white/[0.04] border border-white/5'
                   }`}
                 >
                   {/* Top Pill Tag */}
-                  <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-5">
                     <span
-                      className={`inline-block px-3.5 py-1 rounded-full text-[11px] font-mono tracking-[0.2em] uppercase font-bold ${
+                      className={`inline-block px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono tracking-[0.18em] sm:tracking-[0.2em] uppercase font-bold ${
                         tier.highlighted
                           ? 'bg-core-red/20 text-core-red border border-core-red/40'
                           : 'bg-white/10 text-white/80 border border-white/10'
@@ -234,14 +234,14 @@ export function PlansPricingCards() {
                   </div>
 
                   {/* Price: Old Price crossed out + Current Price highlighted */}
-                  <div className="mb-4">
+                  <div className="mb-2 sm:mb-3 lg:mb-4">
                     {/* Old Price with Strikethrough */}
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-sm sm:text-base line-through text-slate-400/80 tracking-wider">
+                    <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+                      <span className="font-mono text-xs sm:text-sm lg:text-base line-through text-slate-400/80 tracking-wider">
                         {tier.oldPrice}
                       </span>
                       <span
-                        className={`text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full font-bold ${
+                        className={`text-[9px] sm:text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full font-bold ${
                           tier.highlighted
                             ? 'bg-core-red/20 text-core-red border border-core-red/40'
                             : 'bg-white/10 text-white/80 border border-white/10'
@@ -252,25 +252,25 @@ export function PlansPricingCards() {
                     </div>
 
                     {/* Current Price Prominently Highlighted */}
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-display font-black text-4xl sm:text-5xl text-white tracking-tight">
+                    <div className="flex items-baseline gap-1.5 sm:gap-2">
+                      <span className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight">
                         {tier.price}
                       </span>
-                      <span className="text-xs sm:text-sm font-mono text-core-muted font-normal uppercase tracking-wider">
+                      <span className="text-[11px] sm:text-xs lg:text-sm font-mono text-core-muted font-normal uppercase tracking-wider">
                         {tier.period}
                       </span>
                     </div>
                   </div>
 
                   {/* Short Description */}
-                  <p className="text-xs sm:text-sm font-sans text-core-muted font-light leading-relaxed mb-6 min-h-[38px]">
+                  <p className="text-xs sm:text-sm font-sans text-core-muted font-light leading-relaxed mb-4 sm:mb-5 lg:mb-6 min-h-0 sm:min-h-[38px]">
                     {tier.description}
                   </p>
 
                   {/* Action Button directly under description (Reference Structure) */}
                   <button
                     onClick={() => handleCtaClick(tier)}
-                    className={`w-full py-3.5 px-5 rounded-xl font-heading text-xs sm:text-sm uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+                    className={`w-full py-2.5 sm:py-3.5 px-4 sm:px-5 rounded-xl font-heading text-xs sm:text-sm uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
                       tier.highlighted
                         ? 'bg-red-gradient text-white shadow-glow-red hover:shadow-[0_0_35px_rgba(255,42,42,0.6)] hover:brightness-110'
                         : 'bg-white/10 text-white hover:bg-white/20 border border-white/10 hover:border-white/30'
@@ -282,22 +282,22 @@ export function PlansPricingCards() {
                 </div>
 
                 {/* Key Benefits Checklist */}
-                <div className="space-y-3.5 pt-2 pb-4">
-                  <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-core-muted block font-bold mb-4">
+                <div className="space-y-2 sm:space-y-3 pt-1 pb-2 sm:pb-4">
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.25em] text-core-muted block font-bold mb-2 sm:mb-3 lg:mb-4">
                     INCLUDED IN {tier.name}:
                   </span>
                   {tier.features.map((feature) => (
-                    <div key={feature} className="flex items-start gap-3">
+                    <div key={feature} className="flex items-start gap-2.5 sm:gap-3">
                       <div
-                        className={`flex-none w-4 h-4 rounded-full flex items-center justify-center mt-0.5 ${
+                        className={`flex-none w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center mt-0.5 ${
                           tier.highlighted
                             ? 'bg-core-red/20 text-core-red'
                             : 'bg-white/10 text-slate-300'
                         }`}
                       >
-                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <Check className="w-2 sm:w-2.5 h-2 sm:h-2.5 stroke-[3]" />
                       </div>
-                      <span className="text-xs sm:text-[13px] font-sans text-slate-300 font-light leading-snug">
+                      <span className="text-[11px] sm:text-xs lg:text-[13px] font-sans text-slate-300 font-light leading-snug">
                         {feature}
                       </span>
                     </div>
@@ -305,7 +305,7 @@ export function PlansPricingCards() {
                 </div>
 
                 {/* Bottom Guarantee Marker */}
-                <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-core-muted uppercase tracking-wider">
+                <div className="mt-3 sm:mt-5 pt-3 sm:pt-4 border-t border-white/5 flex items-center justify-between text-[9px] sm:text-[10px] font-mono text-core-muted uppercase tracking-wider">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className={`w-3.5 h-3.5 ${tier.highlighted ? 'text-core-red' : 'text-slate-400'}`} />
                     <span>Cancel Anytime</span>
