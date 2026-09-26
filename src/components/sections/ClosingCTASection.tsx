@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/common/Button';
 import { ArrowUpRight, ShieldCheck, MapPin, Mail, Phone, X, Check } from 'lucide-react';
 import { siteConfig } from '@/data/site';
+import { playSuccessSound } from '@/lib/sound';
 
 export function ClosingCTASection() {
   const [modalOpen, setModalOpen] = useState(false);
@@ -14,6 +15,7 @@ export function ClosingCTASection() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    playSuccessSound();
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -135,10 +137,10 @@ export function ClosingCTASection() {
 
               {submitted ? (
                 <div className="py-8 flex flex-col items-center justify-center space-y-4 text-center">
-                  <div className="w-12 h-12 rounded-full bg-core-red/20 border border-core-red flex items-center justify-center text-core-red">
-                    <Check className="w-6 h-6" />
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.35)]">
+                    <Check className="w-6 h-6 text-emerald-400" />
                   </div>
-                  <h4 className="font-display font-bold text-lg text-white">ACCESS GRANTED</h4>
+                  <h4 className="font-display font-bold text-lg text-emerald-400 uppercase tracking-wide">ACCESS GRANTED</h4>
                   <p className="text-xs font-mono text-core-muted uppercase tracking-widest">
                     Concierge pass confirmation dispatched to your email.
                   </p>

@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthModal } from '@/context/AuthModalContext';
 import { useUser } from '@clerk/nextjs';
-import { Check, ArrowRight, Sparkles, ShieldCheck, X } from 'lucide-react';
+import { Check, ArrowRight, Sparkles, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
+import { playSuccessSound } from '@/lib/sound';
 
 interface PricingTier {
   id: string;
@@ -143,6 +144,8 @@ export function PlansPricingCards() {
         throw new Error(data.error || 'Failed to submit membership allocation.');
       }
 
+      // Play subtle success chime only after confirmed save
+      playSuccessSound();
       setIsSubmitted(true);
     } catch (err: any) {
       setBookingError(err.message || 'Submission error. Please try again.');
@@ -473,12 +476,12 @@ export function PlansPricingCards() {
                 </form>
               ) : (
                 <div className="text-center space-y-5 py-2">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-core-red/10 border border-core-red/30 flex items-center justify-center shadow-glow-red">
-                    <Sparkles className="w-7 h-7 text-core-red" />
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.35)]">
+                    <CheckCircle2 className="w-7 h-7 text-emerald-400" />
                   </div>
 
                   <div className="space-y-2">
-                    <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-core-red font-bold block">
+                    <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-mono uppercase tracking-[0.25em] text-emerald-400 font-bold">
                       ALLOCATION RECORDED
                     </span>
                     <h3 className="font-display font-black text-2xl text-white uppercase tracking-tight">
@@ -500,13 +503,13 @@ export function PlansPricingCards() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-core-muted">RESPONSE PROTOCOL:</span>
-                      <span className="text-core-red">&lt; 2 Hours (Admissions Board)</span>
+                      <span className="text-emerald-400 font-bold">&lt; 2 Hours (Admissions Board)</span>
                     </div>
                   </div>
 
                   <button
                     onClick={() => setSelectedTier(null)}
-                    className="w-full py-3.5 rounded-xl bg-red-gradient text-white font-heading font-bold uppercase tracking-widest text-xs shadow-glow-red hover:brightness-110 transition-all"
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white font-heading font-bold uppercase tracking-widest text-xs shadow-[0_0_25px_rgba(16,185,129,0.35)] hover:shadow-[0_0_35px_rgba(16,185,129,0.55)] hover:brightness-110 transition-all"
                   >
                     Return to Plans
                   </button>

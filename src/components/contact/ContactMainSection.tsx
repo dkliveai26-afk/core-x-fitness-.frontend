@@ -13,6 +13,7 @@ import {
   RotateCcw,
   ChevronDown,
 } from 'lucide-react';
+import { playSuccessSound } from '@/lib/sound';
 
 export function ContactMainSection() {
   const [formData, setFormData] = useState({
@@ -69,6 +70,7 @@ export function ContactMainSection() {
         throw new Error(data.error || 'Failed to dispatch inquiry.');
       }
 
+      playSuccessSound();
       setIsSubmitted(true);
     } catch (err: any) {
       setErrorMsg(err.message || 'Dispatch transmission error. Please try again.');
@@ -233,12 +235,12 @@ export function ContactMainSection() {
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className="py-10 text-left space-y-5 max-w-xl"
                   >
-                    <div className="w-14 h-14 rounded-2xl bg-core-red/15 border border-core-red/40 flex items-center justify-center text-core-red shadow-glow-red">
-                      <CheckCircle className="w-7 h-7" />
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_35px_rgba(16,185,129,0.35)]">
+                      <CheckCircle className="w-7 h-7 text-emerald-400" />
                     </div>
 
                     <div className="space-y-1.5">
-                      <span className="text-xs font-mono tracking-[0.3em] uppercase text-core-red font-bold block">
+                      <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-mono tracking-[0.25em] uppercase text-emerald-400 font-bold">
                         DISPATCH RECORDED // RESPONSE &lt; 2 HOURS
                       </span>
                       <h3 className="text-xl sm:text-2xl font-display font-black uppercase tracking-tight text-white">
@@ -252,9 +254,9 @@ export function ContactMainSection() {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/10 hover:border-core-red/40 text-xs font-mono tracking-widest text-white uppercase transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/10 hover:border-emerald-500/40 text-xs font-mono tracking-widest text-white uppercase transition-colors"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-core-red" />
+                      <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Send Another Message</span>
                     </button>
                   </motion.div>
