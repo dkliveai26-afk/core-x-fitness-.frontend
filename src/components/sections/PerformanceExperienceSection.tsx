@@ -26,7 +26,7 @@ export function PerformanceExperienceSection() {
     <section
       id="trainers"
       ref={containerRef}
-      className="relative min-h-screen w-full bg-core-void py-32 px-4 sm:px-8 lg:px-12 border-t border-white/5 overflow-hidden flex flex-col justify-center select-none"
+      className="relative min-h-0 lg:min-h-screen w-full bg-core-void py-14 sm:py-20 lg:py-32 px-4 sm:px-8 lg:px-12 border-t border-white/5 overflow-hidden flex flex-col justify-center select-none"
     >
       {/* Editorial Background Image with Depth Parallax */}
       <motion.div style={{ y: bgY }} className="absolute inset-0 z-0 opacity-15 pointer-events-none">

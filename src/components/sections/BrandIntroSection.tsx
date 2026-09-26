@@ -19,7 +19,7 @@ export function BrandIntroSection() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative min-h-screen w-full bg-core-void py-32 px-6 sm:px-12 overflow-hidden flex flex-col justify-center"
+      className="relative min-h-0 lg:min-h-screen w-full bg-core-void py-14 sm:py-20 lg:py-32 px-6 sm:px-12 overflow-hidden flex flex-col justify-center"
     >
       {/* Background Accent Lines */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />

@@ -25,7 +25,7 @@ export function ClosingCTASection() {
   return (
     <section
       id="contact"
-      className="relative min-h-[80vh] w-full bg-core-void py-32 px-6 sm:px-12 border-t border-white/5 overflow-hidden flex flex-col justify-center items-center text-center"
+      className="relative min-h-0 lg:min-h-[80vh] w-full bg-core-void py-14 sm:py-20 lg:py-32 px-6 sm:px-12 border-t border-white/5 overflow-hidden flex flex-col justify-center items-center text-center"
     >
       {/* Radial Crimson Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-core-red/10 rounded-full blur-[160px] pointer-events-none" />

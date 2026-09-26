@@ -43,7 +43,7 @@ export function TrainingDisciplinesSection() {
     <section
       id="programs"
       ref={containerRef}
-      className="relative min-h-screen w-full bg-core-void py-32 px-6 sm:px-12 border-t border-white/5 overflow-hidden"
+      className="relative min-h-0 lg:min-h-screen w-full bg-core-void py-14 sm:py-20 lg:py-32 px-6 sm:px-12 border-t border-white/5 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto space-y-20 z-10 relative">
         {/* Section Header */}
