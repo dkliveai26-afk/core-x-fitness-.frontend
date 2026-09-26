@@ -2,6 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['three'],
+  env: {
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+      'pk_test_bmljZS1yaW5ndGFpbC05NzcyLmNsZXJrLmFjY291bnRzLmRldiQ',
+  },
   images: {
     remotePatterns: [
       {

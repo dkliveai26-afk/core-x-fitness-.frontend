@@ -131,6 +131,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-core-void text-slate-100 selection:bg-core-red selection:text-white flex flex-col">
         <ClerkProvider
+          publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_bmljZS1yaW5ndGFpbC05NzcyLmNsZXJrLmFjY291bnRzLmRldiQ'}
           appearance={{
             baseTheme: dark,
             variables: {
