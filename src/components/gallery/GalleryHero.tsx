@@ -178,16 +178,16 @@ export function GalleryHero() {
         {/* Dynamic 3D Camera Container */}
         <motion.div
           style={{ scale: cameraScale }}
-          className="relative w-full h-full will-change-transform"
+          className="relative w-full h-full flex items-center justify-center overflow-hidden will-change-transform"
         >
-          {/* Gallery MP4 Video Asset (intra-frame optimized with seamless fallback) */}
+          {/* Gallery MP4 Video Asset (contained on mobile/tablet, full cover on desktop) */}
           <video
             ref={videoRef}
             src="/galerypagevideo1_opt.mp4"
             muted
             playsInline
             preload="auto"
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            className={`w-full h-full object-contain md:object-contain lg:object-cover transition-opacity duration-700 pointer-events-none select-none ${
               isVideoReady ? 'opacity-100' : 'opacity-0'
             }`}
             style={{ willChange: 'contents' }}

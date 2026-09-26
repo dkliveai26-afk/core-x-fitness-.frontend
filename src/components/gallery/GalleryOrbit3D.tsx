@@ -80,8 +80,8 @@ export function GalleryOrbit3D() {
 
   // Responsive 3D Ellipse Radii:
   // Mobile: tight compact orbit; Tablet: medium; Desktop: dramatic wide spatial orbit
-  const radiusX = viewportWidth < 420 ? 135 : viewportWidth < 640 ? 180 : viewportWidth < 1024 ? 300 : 460;
-  const radiusZ = viewportWidth < 420 ? 100 : viewportWidth < 640 ? 135 : viewportWidth < 1024 ? 210 : 310;
+  const radiusX = viewportWidth < 380 ? 105 : viewportWidth < 480 ? 135 : viewportWidth < 640 ? 180 : viewportWidth < 1024 ? 300 : 460;
+  const radiusZ = viewportWidth < 380 ? 80 : viewportWidth < 480 ? 100 : viewportWidth < 640 ? 135 : viewportWidth < 1024 ? 210 : 310;
 
   return (
     <section
@@ -197,8 +197,8 @@ export function GalleryOrbit3D() {
                 key={card.id}
                 className="absolute pointer-events-auto select-none"
                 style={{
-                  width: 'clamp(200px, 22vw, 320px)',
-                  height: 'clamp(290px, 44vh, 440px)',
+                  width: 'clamp(175px, 22vw, 320px)',
+                  height: 'clamp(255px, 44vh, 440px)',
                   transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rotateY}deg) scale(${scale})`,
                   opacity,
                   zIndex,

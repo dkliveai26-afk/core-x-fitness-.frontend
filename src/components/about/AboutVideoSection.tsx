@@ -171,22 +171,24 @@ export function AboutVideoSection() {
       {/* Sticky Fullscreen Viewport — stays pinned while user scrolls through 480vh */}
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-core-void flex items-center justify-center">
 
-        {/* The Clean, Sharp, Fullscreen Video without heavy blurring filters */}
-        <video
-          ref={videoRef}
-          src="/aboutpagevideo.mp4"
-          muted
-          playsInline
-          preload="auto"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
-            isVideoReady ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{ willChange: 'contents' }}
-        />
+        {/* The Clean, Sharp Video with responsive containment on mobile/tablet */}
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+          <video
+            ref={videoRef}
+            src="/aboutpagevideo.mp4"
+            muted
+            playsInline
+            preload="auto"
+            className={`w-full h-full object-contain md:object-contain lg:object-cover transition-opacity duration-300 pointer-events-none select-none ${
+              isVideoReady ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ willChange: 'contents' }}
+          />
 
-        {/* Subtle Edge Transitions to blend video smoothly into black background */}
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-core-void via-core-void/40 to-transparent pointer-events-none z-10" />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-core-void via-core-void/60 to-transparent pointer-events-none z-10" />
+          {/* Subtle Edge Transitions to blend video smoothly into black background */}
+          <div className="absolute inset-x-0 top-0 h-28 sm:h-36 bg-gradient-to-b from-core-void via-core-void/50 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-28 sm:h-36 bg-gradient-to-t from-core-void via-core-void/70 to-transparent pointer-events-none z-10" />
+        </div>
 
         {/* Video Loading State */}
         {!isVideoReady && (

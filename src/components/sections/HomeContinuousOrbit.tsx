@@ -106,17 +106,17 @@ export function HomeContinuousOrbit() {
   }, []);
 
   // Responsive Ellipse Radii:
-  const radiusX = viewportWidth < 420 ? 135 : viewportWidth < 640 ? 180 : viewportWidth < 1024 ? 300 : 440;
-  const radiusZ = viewportWidth < 420 ? 100 : viewportWidth < 640 ? 135 : viewportWidth < 1024 ? 210 : 300;
+  const radiusX = viewportWidth < 380 ? 100 : viewportWidth < 480 ? 130 : viewportWidth < 640 ? 175 : viewportWidth < 1024 ? 290 : 440;
+  const radiusZ = viewportWidth < 380 ? 75 : viewportWidth < 480 ? 95 : viewportWidth < 640 ? 130 : viewportWidth < 1024 ? 200 : 300;
 
   return (
-    <div className="relative w-full py-12 sm:py-20 lg:py-24 overflow-hidden select-none">
+    <div className="relative w-full py-8 sm:py-16 lg:py-24 overflow-hidden select-none">
       {/* Ambient Red Glow in Center of the 3D Orbit */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-radial from-core-red/15 via-core-crimson/5 to-transparent rounded-full blur-[140px] pointer-events-none -z-10" />
 
       {/* 3D Perspective Stage */}
       <div
-        className="relative w-full h-[400px] sm:h-[480px] lg:h-[540px] flex items-center justify-center pointer-events-none"
+        className="relative w-full h-[360px] sm:h-[460px] lg:h-[540px] flex items-center justify-center pointer-events-none"
         style={{
           perspective: '1300px',
           transformStyle: 'preserve-3d',
@@ -170,8 +170,8 @@ export function HomeContinuousOrbit() {
               key={card.id}
               className="absolute pointer-events-auto"
               style={{
-                width: 'clamp(200px, 22vw, 310px)',
-                height: 'clamp(290px, 44vh, 420px)',
+                width: 'clamp(170px, 22vw, 310px)',
+                height: 'clamp(250px, 42vh, 420px)',
                 transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rotateY}deg) scale(${scale})`,
                 opacity,
                 zIndex,

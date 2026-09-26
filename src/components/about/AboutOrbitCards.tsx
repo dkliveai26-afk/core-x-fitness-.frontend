@@ -147,8 +147,8 @@ export function AboutOrbitCards() {
 
   // Responsive Ellipse Radii:
   // Mobile: tight radius; Tablet: medium; Desktop: wide dramatic orbit
-  const radiusX = viewportWidth < 420 ? 140 : viewportWidth < 640 ? 190 : viewportWidth < 1024 ? 310 : 450;
-  const radiusZ = viewportWidth < 420 ? 110 : viewportWidth < 640 ? 150 : viewportWidth < 1024 ? 230 : 320;
+  const radiusX = viewportWidth < 380 ? 105 : viewportWidth < 480 ? 135 : viewportWidth < 640 ? 180 : viewportWidth < 1024 ? 300 : 450;
+  const radiusZ = viewportWidth < 380 ? 80 : viewportWidth < 480 ? 100 : viewportWidth < 640 ? 140 : viewportWidth < 1024 ? 220 : 320;
 
   return (
     <section
@@ -259,8 +259,8 @@ export function AboutOrbitCards() {
                 key={card.id}
                 className="absolute pointer-events-auto transition-shadow duration-300"
                 style={{
-                  width: 'clamp(210px, 22vw, 330px)',
-                  height: 'clamp(300px, 48vh, 460px)',
+                  width: 'clamp(175px, 22vw, 330px)',
+                  height: 'clamp(255px, 44vh, 460px)',
                   transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rotateY}deg) scale(${scale})`,
                   opacity,
                   zIndex,

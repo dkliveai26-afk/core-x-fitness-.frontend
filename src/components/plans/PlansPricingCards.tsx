@@ -317,30 +317,33 @@ export function PlansPricingCards() {
           })}
         </div>
 
-        {/* Promotional Offer Card Banner (Compact, Responsive, Preserving Aspect Ratio) */}
+        {/* Promotional Offer Card Banner (Wider & Balanced on Desktop, Responsive & Contained on Mobile) */}
         <motion.div
           initial={{ opacity: 0, y: 35 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-10 sm:mt-14 flex flex-col items-center justify-center"
+          className="mt-12 sm:mt-16 lg:mt-20 flex flex-col items-center justify-center w-full px-2 sm:px-4 relative"
         >
+          {/* Radial Ambient Red Glow behind banner */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl sm:max-w-4xl h-40 sm:h-52 bg-gradient-radial from-core-red/20 via-core-crimson/8 to-transparent rounded-full blur-[80px] sm:blur-[110px] pointer-events-none -z-10" />
+
           <div
             onClick={() => handleCtaClick(tiers[1])}
-            className="group relative w-full max-w-lg sm:max-w-xl lg:max-w-2xl rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 hover:border-core-red/50 shadow-[0_20px_50px_rgba(0,0,0,0.85)] hover:shadow-[0_20px_50px_rgba(255,42,42,0.2)] transition-all duration-500 cursor-pointer bg-core-dark/80 backdrop-blur-xl"
+            className="group relative w-full max-w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 hover:border-core-red/60 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(255,42,42,0.18)] hover:shadow-[0_30px_70px_rgba(255,42,42,0.3)] transition-all duration-500 cursor-pointer bg-core-dark/90 backdrop-blur-xl"
           >
             <Image
               src="/plans-offer-banner.png"
               alt="Core X Fitness Exclusive Membership Offer - Get Up To 20% Off"
               width={996}
               height={300}
-              className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+              className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.015]"
               priority
             />
           </div>
 
-          <span className="mt-3 text-[10px] font-mono tracking-widest text-core-muted uppercase flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse" />
+          <span className="mt-3.5 sm:mt-4 text-[10px] sm:text-[11px] font-mono tracking-[0.2em] sm:tracking-widest text-core-muted uppercase flex items-center gap-1.5 text-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse shrink-0" />
             LIMITED TIME ATHLETIC ADMISSIONS DISCOUNT
           </span>
         </motion.div>

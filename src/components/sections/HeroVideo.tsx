@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
@@ -12,7 +13,6 @@ export function HeroVideo() {
   const [isVideoReady, setIsVideoReady] = useState(false);
 
   // Framer Motion's useScroll works correctly WITH Lenis smooth scroll.
-  // This is the ONLY reliable scroll progress source in this app.
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
@@ -155,20 +155,27 @@ export function HeroVideo() {
       className="relative h-[500vh] w-full bg-core-void select-none"
     >
       {/* Sticky viewport — stays pinned while user scrolls through the 500vh container */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-core-void">
+      <div className="sticky top-0 h-screen w-full overflow-hidden bg-core-void flex items-center justify-center">
 
-        {/* The actual MP4 video — fullscreen, no overlays, no gradients */}
-        <video
-          ref={videoRef}
-          src="/videoclip.mp4"
-          muted
-          playsInline
-          preload="auto"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-            isVideoReady ? 'opacity-100' : 'opacity-0'
-          }`}
-          style={{ willChange: 'contents' }}
-        />
+        {/* The actual MP4 video — fullscreen desktop, contained & scaled proportionally on mobile/tablet so dumbbells & barbell plates stay 100% in frame */}
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+          <video
+            ref={videoRef}
+            src="/videoclip.mp4"
+            muted
+            playsInline
+            preload="auto"
+            className={`w-full h-full object-contain md:object-contain lg:object-cover transition-opacity duration-500 select-none pointer-events-none ${
+              isVideoReady ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ willChange: 'contents' }}
+          />
+
+          {/* Top & Bottom Ambient Edge Gradients that smoothly fade the video canvas into the black background on mobile/tablet */}
+          <div className="absolute inset-x-0 top-0 h-28 sm:h-36 bg-gradient-to-b from-core-void via-core-void/60 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-x-0 bottom-0 h-28 sm:h-36 bg-gradient-to-t from-core-void via-core-void/70 to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-0 bg-radial-vignette opacity-50 pointer-events-none z-10" />
+        </div>
 
         {/* Loading state — only visible before video metadata loads */}
         {!isVideoReady && (
@@ -180,14 +187,14 @@ export function HeroVideo() {
         {/* Initial Hero Center Heading — large, bold, cinematic opening statement, fades out smoothly on first scroll */}
         <motion.div
           style={{ opacity: centerMessageOpacity, y: centerMessageY, scale: centerMessageScale }}
-          className="absolute inset-0 flex items-center justify-center px-4 sm:px-8 text-center pointer-events-none z-20"
+          className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 md:px-8 text-center pointer-events-none z-20"
         >
-          <div className="w-full max-w-6xl mx-auto flex flex-col items-center justify-center">
-            <h1 className="font-display font-black text-[clamp(1.35rem,3.6vw,3.6rem)] uppercase tracking-tight leading-[1.08] drop-shadow-[0_15px_40px_rgba(0,0,0,0.95)]">
-              <span className="block text-white drop-shadow-[0_8px_25px_rgba(0,0,0,0.95)] whitespace-normal sm:whitespace-nowrap">
+          <div className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center">
+            <h1 className="font-display font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl uppercase tracking-tight leading-[1.08] drop-shadow-[0_15px_40px_rgba(0,0,0,0.95)]">
+              <span className="block text-white drop-shadow-[0_8px_25px_rgba(0,0,0,0.95)]">
                 FORGED IN DISCIPLINE.
               </span>
-              <span className="block mt-2 sm:mt-3 md:mt-4 text-transparent bg-clip-text bg-gradient-to-r from-core-red via-core-accent to-white drop-shadow-[0_0_35px_rgba(255,42,42,0.45)] whitespace-normal sm:whitespace-nowrap">
+              <span className="block mt-1.5 sm:mt-2.5 md:mt-3.5 text-transparent bg-clip-text bg-gradient-to-r from-core-red via-core-accent to-white drop-shadow-[0_0_35px_rgba(255,42,42,0.45)]">
                 BUILT FOR PERFORMANCE.
               </span>
             </h1>
@@ -197,36 +204,46 @@ export function HeroVideo() {
         {/* Scroll hint — fades out immediately when scrolling begins */}
         <motion.div
           style={{ opacity: hintOpacity }}
-          className="absolute bottom-10 inset-x-0 flex flex-col items-center gap-2 z-20 pointer-events-none"
+          className="absolute bottom-6 sm:bottom-10 inset-x-0 flex flex-col items-center gap-1.5 sm:gap-2 z-20 pointer-events-none"
         >
-          <span className="text-[11px] font-mono tracking-[0.35em] text-white/80 uppercase drop-shadow-lg">
+          <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.3em] sm:tracking-[0.35em] text-white/80 uppercase drop-shadow-lg">
             SCROLL TO EXPLORE
           </span>
-          <ChevronDown className="w-5 h-5 text-core-red animate-bounce drop-shadow-lg" />
+          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-core-red animate-bounce drop-shadow-lg" />
         </motion.div>
 
         {/* Hero text — appears ONLY after video reaches its final frame */}
         <motion.div
           style={{ opacity: textOpacity, y: textY, scale: textScale }}
-          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-8 text-center z-30 pointer-events-none"
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 text-center z-30 pointer-events-none"
         >
-          <div className="space-y-6 max-w-5xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-xs font-mono tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
+          <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
               ATHLETIC EXCELLENCE REIMAGINED
             </div>
 
-            <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white leading-[1.05] drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
+            <h1 className="font-display font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tight text-white leading-[1.06] drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
               FORGED IN <span className="text-core-red">DISCIPLINE.</span>
-              <br className="hidden sm:block" />
+              <br className="hidden sm:block" />{' '}
               DEFINED BY{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-core-muted">
                 STRENGTH.
               </span>
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base font-mono tracking-[0.25em] text-core-muted uppercase max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+            <p className="text-[11px] sm:text-xs md:text-sm font-mono tracking-[0.18em] sm:tracking-[0.25em] text-core-muted uppercase max-w-xl sm:max-w-2xl mx-auto leading-relaxed drop-shadow-md">
               AN UNCOMPROMISING ATHLETIC CLUB AND HIGH-PERFORMANCE FACILITY.
             </p>
+
+            <div className="pt-2 sm:pt-4 pointer-events-auto">
+              <Link
+                href="/plans"
+                className="inline-flex items-center gap-2 px-6 py-2.5 sm:px-8 sm:py-3.5 rounded-full bg-red-gradient text-white text-xs sm:text-sm font-heading font-bold uppercase tracking-widest hover:shadow-glow-red hover:scale-105 active:scale-95 transition-all duration-300 border border-core-red/50 shadow-[0_0_25px_rgba(255,42,42,0.4)]"
+              >
+                <span>GET ACCESS</span>
+                <span className="text-sm sm:text-base">↗</span>
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>
