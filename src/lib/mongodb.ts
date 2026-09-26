@@ -1,34 +1,36 @@
 import { MongoClient, Db } from 'mongodb';
 
-const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/corexfitness';
-const options = {};
-
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+const options = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+};
 
 declare global {
   // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-if (process.env.NODE_ENV === 'development') {
+function getClientPromise(): Promise<MongoClient> {
+  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/corexfitness';
+
   if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
+    const client = new MongoClient(uri, options);
     global._mongoClientPromise = client.connect();
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  return global._mongoClientPromise;
 }
 
 /**
  * Returns the MongoDB Database instance.
- * Automatically reuses cached connection pool in development and production.
+ * Automatically reuses cached connection pool across serverless invocations.
  */
-export async function getDatabase(dbName = 'corexfitness'): Promise<Db> {
-  const clientInstance = await clientPromise;
-  return clientInstance.db(dbName);
+export async function getDatabase(dbName?: string): Promise<Db> {
+  const clientInstance = await getClientPromise();
+  const defaultDb = process.env.MONGODB_DB || 'corexfitness';
+  return clientInstance.db(dbName || defaultDb);
 }
 
+const clientPromise = getClientPromise();
 export default clientPromise;
+

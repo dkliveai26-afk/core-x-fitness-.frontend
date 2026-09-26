@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
     } catch {
       // Clerk auth optional on booking form
     }
-    const body = await req.json();
+
+    const body = await req.json().catch(() => ({}));
     const {
       customerName,
       email,
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     const newBooking = {
       customerName: customerName.trim(),
       email: email.trim().toLowerCase(),
-      phone: phone ? phone.trim() : '',
+      phone: phone ? String(phone).trim() : '',
       planName: planName?.trim() || 'Apex Athletic Tier',
       planPrice: planPrice?.trim() || 'Custom',
       planPeriod: planPeriod?.trim() || '/month',
@@ -61,10 +62,20 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('API /api/bookings error:', error);
+    const isConnError =
+      error?.name === 'MongoServerSelectionError' ||
+      error?.message?.includes('ECONNREFUSED') ||
+      error?.message?.includes('timed out') ||
+      !process.env.MONGODB_URI;
+
     return NextResponse.json(
-      { error: 'Failed to record booking. Please try again.' },
+      {
+        error: isConnError
+          ? 'Database connection unavailable. Please verify MONGODB_URI is set in Vercel Environment Variables.'
+          : (error?.message || 'Failed to record booking. Please try again.'),
+      },
       { status: 500 }
     );
   }

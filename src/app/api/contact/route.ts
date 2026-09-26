@@ -3,7 +3,7 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
     const { name, email, phone, topic, service, message } = body;
 
     // Validate required fields
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const newSubmission = {
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      phone: phone.trim(),
+      phone: String(phone).trim(),
       topic: (service || topic || 'Membership Admissions').trim(),
       message: message.trim(),
       status: 'NEW',
@@ -46,10 +46,20 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('API /api/contact error:', error);
+    const isConnError =
+      error?.name === 'MongoServerSelectionError' ||
+      error?.message?.includes('ECONNREFUSED') ||
+      error?.message?.includes('timed out') ||
+      !process.env.MONGODB_URI;
+
     return NextResponse.json(
-      { error: 'Failed to process inquiry dispatch. Please try again or contact directly.' },
+      {
+        error: isConnError
+          ? 'Database connection unavailable. Please verify MONGODB_URI is set in Vercel Environment Variables.'
+          : (error?.message || 'Failed to process inquiry dispatch. Please try again or contact directly.'),
+      },
       { status: 500 }
     );
   }
