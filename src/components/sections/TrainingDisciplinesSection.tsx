@@ -47,41 +47,49 @@ export function TrainingDisciplinesSection() {
     >
       <div className="max-w-7xl mx-auto space-y-20 z-10 relative">
         {/* Section Header */}
-        <motion.div
-          style={{ y: headingY }}
-          initial={{ opacity: 0, x: -60 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/10"
-        >
-          <div className="space-y-3">
-            <span className="text-xs font-mono tracking-[0.35em] text-core-red uppercase font-bold">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-white/10">
+          <motion.div
+            initial={{ opacity: 0, x: -50, y: 20 }}
+            whileInView={{ opacity: 1, x: 0, y: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-3"
+          >
+            <span className="text-xs font-mono tracking-[0.35em] text-core-red uppercase font-bold block">
               02 / TRAINING DISCIPLINES
             </span>
             <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white max-w-full break-words">
               ENGINEERED FOR <span className="text-core-red">PERFORMANCE</span>
             </h2>
-          </div>
-          <p className="text-xs font-mono text-core-muted tracking-widest uppercase max-w-xs">
+          </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 1.0, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            className="text-xs font-mono text-core-muted tracking-widest uppercase max-w-xs font-light"
+          >
             NO CAROUSELS • NO GENERIC CLASSES • ONLY CALIBRATED DISCIPLINE
-          </p>
-        </motion.div>
+          </motion.p>
+        </div>
 
         {/* Editorial Discipline List (Interactive Full-Width Layout) */}
         <div className="space-y-16">
           {disciplines.map((item, idx) => {
             return (
-              <motion.div
+              <div
                 key={item.id}
-                initial={{ opacity: 0, x: -70 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ duration: 0.85, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
                 className="group relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-8 border-b border-white/10"
               >
-                {/* Discipline Info */}
-                <div className="lg:col-span-6 space-y-6">
+                {/* Discipline Info — Glides smoothly from Left */}
+                <motion.div
+                  initial={{ opacity: 0, x: -60 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: '-60px' }}
+                  transition={{ duration: 1.15, delay: idx * 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  className="lg:col-span-6 space-y-6"
+                >
                   <div className="flex items-baseline gap-4">
                     <span className="font-display font-black text-4xl sm:text-6xl text-core-red tracking-wider">
                       {item.id}
@@ -106,10 +114,16 @@ export function TrainingDisciplinesSection() {
                       </span>
                     ))}
                   </div>
-                </div>
+                </motion.div>
 
-                {/* Editorial Visual Frame */}
-                <div className="lg:col-span-6">
+                {/* Editorial Visual Frame — Glides smoothly from Right with subtle scale */}
+                <motion.div
+                  initial={{ opacity: 0, x: 60, scale: 0.95 }}
+                  whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                  viewport={{ once: true, margin: '-60px' }}
+                  transition={{ duration: 1.2, delay: idx * 0.15 + 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className="lg:col-span-6"
+                >
                   <div className="relative h-[300px] sm:h-[380px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:border-core-red/40 transition-colors duration-500">
                     <Image
                       src={item.image}
@@ -123,8 +137,8 @@ export function TrainingDisciplinesSection() {
                       <ArrowUpRight className="w-5 h-5" />
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             );
           })}
         </div>

@@ -2,6 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { useAuthModal } from '@/context/AuthModalContext';
 import { Logo } from '@/components/brand/Logo';
 import { Button } from '@/components/common/Button';
 import { navigationItems } from '@/data/site';
@@ -9,9 +12,40 @@ import { Menu, X, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function Navbar() {
+  const pathname = usePathname();
+  const { openModal } = useAuthModal();
+  const { user } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeItem, setActiveItem] = useState('Philosophy');
+  const [activeItem, setActiveItem] = useState(
+    pathname === '/contact'
+      ? 'Contact'
+      : pathname === '/diet' || pathname === '/dite'
+      ? 'Diet'
+      : pathname === '/gallery'
+      ? 'Gallery'
+      : pathname === '/about'
+      ? 'About'
+      : pathname === '/plans'
+      ? 'Plans'
+      : 'Home'
+  );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (pathname === '/contact') {
+      setActiveItem('Contact');
+    } else if (pathname === '/diet' || pathname === '/dite') {
+      setActiveItem('Diet');
+    } else if (pathname === '/gallery') {
+      setActiveItem('Gallery');
+    } else if (pathname === '/about') {
+      setActiveItem('About');
+    } else if (pathname === '/plans') {
+      setActiveItem('Plans');
+    } else if (pathname === '/') {
+      setActiveItem('Home');
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,36 +58,45 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex items-center h-16 sm:h-20 ${
           isScrolled
-            ? 'py-3.5 bg-core-void/85 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.8)]'
-            : 'py-6 bg-gradient-to-b from-core-void/90 via-core-void/40 to-transparent'
+            ? 'bg-core-void/90 backdrop-blur-md border-b border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'
+            : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Top-Left Official Brand Logo */}
-          <Link
-            href="/"
-            className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-core-red rounded-lg"
-            aria-label="Core X Fitness Home"
-          >
-            <Logo />
-          </Link>
+          <div className="flex-1 flex items-center justify-start">
+            <Link
+              href="/"
+              className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-core-red rounded-lg"
+              aria-label="Core X Fitness Home"
+            >
+              <Logo />
+            </Link>
+          </div>
 
           {/* Center Navigation Capsule */}
           <nav
-            className="hidden lg:flex items-center p-1.5 rounded-full bg-core-dark/80 backdrop-blur-md border border-white/10 shadow-inner-bevel"
+            className="hidden lg:flex flex-none items-center p-1.5 rounded-full bg-core-dark/80 backdrop-blur-md border border-white/10 shadow-inner-bevel"
             aria-label="Main Navigation"
           >
             <ul className="flex items-center gap-1">
               {navigationItems.map((item) => {
-                const isActive = activeItem === item.label;
+                const isActive =
+                  (pathname === '/contact' && item.label === 'Contact') ||
+                  ((pathname === '/diet' || pathname === '/dite') && item.label === 'Diet') ||
+                  (pathname === '/gallery' && item.label === 'Gallery') ||
+                  (pathname === '/about' && item.label === 'About') ||
+                  (pathname === '/plans' && item.label === 'Plans') ||
+                  (pathname === '/' && activeItem === item.label);
+
                 return (
                   <li key={item.label} className="relative">
-                    <a
+                    <Link
                       href={item.href}
                       onClick={() => setActiveItem(item.label)}
-                      className={`relative px-4 py-2 text-xs uppercase font-heading font-bold tracking-widest transition-all duration-300 rounded-full block select-none ${
+                      className={`relative px-5 py-2 text-xs uppercase font-heading font-bold tracking-widest transition-all duration-300 rounded-full block select-none ${
                         isActive
                           ? 'text-white'
                           : 'text-core-muted hover:text-white hover:bg-white/5'
@@ -67,7 +110,7 @@ export function Navbar() {
                         />
                       )}
                       {item.label}
-                    </a>
+                    </Link>
                   </li>
                 );
               })}
@@ -75,45 +118,101 @@ export function Navbar() {
           </nav>
 
           {/* Right Action Cluster */}
-          <div className="hidden md:flex items-center">
-            <Button
-              variant="primary"
-              size="md"
-              rightIcon={<ArrowUpRight className="w-4 h-4" />}
-              onClick={() => {
-                const target = document.querySelector('#contact');
-                target?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Get Access
-            </Button>
-          </div>
+          <div className="flex-1 flex items-center justify-end">
+            <div className="hidden md:flex items-center">
+              <SignedOut>
+                <Button
+                  variant="primary"
+                  size="md"
+                  rightIcon={<ArrowUpRight className="w-4 h-4" />}
+                  onClick={() => openModal('signIn')}
+                >
+                  Get Access
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                <div className="flex items-center gap-3">
+                  {user && (
+                    <div className="hidden sm:flex flex-col items-end text-right leading-tight select-none">
+                      <span className="text-xs font-heading font-bold text-white uppercase tracking-wider truncate max-w-[150px]">
+                        {user.fullName || user.firstName || 'Athlete'}
+                      </span>
+                      <span className="text-[10px] font-mono text-core-red uppercase tracking-widest font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse" />
+                        Member Portal
+                      </span>
+                    </div>
+                  )}
+                  <UserButton
+                    userProfileMode="modal"
+                    appearance={{
+                      elements: {
+                        rootBox: 'flex items-center justify-center',
+                        userButtonTrigger:
+                          'focus:outline-none focus-visible:ring-2 focus-visible:ring-core-red rounded-full transition-transform hover:scale-105 active:scale-95',
+                        userButtonAvatarBox:
+                          'w-10 h-10 rounded-full ring-2 ring-core-red/80 hover:ring-core-red shadow-glow-red overflow-hidden flex items-center justify-center transition-all',
+                        userButtonAvatarImage: 'w-full h-full object-cover rounded-full',
+                        userButtonPopoverCard:
+                          'bg-[#0B0D11]/95 backdrop-blur-2xl border border-white/12 text-white shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_30px_rgba(255,42,42,0.15)] rounded-2xl p-2',
+                        userPreviewMainIdentifier:
+                          'text-white font-heading font-bold text-sm tracking-wide uppercase',
+                        userPreviewSecondaryIdentifier: 'text-slate-400 font-mono text-xs',
+                        userButtonPopoverActionButton:
+                          'text-slate-200 hover:text-white hover:bg-white/5 font-mono text-xs transition-colors rounded-xl px-3 py-2',
+                        userButtonPopoverActionButtonIcon: 'text-core-red',
+                        userButtonPopoverActionButtonText:
+                          'font-mono text-xs text-slate-200 font-medium',
+                        userButtonPopoverFooter: 'hidden',
+                      },
+                    }}
+                  />
+                </div>
+              </SignedIn>
+            </div>
 
-          {/* Mobile Menu Trigger Button */}
-          <div className="flex md:hidden items-center gap-3">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                const target = document.querySelector('#contact');
-                target?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Access
-            </Button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-lg bg-core-dark border border-white/10 text-white hover:text-core-red transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-core-red"
-              aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* Mobile / Tablet Menu Trigger Button (Visible on screens < 1024px) */}
+            <div className="flex lg:hidden items-center gap-2 sm:gap-2.5">
+              <SignedOut>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => openModal('signIn')}
+                >
+                  Access
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                <UserButton
+                  userProfileMode="modal"
+                  appearance={{
+                    elements: {
+                      rootBox: 'flex items-center justify-center',
+                      userButtonTrigger:
+                        'focus:outline-none focus:ring-2 focus:ring-core-red rounded-full transition-transform active:scale-95',
+                      userButtonAvatarBox:
+                        'w-8 h-8 rounded-full ring-2 ring-core-red/80 shadow-glow-red overflow-hidden',
+                      userButtonAvatarImage: 'w-full h-full object-cover rounded-full',
+                      userButtonPopoverCard:
+                        'bg-[#0B0D11]/95 backdrop-blur-2xl border border-white/12 text-white shadow-[0_25px_60px_rgba(0,0,0,0.95)] rounded-2xl p-2',
+                    },
+                  }}
+                />
+              </SignedIn>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 rounded-lg bg-core-dark border border-white/10 text-white hover:text-core-red transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-core-red"
+                aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
+                aria-expanded={mobileMenuOpen}
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Fullscreen Drawer */}
+      {/* Mobile / Tablet Menu Fullscreen Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -121,7 +220,7 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-core-void/98 backdrop-blur-2xl pt-28 pb-12 px-6 flex flex-col justify-between md:hidden"
+            className="fixed inset-0 z-40 bg-core-void/98 backdrop-blur-2xl pt-24 sm:pt-28 pb-10 sm:pb-12 px-5 sm:px-8 flex flex-col justify-between overflow-y-auto max-h-[100dvh] lg:hidden"
           >
             {/* Background Ambient Glow */}
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 bg-core-red/15 rounded-full blur-3xl pointer-events-none -z-10" />
@@ -135,43 +234,82 @@ export function Navbar() {
               </div>
 
               <ul className="space-y-3">
-                {navigationItems.map((item, index) => (
-                  <motion.li
-                    key={item.label}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    <a
-                      href={item.href}
-                      onClick={() => {
-                        setActiveItem(item.label);
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex items-center justify-between py-3 text-xl font-display font-bold uppercase tracking-wider text-white hover:text-core-red transition-colors border-b border-white/5"
+                {navigationItems.map((item, index) => {
+                  const isActive =
+                    (pathname === '/contact' && item.label === 'Contact') ||
+                    ((pathname === '/diet' || pathname === '/dite') && item.label === 'Diet') ||
+                    (pathname === '/gallery' && item.label === 'Gallery') ||
+                    (pathname === '/about' && item.label === 'About') ||
+                    (pathname === '/plans' && item.label === 'Plans') ||
+                    (pathname === '/' && activeItem === item.label);
+
+                  return (
+                    <motion.li
+                      key={item.label}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
                     >
-                      <span>{item.label}</span>
-                      <ArrowUpRight className="w-5 h-5 text-core-muted" />
-                    </a>
-                  </motion.li>
-                ))}
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          setActiveItem(item.label);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`flex items-center justify-between py-3 text-xl font-display font-bold uppercase tracking-wider transition-colors border-b border-white/5 ${
+                          isActive ? 'text-core-red' : 'text-white hover:text-core-red'
+                        }`}
+                      >
+                        <span>{item.label}</span>
+                        <ArrowUpRight className={`w-5 h-5 ${isActive ? 'text-core-red' : 'text-core-muted'}`} />
+                      </Link>
+                    </motion.li>
+                  );
+                })}
               </ul>
             </div>
 
             <div className="space-y-4 pt-6 border-t border-white/10">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full"
-                rightIcon={<ArrowUpRight className="w-5 h-5" />}
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  const target = document.querySelector('#contact');
-                  target?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Get Access
-              </Button>
+              <SignedOut>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  rightIcon={<ArrowUpRight className="w-5 h-5" />}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openModal('signIn');
+                  }}
+                >
+                  Get Access
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/10">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-mono tracking-widest text-core-red uppercase block font-bold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse" />
+                      ACTIVE ATHLETE PASS
+                    </span>
+                    <span className="text-sm font-heading font-bold text-white uppercase truncate block max-w-[200px]">
+                      {user?.fullName || user?.firstName || 'Member'}
+                    </span>
+                  </div>
+                  <div className="w-9 h-9 rounded-full ring-2 ring-core-red/80 overflow-hidden shadow-glow-red flex items-center justify-center">
+                    {user?.imageUrl ? (
+                      <img
+                        src={user.imageUrl}
+                        alt={user.fullName || 'Member Profile'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-core-dark flex items-center justify-center text-xs font-mono text-white">
+                        CX
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </SignedIn>
               <div className="text-center text-xs font-mono text-core-muted uppercase tracking-widest">
                 24/7 Biometric Access • 740 Grand Avenue
               </div>

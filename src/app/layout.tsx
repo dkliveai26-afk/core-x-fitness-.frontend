@@ -1,8 +1,7 @@
+import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { SmoothScrollProvider } from '@/components/common/SmoothScrollProvider';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { siteConfig } from '@/data/site';
 
 export const metadata: Metadata = {
@@ -60,7 +59,13 @@ export const metadata: Metadata = {
     creator: '@corexfitness',
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    shortcut: ['/favicon.ico'],
+    apple: [
+      { url: '/favicon.ico' },
+    ],
   },
 };
 
@@ -118,17 +123,30 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className="min-h-screen bg-core-void text-slate-100 selection:bg-core-red selection:text-white flex flex-col">
-        <SmoothScrollProvider>
-          <Navbar />
-          <main className="flex-1 w-full flex flex-col">{children}</main>
-          <Footer />
-        </SmoothScrollProvider>
+        <ClerkProvider
+          appearance={{
+            baseTheme: dark,
+            variables: {
+              colorPrimary: '#FF2A2A',
+              colorBackground: '#0B0D10',
+              colorInputBackground: '#050607',
+              colorInputText: '#FFFFFF',
+              colorText: '#FFFFFF',
+              colorTextSecondary: '#94A3B8',
+              borderRadius: '0.75rem',
+              colorDanger: '#FF2A2A',
+            },
+          }}
+        >
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   );

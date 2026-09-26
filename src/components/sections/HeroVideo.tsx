@@ -1,137 +1,230 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 
 export function HeroVideo() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoDuration, setVideoDuration] = useState<number>(15);
-  const targetTimeRef = useRef<number>(0);
-  const currentTimeRef = useRef<number>(0);
-  const animationFrameRef = useRef<number | null>(null);
+  const videoDurationRef = useRef<number>(0);
+  const rafIdRef = useRef<number>(0);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
-  // Track scroll progress through the 480vh section container for generous full-video scroll distance
+  // Framer Motion's useScroll works correctly WITH Lenis smooth scroll.
+  // This is the ONLY reliable scroll progress source in this app.
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   });
 
-  // Setup video metadata and smooth LERP scrubbing loop for the new videoclip.mp4
+  // Text overlays — appear ONLY after the video reaches its final frame
+  const textOpacity = useTransform(scrollYProgress, [0.84, 0.90, 1.0], [0, 1, 1]);
+  const textY = useTransform(scrollYProgress, [0.84, 0.90], [40, 0]);
+  const textScale = useTransform(scrollYProgress, [0.84, 0.90], [0.95, 1]);
+  const hintOpacity = useTransform(scrollYProgress, [0, 0.04], [1, 0]);
+
+  // Initial Hero Center Heading — fades out smoothly on first scroll
+  const centerMessageOpacity = useTransform(scrollYProgress, [0, 0.04], [1, 0]);
+  const centerMessageY = useTransform(scrollYProgress, [0, 0.04], [0, -25]);
+  const centerMessageScale = useTransform(scrollYProgress, [0, 0.04], [1, 0.96]);
+
+  // Track seeking state and target time to prevent uncontrolled seek flooding
+  const targetTimeRef = useRef<number>(0);
+  const isSeekingRef = useRef<boolean>(false);
+
+  // Video initialization and decoder unlock
+  const onVideoReady = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.duration && !isNaN(video.duration) && video.duration > 0) {
+      videoDurationRef.current = video.duration;
+      setIsVideoReady(true);
+
+      // Unlock video decoder pipeline
+      video.play().then(() => {
+        video.pause();
+        video.currentTime = 0;
+      }).catch(() => {
+        // Autoplay muted fallback
+      });
+    }
+  }, []);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     video.pause();
-
-    const handleLoadedMetadata = () => {
-      if (video.duration && !isNaN(video.duration)) {
-        setVideoDuration(video.duration);
-      }
-    };
+    video.currentTime = 0;
 
     if (video.readyState >= 1) {
-      handleLoadedMetadata();
+      onVideoReady();
     } else {
-      video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      video.addEventListener('loadedmetadata', onVideoReady);
     }
 
-    // Ultra-smooth RAF loop with LERP interpolation for buttery motion without frame jumps
-    const updateVideoTime = () => {
-      if (videoRef.current && videoDuration > 0) {
-        const diff = targetTimeRef.current - currentTimeRef.current;
-        if (Math.abs(diff) > 0.001) {
-          currentTimeRef.current += diff * 0.12; // Smooth lerp coefficient
-          const safeTime = Math.max(0, Math.min(videoDuration - 0.02, currentTimeRef.current));
-          try {
-            videoRef.current.currentTime = safeTime;
-          } catch (e) {
-            // Ignore seek errors during mount
-          }
+    return () => {
+      video.removeEventListener('loadedmetadata', onVideoReady);
+    };
+  }, [onVideoReady]);
+
+  // Core scrub engine: RAF loop with seek-safe queueing
+  useEffect(() => {
+    let active = true;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const performSeek = () => {
+      if (!active || !video) return;
+      const duration = videoDurationRef.current;
+      if (duration <= 0) return;
+
+      const target = Math.max(0, Math.min(duration - 0.02, targetTimeRef.current));
+      const diff = Math.abs(video.currentTime - target);
+
+      // Controlled seek: only dispatch when not already seeking and gap is meaningful
+      if (diff > 0.008 && !isSeekingRef.current && !video.seeking) {
+        isSeekingRef.current = true;
+        try {
+          video.currentTime = target;
+        } catch {
+          isSeekingRef.current = false;
         }
       }
-      animationFrameRef.current = requestAnimationFrame(updateVideoTime);
     };
 
-    animationFrameRef.current = requestAnimationFrame(updateVideoTime);
+    const handleSeeked = () => {
+      isSeekingRef.current = false;
+      performSeek();
+    };
+
+    const handleSeeking = () => {
+      isSeekingRef.current = true;
+    };
+
+    video.addEventListener('seeked', handleSeeked);
+    video.addEventListener('seeking', handleSeeking);
+
+    // RAF loop interpolates smoothly towards scroll position
+    let lastDispatchedTarget = -1;
+
+    const tick = () => {
+      if (!active) return;
+
+      const duration = videoDurationRef.current;
+      if (video && duration > 0) {
+        const rawProgress = scrollYProgress.get();
+
+        // 0 to 0.84 maps to 0 to 100% of video (full duration)
+        const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.84));
+        const desiredTime = videoProgress * (duration - 0.02);
+
+        // Smooth sub-frame interpolation
+        const diff = desiredTime - targetTimeRef.current;
+        if (Math.abs(diff) < 0.002) {
+          targetTimeRef.current = desiredTime;
+        } else {
+          // Responsive follow speed that eliminates lag while preserving smoothness
+          targetTimeRef.current += diff * 0.45;
+        }
+
+        if (Math.abs(targetTimeRef.current - lastDispatchedTarget) > 0.005) {
+          lastDispatchedTarget = targetTimeRef.current;
+          performSeek();
+        }
+      }
+
+      rafIdRef.current = requestAnimationFrame(tick);
+    };
+
+    rafIdRef.current = requestAnimationFrame(tick);
 
     return () => {
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      active = false;
+      video.removeEventListener('seeked', handleSeeked);
+      video.removeEventListener('seeking', handleSeeking);
+      cancelAnimationFrame(rafIdRef.current);
     };
-  }, [videoDuration]);
-
-  // PHASE 1 (0.00 -> 0.70 scroll): Map scroll 100% to the full video duration (frame 0 -> final frame)
-  useMotionValueEvent(scrollYProgress, 'change', (latest) => {
-    const videoProgress = Math.max(0, Math.min(1, latest / 0.70));
-    targetTimeRef.current = videoProgress * videoDuration;
-  });
-
-  // PHASE 2 (>0.72 scroll): Text Reveal AFTER 100% video completion with left-side entrance animation
-  const textOpacity = useTransform(scrollYProgress, [0.70, 0.80, 0.92, 0.98], [0, 1, 1, 0]);
-  const textX = useTransform(scrollYProgress, [0.70, 0.82], [-60, 0]);
-  const textScale = useTransform(scrollYProgress, [0.70, 0.82], [0.97, 1]);
-
-  // Scroll Hint Indicator (visible only at the very start 0 -> 0.10 scroll)
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.10], [1, 0]);
+  }, [scrollYProgress]);
 
   return (
     <section
       id="hero"
       ref={containerRef}
-      className="relative h-[480vh] w-full bg-core-void select-none"
+      className="relative h-[500vh] w-full bg-core-void select-none"
     >
-      {/* Sticky Fullscreen Viewport Frame */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center bg-core-void">
-        
-        {/* Crisp Full-bleed Video Frame (New Unwatermarked videoclip.mp4) */}
-        <div className="relative w-full h-full flex items-center justify-center z-0">
-          <video
-            ref={videoRef}
-            src="/videoclip.mp4"
-            muted
-            playsInline
-            preload="auto"
-            className="w-full h-full object-contain md:object-cover object-center pointer-events-none filter brightness-105 contrast-105"
-          />
+      {/* Sticky viewport — stays pinned while user scrolls through the 500vh container */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden bg-core-void">
 
-          {/* Minimal top and bottom gradient fades to cleanly blend video edges into black background without blur */}
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-core-void via-core-void/30 to-transparent pointer-events-none z-10" />
-          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-core-void via-core-void/50 to-transparent pointer-events-none z-10" />
-        </div>
+        {/* The actual MP4 video — fullscreen, no overlays, no gradients */}
+        <video
+          ref={videoRef}
+          src="/videoclip.mp4"
+          muted
+          playsInline
+          preload="auto"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            isVideoReady ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ willChange: 'contents' }}
+        />
 
-        {/* Minimal Initial Scroll Hint (Fades out immediately as user starts scrolling) */}
+        {/* Loading state — only visible before video metadata loads */}
+        {!isVideoReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-core-void z-10">
+            <div className="w-8 h-8 border-2 border-core-red border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+
+        {/* Initial Hero Center Heading — large, bold, cinematic opening statement, fades out smoothly on first scroll */}
         <motion.div
-          style={{ opacity: hintOpacity }}
-          className="absolute bottom-8 inset-x-0 flex flex-col items-center justify-center gap-2 z-20 pointer-events-none"
+          style={{ opacity: centerMessageOpacity, y: centerMessageY, scale: centerMessageScale }}
+          className="absolute inset-0 flex items-center justify-center px-4 sm:px-8 text-center pointer-events-none z-20"
         >
-          <span className="text-[11px] font-mono tracking-[0.35em] text-core-muted/90 uppercase">
-            SCROLL TO CONTROL ANIMATION
-          </span>
-          <ChevronDown className="w-5 h-5 text-core-red animate-bounce" />
+          <div className="w-full max-w-6xl mx-auto flex flex-col items-center justify-center">
+            <h1 className="font-display font-black text-[clamp(1.35rem,3.6vw,3.6rem)] uppercase tracking-tight leading-[1.08] drop-shadow-[0_15px_40px_rgba(0,0,0,0.95)]">
+              <span className="block text-white drop-shadow-[0_8px_25px_rgba(0,0,0,0.95)] whitespace-normal sm:whitespace-nowrap">
+                FORGED IN DISCIPLINE.
+              </span>
+              <span className="block mt-2 sm:mt-3 md:mt-4 text-transparent bg-clip-text bg-gradient-to-r from-core-red via-core-accent to-white drop-shadow-[0_0_35px_rgba(255,42,42,0.45)] whitespace-normal sm:whitespace-nowrap">
+                BUILT FOR PERFORMANCE.
+              </span>
+            </h1>
+          </div>
         </motion.div>
 
-        {/* TEXT REVEAL CONTAINER — Appears ONLY AFTER the video completes 100% of its frames */}
-        {/* Left-side entrance animation (textX) + smooth opacity fade */}
+        {/* Scroll hint — fades out immediately when scrolling begins */}
         <motion.div
-          style={{ opacity: textOpacity, x: textX, scale: textScale }}
-          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-8 text-center z-30 pointer-events-none max-w-5xl mx-auto"
+          style={{ opacity: hintOpacity }}
+          className="absolute bottom-10 inset-x-0 flex flex-col items-center gap-2 z-20 pointer-events-none"
         >
-          <div className="space-y-6 text-left sm:text-center w-full">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-xs font-mono tracking-[0.3em] text-core-red uppercase font-bold">
+          <span className="text-[11px] font-mono tracking-[0.35em] text-white/80 uppercase drop-shadow-lg">
+            SCROLL TO EXPLORE
+          </span>
+          <ChevronDown className="w-5 h-5 text-core-red animate-bounce drop-shadow-lg" />
+        </motion.div>
+
+        {/* Hero text — appears ONLY after video reaches its final frame */}
+        <motion.div
+          style={{ opacity: textOpacity, y: textY, scale: textScale }}
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-8 text-center z-30 pointer-events-none"
+        >
+          <div className="space-y-6 max-w-5xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-xs font-mono tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
               ATHLETIC EXCELLENCE REIMAGINED
             </div>
 
-            <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white leading-[1.05] drop-shadow-[0_10px_30px_rgba(0,0,0,0.9)] max-w-4xl mx-auto break-words">
+            <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white leading-[1.05] drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
               FORGED IN <span className="text-core-red">DISCIPLINE.</span>
               <br className="hidden sm:block" />
-              DEFINED BY <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-core-muted">STRENGTH.</span>
+              DEFINED BY{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-core-muted">
+                STRENGTH.
+              </span>
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base font-mono tracking-[0.25em] text-core-muted uppercase max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xs sm:text-sm md:text-base font-mono tracking-[0.25em] text-core-muted uppercase max-w-2xl mx-auto leading-relaxed drop-shadow-md">
               AN UNCOMPROMISING ATHLETIC CLUB AND HIGH-PERFORMANCE FACILITY.
             </p>
           </div>

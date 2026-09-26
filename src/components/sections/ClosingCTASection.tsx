@@ -31,20 +31,45 @@ export function ClosingCTASection() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-core-red/10 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-4xl mx-auto space-y-10 z-10">
-        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono tracking-[0.3em] text-core-red uppercase">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          FINAL THRESHOLD
-        </span>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono tracking-[0.3em] text-core-red uppercase">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            FINAL THRESHOLD
+          </span>
+        </motion.div>
 
-        <h2 className="font-display font-black text-4xl sm:text-7xl md:text-8xl uppercase tracking-wider text-white leading-none">
+        <motion.h2
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 1.2, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="font-display font-black text-4xl sm:text-7xl md:text-8xl uppercase tracking-wider text-white leading-none"
+        >
           FORGED IN <span className="text-core-red">DISCIPLINE.</span>
-        </h2>
+        </motion.h2>
 
-        <p className="text-xs sm:text-sm font-mono tracking-[0.3em] text-core-muted uppercase max-w-xl mx-auto">
+        <motion.p
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="text-xs sm:text-sm font-mono tracking-[0.3em] text-core-muted uppercase max-w-xl mx-auto font-light"
+        >
           EXPERIENCE THE UNCOMPROMISING ATHLETIC STANDARD AT CORE X FITNESS.
-        </p>
+        </motion.p>
 
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.94, y: 20 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 1.0, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
           <Button
             variant="primary"
             size="xl"
@@ -53,22 +78,27 @@ export function ClosingCTASection() {
           >
             Claim Access Pass
           </Button>
-        </div>
+        </motion.div>
 
-        {/* Minimal Location & Contact Details */}
+        {/* Minimal Location & Contact Details with Staggered Entrance */}
         <div className="pt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 border-t border-white/10 text-xs font-mono text-core-muted uppercase tracking-widest max-w-3xl mx-auto">
-          <div className="flex items-center justify-center gap-2">
-            <MapPin className="w-4 h-4 text-core-red" />
-            <span>740 GRAND AVE, NYC</span>
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <Phone className="w-4 h-4 text-core-red" />
-            <span>+1 (800) 555-CORE</span>
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <Mail className="w-4 h-4 text-core-red" />
-            <span>CONCIERGE@COREX.COM</span>
-          </div>
+          {[
+            { icon: MapPin, text: '740 GRAND AVE, KOLKATA' },
+            { icon: Phone, text: '+1 (800) 555-CORE' },
+            { icon: Mail, text: 'CONCIERGE@COREX.COM' },
+          ].map((item, idx) => (
+            <motion.div
+              key={item.text}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.9, delay: 0.5 + idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
+              className="flex items-center justify-center gap-2"
+            >
+              <item.icon className="w-4 h-4 text-core-red" />
+              <span>{item.text}</span>
+            </motion.div>
+          ))}
         </div>
       </div>
 

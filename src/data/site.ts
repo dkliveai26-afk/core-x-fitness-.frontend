@@ -24,11 +24,12 @@ export const siteConfig = {
 };
 
 export const navigationItems: NavItem[] = [
-  { label: 'Home', href: '#hero' },
-  { label: 'About', href: '#about' },
-  { label: 'Programs', href: '#programs' },
-  { label: 'Trainers', href: '#trainers' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Plans', href: '/plans' },
+  { label: 'Gallery', href: '/gallery' },
+  { label: 'Diet', href: '/diet' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export const heroStats: StatItem[] = [

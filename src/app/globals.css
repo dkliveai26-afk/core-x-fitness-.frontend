@@ -71,3 +71,65 @@ canvas {
     scroll-behavior: auto !important;
   }
 }
+
+/* Core X Fitness - Clerk Luxury Glass Integration */
+.cl-rootBox {
+  width: 100% !important;
+}
+
+.cl-cardBox {
+  width: 100% !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.cl-card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.cl-userButtonPopoverCard {
+  background: rgba(11, 14, 20, 0.92) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(255, 42, 42, 0.15) !important;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+  background: rgba(255, 42, 42, 0.12) !important;
+}
+
+.cl-userButtonPopoverActionButtonText {
+  color: #F8FAFC !important;
+}
+
+.cl-userButtonPopoverActionButtonIcon {
+  color: #FF2A2A !important;
+}
+
+.cl-modalBackdrop {
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.cl-userProfile-root {
+  background: rgba(11, 14, 20, 0.95) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 45px rgba(255, 42, 42, 0.15) !important;
+}
+
+.cl-footerActionLink {
+  color: #FF2A2A !important;
+  font-weight: 700 !important;
+}
+
+.cl-footerActionLink:hover {
+  color: #FFFFFF !important;
+}
+

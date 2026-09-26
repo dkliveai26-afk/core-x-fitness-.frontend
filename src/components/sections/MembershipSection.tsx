@@ -117,7 +117,7 @@ export function MembershipSection() {
                   {/* Pricing Display */}
                   <div className="mt-6 pt-6 border-t border-white/10 flex items-baseline gap-2">
                     <span className="text-4xl sm:text-5xl font-display font-black text-white">
-                      ${price}
+                      ₹{price.toLocaleString('en-IN')}
                     </span>
                     <span className="text-xs font-mono text-core-muted">
                       {plan.period}

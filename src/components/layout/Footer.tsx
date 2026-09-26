@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Logo } from '@/components/brand/Logo';
 import { Button } from '@/components/common/Button';
 import { siteConfig } from '@/data/site';
@@ -19,7 +20,13 @@ export function Footer() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Top VIP Concierge Banner */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-core-dark border border-white/10 flex flex-col md:flex-row items-center justify-between gap-8 mb-20 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          className="p-8 sm:p-12 rounded-3xl bg-core-dark border border-white/10 flex flex-col md:flex-row items-center justify-between gap-8 mb-20 shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+        >
           <div className="max-w-xl">
             <span className="text-xs font-mono uppercase tracking-[0.25em] text-core-red font-bold">
               CONCIERGE & PRIVATE TOURS
@@ -27,7 +34,7 @@ export function Footer() {
             <h3 className="text-2xl sm:text-3xl font-display font-bold text-white mt-2 uppercase">
               Schedule Your Private Facility Assessment
             </h3>
-            <p className="text-sm text-core-muted mt-2 font-sans">
+            <p className="text-sm text-core-muted mt-2 font-sans font-light">
               Experience the private recovery chambers, Eleiko stations, and receive a baseline biometric assessment with our Master Coaches.
             </p>
           </div>
@@ -47,14 +54,20 @@ export function Footer() {
               Request Access
             </Button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Main Footer Links Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 pb-16 border-b border-white/10">
+        {/* Main Footer Links Columns with Staggered Fade */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 1.1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-10 lg:gap-12 pb-12 sm:pb-16 border-b border-white/10"
+        >
           {/* Brand Info */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="sm:col-span-2 lg:col-span-2 space-y-5">
             <Logo />
-            <p className="text-sm text-core-muted max-w-sm font-sans leading-relaxed">
+            <p className="text-sm text-core-muted max-w-sm font-sans leading-relaxed font-light">
               {siteConfig.description}
             </p>
 
@@ -95,11 +108,12 @@ export function Footer() {
               Navigation
             </h4>
             <ul className="space-y-2.5 text-sm font-sans text-core-muted">
-              <li><a href="#hero" className="hover:text-white transition-colors">Home</a></li>
-              <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Programs</a></li>
-              <li><a href="#trainers" className="hover:text-white transition-colors">Trainers</a></li>
-              <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
+              <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+              <li><Link href="/plans" className="hover:text-white transition-colors">Plans</Link></li>
+              <li><Link href="/gallery" className="hover:text-white transition-colors">Gallery</Link></li>
+              <li><Link href="/diet" className="hover:text-white transition-colors">Diet</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
 
@@ -109,15 +123,15 @@ export function Footer() {
               Disciplines
             </h4>
             <ul className="space-y-2.5 text-sm font-sans text-core-muted">
-              <li><a href="#programs" className="hover:text-white transition-colors">Hypertrophy & Power</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Athletic Conditioning</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Biometric Recovery</a></li>
-              <li><a href="#programs" className="hover:text-white transition-colors">Olympic Barbell Protocol</a></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">Hypertrophy & Power</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">Athletic Conditioning</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">Biometric Recovery</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">Olympic Barbell Protocol</Link></li>
             </ul>
           </div>
 
           {/* Quick Links 3: Contact & Hours */}
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-white font-bold mb-4">
               Flagship Club
             </h4>
@@ -136,7 +150,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
-        </div>
+        </motion.div>
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-core-muted">
