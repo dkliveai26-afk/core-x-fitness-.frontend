@@ -1,8 +1,7 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_COOKIE_NAME } from "@/lib/admin-constants";
 
-export default clerkMiddleware(async (auth, req) => {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const lowerPath = pathname.toLowerCase();
 
@@ -55,7 +54,9 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(url);
     }
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

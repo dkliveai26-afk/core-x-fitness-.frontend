@@ -4,7 +4,13 @@ import { auth } from '@clerk/nextjs/server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    let clerkUserId: string | null = null;
+    try {
+      const authData = await auth();
+      clerkUserId = authData?.userId || null;
+    } catch {
+      // Clerk auth optional on booking form
+    }
     const body = await req.json();
     const {
       customerName,
@@ -39,7 +45,7 @@ export async function POST(req: NextRequest) {
       bookingType: bookingType || 'MEMBERSHIP_ALLOCATION',
       preferredDate: preferredDate || now,
       status: 'PENDING',
-      clerkUserId: userId || null,
+      clerkUserId: clerkUserId || null,
       notes: [],
       createdAt: now,
       updatedAt: now,
