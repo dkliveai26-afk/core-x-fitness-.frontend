@@ -178,15 +178,15 @@ export function HeroVideo() {
         const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
         const desiredTime = videoProgress * (activeDuration - 0.02);
 
-        // Smooth follow
+        // Responsive, low-latency follow for instant silky-smooth reaction
         const diff = desiredTime - targetTimeRef.current;
-        if (Math.abs(diff) < 0.002) {
+        if (Math.abs(diff) < 0.001) {
           targetTimeRef.current = desiredTime;
         } else {
-          targetTimeRef.current += diff * 0.55;
+          targetTimeRef.current += diff * 0.85;
         }
 
-        if (Math.abs(targetTimeRef.current - lastDispatchedTarget) > 0.005) {
+        if (Math.abs(targetTimeRef.current - lastDispatchedTarget) > 0.003) {
           lastDispatchedTarget = targetTimeRef.current;
           performSeek(activeVideo, isMobileScreen, targetTimeRef.current);
         }
@@ -223,10 +223,12 @@ export function HeroVideo() {
             muted
             playsInline
             preload="auto"
+            disablePictureInPicture
+            disableRemotePlayback
             className={`hidden md:block w-full h-full object-cover transition-opacity duration-500 select-none pointer-events-none ${
               isDesktopReady ? 'opacity-100' : 'opacity-0'
             }`}
-            style={{ willChange: 'contents' }}
+            style={{ willChange: 'contents, transform', transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
           />
 
           {/* 2. Mobile Video — specifically loaded for mobile (< 768px) screens */}
@@ -236,10 +238,12 @@ export function HeroVideo() {
             muted
             playsInline
             preload="auto"
+            disablePictureInPicture
+            disableRemotePlayback
             className={`block md:hidden w-full h-full object-cover transition-opacity duration-500 select-none pointer-events-none ${
               isMobileReady ? 'opacity-100' : 'opacity-0'
             }`}
-            style={{ willChange: 'contents' }}
+            style={{ willChange: 'contents, transform', transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
           />
 
           {/* Premium Ambient Vignette & Gradient Overlays */}
