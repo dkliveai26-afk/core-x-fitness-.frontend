@@ -7,30 +7,13 @@ import { ChevronDown } from 'lucide-react';
 
 export function HeroVideo() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoDurationRef = useRef<number>(0);
+  const desktopVideoRef = useRef<HTMLVideoElement>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement>(null);
+  const desktopDurationRef = useRef<number>(0);
+  const mobileDurationRef = useRef<number>(0);
   const rafIdRef = useRef<number>(0);
-  const [isVideoReady, setIsVideoReady] = useState(false);
-  const [isMobile, setIsMobile] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 768;
-    }
-    return false;
-  });
-
-  // Track responsive screen size (desktop vs mobile)
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Use dedicated mobile video for mobile screens, desktop video for desktop
-  const videoSrc = isMobile ? '/video-for-mobile-preview.mp4' : '/videoclip.mp4';
+  const [isDesktopReady, setIsDesktopReady] = useState(false);
+  const [isMobileReady, setIsMobileReady] = useState(false);
 
   // Framer Motion scroll tracker with Lenis smooth scroll compatibility
   const { scrollYProgress } = useScroll({
@@ -49,116 +32,153 @@ export function HeroVideo() {
 
   const hintOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
 
-  // Track seeking state and target time
+  // Track seeking state and target times
   const targetTimeRef = useRef<number>(0);
-  const isSeekingRef = useRef<boolean>(false);
-  const pendingTargetRef = useRef<number | null>(null);
+  const isSeekingDesktopRef = useRef<boolean>(false);
+  const isSeekingMobileRef = useRef<boolean>(false);
+  const pendingDesktopTargetRef = useRef<number | null>(null);
+  const pendingMobileTargetRef = useRef<number | null>(null);
 
-  // Video initialization and decoder unlock
-  const onVideoReady = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.duration && !isNaN(video.duration) && video.duration > 0) {
-      videoDurationRef.current = video.duration;
-      setIsVideoReady(true);
+  // Initialize and prime video decoders
+  const initVideo = useCallback((video: HTMLVideoElement, isMob: boolean) => {
+    if (!video || !video.duration || isNaN(video.duration) || video.duration <= 0) return;
 
-      // Unlock video decoder pipeline and sync to current scroll progress
-      video.play().then(() => {
-        video.pause();
-        const rawProgress = scrollYProgress.get();
-        const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
-        const initialTime = videoProgress * (video.duration - 0.02);
-        video.currentTime = Math.max(0, initialTime);
-        targetTimeRef.current = initialTime;
-      }).catch(() => {
-        // Autoplay muted fallback
-      });
+    if (isMob) {
+      mobileDurationRef.current = video.duration;
+      setIsMobileReady(true);
+    } else {
+      desktopDurationRef.current = video.duration;
+      setIsDesktopReady(true);
     }
+
+    video.play().then(() => {
+      video.pause();
+      const rawProgress = scrollYProgress.get();
+      const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
+      const initialTime = videoProgress * (video.duration - 0.02);
+      video.currentTime = Math.max(0, initialTime);
+    }).catch(() => {
+      // Autoplay muted fallback
+    });
   }, [scrollYProgress]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const dVideo = desktopVideoRef.current;
+    const mVideo = mobileVideoRef.current;
 
-    setIsVideoReady(false);
-    video.pause();
+    const onDesktopMeta = () => { if (dVideo) initVideo(dVideo, false); };
+    const onMobileMeta = () => { if (mVideo) initVideo(mVideo, true); };
 
-    if (video.readyState >= 1) {
-      onVideoReady();
-    } else {
-      video.addEventListener('loadedmetadata', onVideoReady);
-      video.addEventListener('loadeddata', onVideoReady);
-      video.addEventListener('canplay', onVideoReady);
+    if (dVideo) {
+      dVideo.pause();
+      if (dVideo.readyState >= 1) onDesktopMeta();
+      else {
+        dVideo.addEventListener('loadedmetadata', onDesktopMeta);
+        dVideo.addEventListener('loadeddata', onDesktopMeta);
+        dVideo.addEventListener('canplay', onDesktopMeta);
+      }
+    }
+
+    if (mVideo) {
+      mVideo.pause();
+      if (mVideo.readyState >= 1) onMobileMeta();
+      else {
+        mVideo.addEventListener('loadedmetadata', onMobileMeta);
+        mVideo.addEventListener('loadeddata', onMobileMeta);
+        mVideo.addEventListener('canplay', onMobileMeta);
+      }
     }
 
     return () => {
-      video.removeEventListener('loadedmetadata', onVideoReady);
-      video.removeEventListener('loadeddata', onVideoReady);
-      video.removeEventListener('canplay', onVideoReady);
+      if (dVideo) {
+        dVideo.removeEventListener('loadedmetadata', onDesktopMeta);
+        dVideo.removeEventListener('loadeddata', onDesktopMeta);
+        dVideo.removeEventListener('canplay', onDesktopMeta);
+      }
+      if (mVideo) {
+        mVideo.removeEventListener('loadedmetadata', onMobileMeta);
+        mVideo.removeEventListener('loadeddata', onMobileMeta);
+        mVideo.removeEventListener('canplay', onMobileMeta);
+      }
     };
-  }, [videoSrc, onVideoReady]);
+  }, [initVideo]);
 
-  // Core scrub engine: RAF loop with seek-safe queueing
+  // Core scrub engine: continuous RAF sync across active responsive video
   useEffect(() => {
     let active = true;
-    const video = videoRef.current;
-    if (!video) return;
 
-    const performSeek = (targetTime: number) => {
+    const performSeek = (video: HTMLVideoElement, isMob: boolean, targetTime: number) => {
       if (!active || !video) return;
-      const duration = videoDurationRef.current;
+      const duration = isMob ? mobileDurationRef.current : desktopDurationRef.current;
       if (duration <= 0) return;
 
       const target = Math.max(0, Math.min(duration - 0.02, targetTime));
+      const isSeeking = isMob ? isSeekingMobileRef : isSeekingDesktopRef;
+      const pendingTarget = isMob ? pendingMobileTargetRef : pendingDesktopTargetRef;
 
-      if (isSeekingRef.current || video.seeking) {
-        pendingTargetRef.current = target;
+      if (isSeeking.current || video.seeking) {
+        pendingTarget.current = target;
         return;
       }
 
       const diff = Math.abs(video.currentTime - target);
       if (diff > 0.005) {
-        isSeekingRef.current = true;
+        isSeeking.current = true;
         try {
           video.currentTime = target;
         } catch {
-          isSeekingRef.current = false;
+          isSeeking.current = false;
         }
       }
     };
 
-    const handleSeeked = () => {
-      isSeekingRef.current = false;
-      if (pendingTargetRef.current !== null) {
-        const next = pendingTargetRef.current;
-        pendingTargetRef.current = null;
-        performSeek(next);
-      } else {
-        performSeek(targetTimeRef.current);
+    const dVideo = desktopVideoRef.current;
+    const mVideo = mobileVideoRef.current;
+
+    const handleDesktopSeeked = () => {
+      isSeekingDesktopRef.current = false;
+      if (pendingDesktopTargetRef.current !== null && dVideo) {
+        const next = pendingDesktopTargetRef.current;
+        pendingDesktopTargetRef.current = null;
+        performSeek(dVideo, false, next);
       }
     };
 
-    const handleSeeking = () => {
-      isSeekingRef.current = true;
+    const handleMobileSeeked = () => {
+      isSeekingMobileRef.current = false;
+      if (pendingMobileTargetRef.current !== null && mVideo) {
+        const next = pendingMobileTargetRef.current;
+        pendingMobileTargetRef.current = null;
+        performSeek(mVideo, true, next);
+      }
     };
 
-    video.addEventListener('seeked', handleSeeked);
-    video.addEventListener('seeking', handleSeeking);
+    if (dVideo) {
+      dVideo.addEventListener('seeked', handleDesktopSeeked);
+      dVideo.addEventListener('seeking', () => { isSeekingDesktopRef.current = true; });
+    }
+    if (mVideo) {
+      mVideo.addEventListener('seeked', handleMobileSeeked);
+      mVideo.addEventListener('seeking', () => { isSeekingMobileRef.current = true; });
+    }
 
     let lastDispatchedTarget = -1;
 
     const tick = () => {
       if (!active) return;
 
-      const duration = videoDurationRef.current;
-      if (video && duration > 0) {
+      const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+      const activeVideo = isMobileScreen ? mobileVideoRef.current : desktopVideoRef.current;
+      const activeDuration = isMobileScreen ? mobileDurationRef.current : desktopDurationRef.current;
+
+      if (activeVideo && activeDuration > 0) {
         const rawProgress = scrollYProgress.get();
 
         // 0 to 0.80 maps to full video duration smoothly
         const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
-        const desiredTime = videoProgress * (duration - 0.02);
+        const desiredTime = videoProgress * (activeDuration - 0.02);
 
-        // Smooth sub-frame follow
+        // Smooth follow
         const diff = desiredTime - targetTimeRef.current;
         if (Math.abs(diff) < 0.002) {
           targetTimeRef.current = desiredTime;
@@ -168,7 +188,7 @@ export function HeroVideo() {
 
         if (Math.abs(targetTimeRef.current - lastDispatchedTarget) > 0.005) {
           lastDispatchedTarget = targetTimeRef.current;
-          performSeek(targetTimeRef.current);
+          performSeek(activeVideo, isMobileScreen, targetTimeRef.current);
         }
       }
 
@@ -179,8 +199,8 @@ export function HeroVideo() {
 
     return () => {
       active = false;
-      video.removeEventListener('seeked', handleSeeked);
-      video.removeEventListener('seeking', handleSeeking);
+      if (dVideo) dVideo.removeEventListener('seeked', handleDesktopSeeked);
+      if (mVideo) mVideo.removeEventListener('seeked', handleMobileSeeked);
       cancelAnimationFrame(rafIdRef.current);
     };
   }, [scrollYProgress]);
@@ -196,14 +216,28 @@ export function HeroVideo() {
 
         {/* Video Background */}
         <div className="absolute inset-0 w-full h-full overflow-hidden">
+          {/* 1. Desktop Video — rendered for md (>= 768px) and larger screens */}
           <video
-            ref={videoRef}
-            src={videoSrc}
+            ref={desktopVideoRef}
+            src="/videoclip.mp4"
             muted
             playsInline
             preload="auto"
-            className={`w-full h-full object-cover transition-opacity duration-500 select-none pointer-events-none ${
-              isVideoReady ? 'opacity-100' : 'opacity-0'
+            className={`hidden md:block w-full h-full object-cover transition-opacity duration-500 select-none pointer-events-none ${
+              isDesktopReady ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ willChange: 'contents' }}
+          />
+
+          {/* 2. Mobile Video — specifically loaded for mobile (< 768px) screens */}
+          <video
+            ref={mobileVideoRef}
+            src="/video-for-mobile-preview.mp4"
+            muted
+            playsInline
+            preload="auto"
+            className={`block md:hidden w-full h-full object-cover transition-opacity duration-500 select-none pointer-events-none ${
+              isMobileReady ? 'opacity-100' : 'opacity-0'
             }`}
             style={{ willChange: 'contents' }}
           />
@@ -214,7 +248,7 @@ export function HeroVideo() {
         </div>
 
         {/* Loading Spinner */}
-        {!isVideoReady && (
+        {!isDesktopReady && !isMobileReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-core-void z-20">
             <div className="w-8 h-8 border-2 border-core-red border-t-transparent rounded-full animate-spin" />
           </div>
