@@ -11,6 +11,26 @@ export function HeroVideo() {
   const videoDurationRef = useRef<number>(0);
   const rafIdRef = useRef<number>(0);
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
+
+  // Track responsive screen size (desktop vs mobile)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Use dedicated mobile video for mobile screens, desktop video for desktop
+  const videoSrc = isMobile ? '/video-for-mobile-preview.mp4' : '/videoclip.mp4';
 
   // Framer Motion scroll tracker with Lenis smooth scroll compatibility
   const { scrollYProgress } = useScroll({
@@ -18,7 +38,7 @@ export function HeroVideo() {
     offset: ['start start', 'end end'],
   });
 
-  // Smooth text & overlay transitions
+  // Smooth text & overlay transitions (identical timing & sequences on desktop and mobile)
   const centerMessageOpacity = useTransform(scrollYProgress, [0, 0.06], [1, 0]);
   const centerMessageY = useTransform(scrollYProgress, [0, 0.06], [0, -20]);
   const centerMessageScale = useTransform(scrollYProgress, [0, 0.06], [1, 0.96]);
@@ -32,6 +52,7 @@ export function HeroVideo() {
   // Track seeking state and target time
   const targetTimeRef = useRef<number>(0);
   const isSeekingRef = useRef<boolean>(false);
+  const pendingTargetRef = useRef<number | null>(null);
 
   // Video initialization and decoder unlock
   const onVideoReady = useCallback(() => {
@@ -41,33 +62,41 @@ export function HeroVideo() {
       videoDurationRef.current = video.duration;
       setIsVideoReady(true);
 
-      // Unlock video decoder pipeline
+      // Unlock video decoder pipeline and sync to current scroll progress
       video.play().then(() => {
         video.pause();
-        video.currentTime = 0;
+        const rawProgress = scrollYProgress.get();
+        const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
+        const initialTime = videoProgress * (video.duration - 0.02);
+        video.currentTime = Math.max(0, initialTime);
+        targetTimeRef.current = initialTime;
       }).catch(() => {
         // Autoplay muted fallback
       });
     }
-  }, []);
+  }, [scrollYProgress]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    setIsVideoReady(false);
     video.pause();
-    video.currentTime = 0;
 
     if (video.readyState >= 1) {
       onVideoReady();
     } else {
       video.addEventListener('loadedmetadata', onVideoReady);
+      video.addEventListener('loadeddata', onVideoReady);
+      video.addEventListener('canplay', onVideoReady);
     }
 
     return () => {
       video.removeEventListener('loadedmetadata', onVideoReady);
+      video.removeEventListener('loadeddata', onVideoReady);
+      video.removeEventListener('canplay', onVideoReady);
     };
-  }, [onVideoReady]);
+  }, [videoSrc, onVideoReady]);
 
   // Core scrub engine: RAF loop with seek-safe queueing
   useEffect(() => {
@@ -75,15 +104,20 @@ export function HeroVideo() {
     const video = videoRef.current;
     if (!video) return;
 
-    const performSeek = () => {
+    const performSeek = (targetTime: number) => {
       if (!active || !video) return;
       const duration = videoDurationRef.current;
       if (duration <= 0) return;
 
-      const target = Math.max(0, Math.min(duration - 0.02, targetTimeRef.current));
-      const diff = Math.abs(video.currentTime - target);
+      const target = Math.max(0, Math.min(duration - 0.02, targetTime));
 
-      if (diff > 0.008 && !isSeekingRef.current && !video.seeking) {
+      if (isSeekingRef.current || video.seeking) {
+        pendingTargetRef.current = target;
+        return;
+      }
+
+      const diff = Math.abs(video.currentTime - target);
+      if (diff > 0.005) {
         isSeekingRef.current = true;
         try {
           video.currentTime = target;
@@ -95,7 +129,13 @@ export function HeroVideo() {
 
     const handleSeeked = () => {
       isSeekingRef.current = false;
-      performSeek();
+      if (pendingTargetRef.current !== null) {
+        const next = pendingTargetRef.current;
+        pendingTargetRef.current = null;
+        performSeek(next);
+      } else {
+        performSeek(targetTimeRef.current);
+      }
     };
 
     const handleSeeking = () => {
@@ -114,21 +154,21 @@ export function HeroVideo() {
       if (video && duration > 0) {
         const rawProgress = scrollYProgress.get();
 
-        // 0 to 0.80 maps to full video duration
+        // 0 to 0.80 maps to full video duration smoothly
         const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
         const desiredTime = videoProgress * (duration - 0.02);
 
-        // Smooth sub-frame interpolation
+        // Smooth sub-frame follow
         const diff = desiredTime - targetTimeRef.current;
         if (Math.abs(diff) < 0.002) {
           targetTimeRef.current = desiredTime;
         } else {
-          targetTimeRef.current += diff * 0.45;
+          targetTimeRef.current += diff * 0.55;
         }
 
         if (Math.abs(targetTimeRef.current - lastDispatchedTarget) > 0.005) {
           lastDispatchedTarget = targetTimeRef.current;
-          performSeek();
+          performSeek(targetTimeRef.current);
         }
       }
 
@@ -149,7 +189,7 @@ export function HeroVideo() {
     <section
       id="hero"
       ref={containerRef}
-      className="relative h-[150vh] sm:h-[200vh] lg:h-[380vh] w-full bg-core-void select-none"
+      className="relative h-[320vh] sm:h-[350vh] lg:h-[380vh] w-full bg-core-void select-none"
     >
       {/* Sticky Fullscreen Viewport — Seamless, immersive hero on all devices */}
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-core-void flex items-center justify-center">
@@ -158,7 +198,7 @@ export function HeroVideo() {
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <video
             ref={videoRef}
-            src="/videoclip.mp4"
+            src={videoSrc}
             muted
             playsInline
             preload="auto"
