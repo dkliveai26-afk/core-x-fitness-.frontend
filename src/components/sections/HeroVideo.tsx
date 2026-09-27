@@ -11,25 +11,15 @@ export function HeroVideo() {
   const videoDurationRef = useRef<number>(0);
   const rafIdRef = useRef<number>(0);
   const [isVideoReady, setIsVideoReady] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string>(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      return '/video-for-mobile-preview.mp4';
-    }
-    return '/videoclip.mp4';
-  });
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  // Automatically update source if device crosses mobile breakpoint
   useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      const targetSrc = isMobile ? '/video-for-mobile-preview.mp4' : '/videoclip.mp4';
-      setVideoSrc((prev) => (prev !== targetSrc ? targetSrc : prev));
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setIsMobile(true);
+    }
   }, []);
+
+  const videoSrc = isMobile ? '/video-for-mobile-preview.mp4' : '/videoclip.mp4';
 
   // Framer Motion scroll tracker with Lenis smooth scroll compatibility
   const { scrollYProgress } = useScroll({
@@ -37,7 +27,7 @@ export function HeroVideo() {
     offset: ['start start', 'end end'],
   });
 
-  // Smooth text & overlay transitions (exact original timing & curves)
+  // Smooth text & overlay transitions
   const centerMessageOpacity = useTransform(scrollYProgress, [0, 0.06], [1, 0]);
   const centerMessageY = useTransform(scrollYProgress, [0, 0.06], [0, -20]);
   const centerMessageScale = useTransform(scrollYProgress, [0, 0.06], [1, 0.96]);
@@ -52,7 +42,7 @@ export function HeroVideo() {
   const targetTimeRef = useRef<number>(0);
   const isSeekingRef = useRef<boolean>(false);
 
-  // Video initialization and decoder unlock (exact original)
+  // Video initialization and decoder unlock
   const onVideoReady = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -63,23 +53,19 @@ export function HeroVideo() {
       // Unlock video decoder pipeline
       video.play().then(() => {
         video.pause();
-        const rawProgress = scrollYProgress.get();
-        const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
-        const initialTime = videoProgress * (video.duration - 0.02);
-        video.currentTime = Math.max(0, initialTime);
-        targetTimeRef.current = initialTime;
+        video.currentTime = 0;
       }).catch(() => {
         // Autoplay muted fallback
       });
     }
-  }, [scrollYProgress]);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    setIsVideoReady(false);
     video.pause();
+    video.currentTime = 0;
 
     if (video.readyState >= 1) {
       onVideoReady();
@@ -92,7 +78,7 @@ export function HeroVideo() {
     };
   }, [onVideoReady, videoSrc]);
 
-  // Core scrub engine: exact original RAF loop with seek-safe queueing
+  // Core scrub engine: RAF loop with seek-safe queueing
   useEffect(() => {
     let active = true;
     const video = videoRef.current;
@@ -141,7 +127,7 @@ export function HeroVideo() {
         const videoProgress = Math.min(1, Math.max(0, rawProgress / 0.80));
         const desiredTime = videoProgress * (duration - 0.02);
 
-        // Smooth sub-frame interpolation (exact original 0.45 smoothing)
+        // Smooth sub-frame interpolation
         const diff = desiredTime - targetTimeRef.current;
         if (Math.abs(diff) < 0.002) {
           targetTimeRef.current = desiredTime;
@@ -166,18 +152,18 @@ export function HeroVideo() {
       video.removeEventListener('seeking', handleSeeking);
       cancelAnimationFrame(rafIdRef.current);
     };
-  }, [scrollYProgress, videoSrc]);
+  }, [scrollYProgress]);
 
   return (
     <section
       id="hero"
       ref={containerRef}
-      className="relative h-[320vh] sm:h-[350vh] lg:h-[380vh] w-full bg-core-void select-none"
+      className="relative h-[150vh] sm:h-[200vh] lg:h-[380vh] w-full bg-core-void select-none"
     >
       {/* Sticky Fullscreen Viewport — Seamless, immersive hero on all devices */}
       <div className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-core-void flex items-center justify-center">
 
-        {/* Video Background — Single clean video element */}
+        {/* Video Background */}
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <video
             ref={videoRef}
