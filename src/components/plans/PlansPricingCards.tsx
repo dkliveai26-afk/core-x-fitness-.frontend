@@ -1,86 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthModal } from '@/context/AuthModalContext';
 import { useUser } from '@clerk/nextjs';
 import { Check, ArrowRight, Sparkles, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
 import { playSuccessSound } from '@/lib/sound';
+import { PlanItem, OfferBannerItem } from '@/types/database';
+import { formatInrPrice, calculateDiscount, DEFAULT_PLANS } from '@/lib/plans-shared';
+import { DEFAULT_OFFER_BANNER } from '@/lib/offer-banner-shared';
 
-interface PricingTier {
-  id: string;
-  name: string;
-  badge: string;
-  oldPrice: string;
-  price: string;
-  period: string;
-  description: string;
-  ctaText: string;
-  highlighted: boolean;
-  features: string[];
+interface PlansPricingCardsProps {
+  initialPlans?: PlanItem[];
+  initialOfferBanner?: OfferBannerItem | null;
 }
 
-const tiers: PricingTier[] = [
-  {
-    id: 'core',
-    name: 'CORE',
-    badge: 'FOUNDATION TIER',
-    oldPrice: '₹2,999',
-    price: '₹1,999',
-    period: '/ MONTH',
-    description: 'Essential Olympic strength & conditioning platform access.',
-    ctaText: 'Select Core Access',
-    highlighted: false,
-    features: [
-      'Full 18,500 sq ft main strength floor access',
-      'Eleiko Olympic platforms & Prime machined racks',
-      'Executive locker suites with Malin+Goetz',
-      'Dedicated towel service & ionized hydration',
-    ],
-  },
-  {
-    id: 'performance',
-    name: 'PERFORMANCE',
-    badge: 'ATHLETIC STANDARD',
-    oldPrice: '₹4,999',
-    price: '₹3,499',
-    period: '/ MONTH',
-    description: 'Full athletic performance, biometric recovery & coaching telemetry.',
-    ctaText: 'Claim Performance Pass',
-    highlighted: true,
-    features: [
-      'All Core Access privileges included',
-      'Unlimited Cryotherapy (-140°C) & Infrared Sauna',
-      'Hyperbaric Oxygen Chamber sessions (4x/mo)',
-      'Monthly InBody 770 Biometric Analysis',
-      'Bi-weekly 1-on-1 Master Coach Check-ins',
-    ],
-  },
-  {
-    id: 'elite',
-    name: 'ELITE',
-    badge: 'PRIVATE CONCIERGE',
-    oldPrice: '₹8,999',
-    price: '₹5,999',
-    period: '/ MONTH',
-    description: 'Strictly limited to 75 members with dedicated coach & valet.',
-    ctaText: 'Apply For Elite Tier',
-    highlighted: false,
-    features: [
-      '24/7 Biometric Keycard Access (365 days)',
-      'Private training pod reserved upon arrival',
-      'Dedicated Master Coach with weekly programming',
-      'Unlimited Recovery Suite & Magnesium Cold Plunge',
-      'Complimentary valet parking & laundry service',
-    ],
-  },
-];
-
-export function PlansPricingCards() {
+export function PlansPricingCards({
+  initialPlans,
+  initialOfferBanner,
+}: PlansPricingCardsProps) {
   const { openModal } = useAuthModal();
   const { isSignedIn, user } = useUser();
-  const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
+
+  const [plans, setPlans] = useState<PlanItem[]>(() => {
+    if (initialPlans && initialPlans.length > 0) return initialPlans;
+    return DEFAULT_PLANS.map((p, idx) => ({ ...p, _id: `default-${idx}` }));
+  });
+
+  const [offerBanner, setOfferBanner] = useState<OfferBannerItem | null>(() => {
+    if (initialOfferBanner !== undefined) return initialOfferBanner;
+    return { ...DEFAULT_OFFER_BANNER, _id: 'default-banner' };
+  });
+
+  const [selectedPlan, setSelectedPlan] = useState<PlanItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [bookingForm, setBookingForm] = useState({
@@ -91,8 +44,33 @@ export function PlansPricingCards() {
   });
   const [bookingError, setBookingError] = useState('');
 
-  const handleCtaClick = (tier: PricingTier) => {
-    setSelectedTier(tier);
+  // Client-side synchronization if initial props were not passed
+  useEffect(() => {
+    if (!initialPlans) {
+      fetch('/api/plans')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.plans && data.plans.length > 0) {
+            setPlans(data.plans);
+          }
+        })
+        .catch((err) => console.warn('Plans fetch notice:', err));
+    }
+
+    if (initialOfferBanner === undefined) {
+      fetch('/api/offer-banner')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.banner !== undefined) {
+            setOfferBanner(data.banner);
+          }
+        })
+        .catch((err) => console.warn('Offer banner fetch notice:', err));
+    }
+  }, [initialPlans, initialOfferBanner]);
+
+  const handleCtaClick = (plan: PlanItem) => {
+    setSelectedPlan(plan);
     setIsSubmitted(false);
     setBookingError('');
     if (isSignedIn && user) {
@@ -114,7 +92,7 @@ export function PlansPricingCards() {
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTier) return;
+    if (!selectedPlan) return;
     if (!bookingForm.name.trim() || !bookingForm.email.trim()) {
       setBookingError('Name and email are required.');
       return;
@@ -131,9 +109,9 @@ export function PlansPricingCards() {
           customerName: bookingForm.name.trim(),
           email: bookingForm.email.trim(),
           phone: bookingForm.phone.trim(),
-          planName: selectedTier.name,
-          planPrice: selectedTier.price,
-          planPeriod: selectedTier.period,
+          planName: selectedPlan.name,
+          planPrice: formatInrPrice(selectedPlan.price),
+          planPeriod: selectedPlan.duration,
           bookingType: 'MEMBERSHIP_ALLOCATION',
           preferredDate: bookingForm.preferredDate || new Date().toISOString(),
         }),
@@ -154,15 +132,17 @@ export function PlansPricingCards() {
     }
   };
 
+  const featuredPlan = plans.find((p) => p.highlighted) || plans[1] || plans[0];
+
   return (
     <section id="pricing-matrix" className="relative py-12 sm:py-20 bg-core-void px-4 sm:px-6 lg:px-8">
       {/* Ambient background glows */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-6xl h-96 bg-core-red/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* 3 Reference-Inspired Animated Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-          {tiers.map((tier, index) => {
+        {/* Dynamic Reference-Inspired Animated Cards */}
+        <div className={`grid grid-cols-1 ${plans.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' : 'md:grid-cols-2 lg:grid-cols-3'} gap-6 lg:gap-8 items-stretch`}>
+          {plans.map((plan, index) => {
             // Animated entrance: left from left, middle from bottom/front, right from right
             const entranceVariants = {
               hidden: {
@@ -184,11 +164,12 @@ export function PlansPricingCards() {
               },
             };
 
-            const isThirdOnTablet = index === 2;
+            const isThirdOnTablet = index === 2 && plans.length === 3;
+            const discountText = plan.discount || calculateDiscount(plan.originalPrice, plan.price);
 
             return (
               <motion.div
-                key={tier.id}
+                key={plan._id || plan.name}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: '-60px' }}
@@ -197,13 +178,13 @@ export function PlansPricingCards() {
                 className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-500 backdrop-blur-xl ${
                   isThirdOnTablet ? 'md:col-span-2 lg:col-span-1 md:max-w-md md:mx-auto md:w-full lg:max-w-none' : ''
                 } ${
-                  tier.highlighted
+                  plan.highlighted
                     ? 'bg-gradient-to-b from-[#170E10] via-core-dark to-[#0C0E12] border-2 border-core-red shadow-[0_20px_50px_rgba(255,42,42,0.18)] lg:-translate-y-2'
                     : 'bg-core-dark/90 border border-white/10 hover:border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.8)]'
                 }`}
               >
-                {/* Popular Pill Marker for Middle Plan */}
-                {tier.highlighted && (
+                {/* Popular Pill Marker for Highlighted Plan */}
+                {plan.highlighted && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20">
                     <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-0.5 sm:py-1 rounded-full bg-red-gradient text-[9px] sm:text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.25em] text-white uppercase font-bold shadow-glow-red whitespace-nowrap">
                       <Sparkles className="w-3 h-3 text-white" />
@@ -215,7 +196,7 @@ export function PlansPricingCards() {
                 {/* Top Section matching reference layout */}
                 <div
                   className={`rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-7 mb-4 sm:mb-6 lg:mb-8 transition-all ${
-                    tier.highlighted
+                    plan.highlighted
                       ? 'bg-gradient-to-br from-[#260E12]/90 to-[#12151B]/95 border border-core-red/30'
                       : 'bg-white/[0.04] border border-white/5'
                   }`}
@@ -224,62 +205,66 @@ export function PlansPricingCards() {
                   <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-5">
                     <span
                       className={`inline-block px-2.5 sm:px-3.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-mono tracking-[0.18em] sm:tracking-[0.2em] uppercase font-bold ${
-                        tier.highlighted
+                        plan.highlighted
                           ? 'bg-core-red/20 text-core-red border border-core-red/40'
                           : 'bg-white/10 text-white/80 border border-white/10'
                       }`}
                     >
-                      {tier.badge}
+                      {plan.badge}
                     </span>
                     <span className="text-[10px] font-mono text-core-muted tracking-widest uppercase">
-                      {tier.name}
+                      {plan.name}
                     </span>
                   </div>
 
                   {/* Price: Old Price crossed out + Current Price highlighted */}
                   <div className="mb-2 sm:mb-3 lg:mb-4">
-                    {/* Old Price with Strikethrough */}
+                    {/* Old Price with Strikethrough & Discount */}
                     <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
-                      <span className="font-mono text-xs sm:text-sm lg:text-base line-through text-slate-400/80 tracking-wider">
-                        {tier.oldPrice}
-                      </span>
-                      <span
-                        className={`text-[9px] sm:text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full font-bold ${
-                          tier.highlighted
-                            ? 'bg-core-red/20 text-core-red border border-core-red/40'
-                            : 'bg-white/10 text-white/80 border border-white/10'
-                        }`}
-                      >
-                        SAVE {Math.round((1 - parseInt(tier.price.replace(/[^\d]/g, '')) / parseInt(tier.oldPrice.replace(/[^\d]/g, ''))) * 100)}%
-                      </span>
+                      {plan.originalPrice > 0 && (
+                        <span className="font-mono text-xs sm:text-sm lg:text-base line-through text-slate-400/80 tracking-wider">
+                          {formatInrPrice(plan.originalPrice)}
+                        </span>
+                      )}
+                      {discountText && (
+                        <span
+                          className={`text-[9px] sm:text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full font-bold ${
+                            plan.highlighted
+                              ? 'bg-core-red/20 text-core-red border border-core-red/40'
+                              : 'bg-white/10 text-white/80 border border-white/10'
+                          }`}
+                        >
+                          {discountText}
+                        </span>
+                      )}
                     </div>
 
                     {/* Current Price Prominently Highlighted */}
                     <div className="flex items-baseline gap-1.5 sm:gap-2">
                       <span className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight">
-                        {tier.price}
+                        {formatInrPrice(plan.price)}
                       </span>
                       <span className="text-[11px] sm:text-xs lg:text-sm font-mono text-core-muted font-normal uppercase tracking-wider">
-                        {tier.period}
+                        {plan.duration}
                       </span>
                     </div>
                   </div>
 
                   {/* Short Description */}
                   <p className="text-xs sm:text-sm font-sans text-core-muted font-light leading-relaxed mb-4 sm:mb-5 lg:mb-6 min-h-0 sm:min-h-[38px]">
-                    {tier.description}
+                    {plan.shortDescription}
                   </p>
 
-                  {/* Action Button directly under description (Reference Structure) */}
+                  {/* Action Button directly under description */}
                   <button
-                    onClick={() => handleCtaClick(tier)}
+                    onClick={() => handleCtaClick(plan)}
                     className={`w-full py-2.5 sm:py-3.5 px-4 sm:px-5 rounded-xl font-heading text-xs sm:text-sm uppercase tracking-widest font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
-                      tier.highlighted
+                      plan.highlighted
                         ? 'bg-red-gradient text-white shadow-glow-red hover:shadow-[0_0_35px_rgba(255,42,42,0.6)] hover:brightness-110'
                         : 'bg-white/10 text-white hover:bg-white/20 border border-white/10 hover:border-white/30'
                     }`}
                   >
-                    <span>{tier.ctaText}</span>
+                    <span>{plan.ctaText || `Select ${plan.name}`}</span>
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
@@ -287,13 +272,13 @@ export function PlansPricingCards() {
                 {/* Key Benefits Checklist */}
                 <div className="space-y-2 sm:space-y-3 pt-1 pb-2 sm:pb-4">
                   <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.25em] text-core-muted block font-bold mb-2 sm:mb-3 lg:mb-4">
-                    INCLUDED IN {tier.name}:
+                    INCLUDED IN {plan.name}:
                   </span>
-                  {tier.features.map((feature) => (
-                    <div key={feature} className="flex items-start gap-2.5 sm:gap-3">
+                  {plan.features.map((feature, fIdx) => (
+                    <div key={fIdx} className="flex items-start gap-2.5 sm:gap-3">
                       <div
                         className={`flex-none w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center mt-0.5 ${
-                          tier.highlighted
+                          plan.highlighted
                             ? 'bg-core-red/20 text-core-red'
                             : 'bg-white/10 text-slate-300'
                         }`}
@@ -310,7 +295,7 @@ export function PlansPricingCards() {
                 {/* Bottom Guarantee Marker */}
                 <div className="mt-3 sm:mt-5 pt-3 sm:pt-4 border-t border-white/5 flex items-center justify-between text-[9px] sm:text-[10px] font-mono text-core-muted uppercase tracking-wider">
                   <div className="flex items-center gap-1.5">
-                    <ShieldCheck className={`w-3.5 h-3.5 ${tier.highlighted ? 'text-core-red' : 'text-slate-400'}`} />
+                    <ShieldCheck className={`w-3.5 h-3.5 ${plan.highlighted ? 'text-core-red' : 'text-slate-400'}`} />
                     <span>Cancel Anytime</span>
                   </div>
                   <span>Kolkata Club</span>
@@ -320,41 +305,43 @@ export function PlansPricingCards() {
           })}
         </div>
 
-        {/* Promotional Offer Card Banner (Wider & Balanced on Desktop, Responsive & Contained on Mobile) */}
-        <motion.div
-          initial={{ opacity: 0, y: 35 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-12 sm:mt-16 lg:mt-20 flex flex-col items-center justify-center w-full px-2 sm:px-4 relative"
-        >
-          {/* Radial Ambient Red Glow behind banner */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl sm:max-w-4xl h-40 sm:h-52 bg-gradient-radial from-core-red/20 via-core-crimson/8 to-transparent rounded-full blur-[80px] sm:blur-[110px] pointer-events-none -z-10" />
-
-          <div
-            onClick={() => handleCtaClick(tiers[1])}
-            className="group relative w-full max-w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 hover:border-core-red/60 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(255,42,42,0.18)] hover:shadow-[0_30px_70px_rgba(255,42,42,0.3)] transition-all duration-500 cursor-pointer bg-core-dark/90 backdrop-blur-xl"
+        {/* Promotional Offer Card Banner (Database-Driven with Fixed Location & Styling) */}
+        {offerBanner && offerBanner.isActive && (
+          <motion.div
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-12 sm:mt-16 lg:mt-20 flex flex-col items-center justify-center w-full px-2 sm:px-4 relative"
           >
-            <Image
-              src="/plans-offer-banner.png"
-              alt="Core X Fitness Exclusive Membership Offer - Get Up To 20% Off"
-              width={996}
-              height={300}
-              className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.015]"
-              priority
-            />
-          </div>
+            {/* Radial Ambient Red Glow behind banner */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl sm:max-w-4xl h-40 sm:h-52 bg-gradient-radial from-core-red/20 via-core-crimson/8 to-transparent rounded-full blur-[80px] sm:blur-[110px] pointer-events-none -z-10" />
 
-          <span className="mt-3.5 sm:mt-4 text-[10px] sm:text-[11px] font-mono tracking-[0.2em] sm:tracking-widest text-core-muted uppercase flex items-center gap-1.5 text-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse shrink-0" />
-            LIMITED TIME ATHLETIC ADMISSIONS DISCOUNT
-          </span>
-        </motion.div>
+            <div
+              onClick={() => featuredPlan && handleCtaClick(featuredPlan)}
+              className="group relative w-full max-w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 hover:border-core-red/60 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_35px_rgba(255,42,42,0.18)] hover:shadow-[0_30px_70px_rgba(255,42,42,0.3)] transition-all duration-500 cursor-pointer bg-core-dark/90 backdrop-blur-xl"
+            >
+              <Image
+                src={offerBanner.imageUrl || '/plans-offer-banner.png'}
+                alt={offerBanner.title || 'Core X Fitness Exclusive Membership Offer - Get Up To 20% Off'}
+                width={996}
+                height={300}
+                className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.015]"
+                priority
+              />
+            </div>
+
+            <span className="mt-3.5 sm:mt-4 text-[10px] sm:text-[11px] font-mono tracking-[0.2em] sm:tracking-widest text-core-muted uppercase flex items-center gap-1.5 text-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse shrink-0" />
+              {offerBanner.badgeText || 'LIMITED TIME ATHLETIC ADMISSIONS DISCOUNT'}
+            </span>
+          </motion.div>
+        )}
       </div>
 
       {/* Interactive Reservation Modal for Visitors & Members */}
       <AnimatePresence>
-        {selectedTier && (
+        {selectedPlan && (
           <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -363,7 +350,7 @@ export function PlansPricingCards() {
               className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl bg-core-dark border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_50px_rgba(255,42,42,0.2)] text-left space-y-5"
             >
               <button
-                onClick={() => setSelectedTier(null)}
+                onClick={() => setSelectedPlan(null)}
                 className="absolute top-5 right-5 p-2 rounded-full bg-white/5 text-core-muted hover:text-white hover:bg-white/10 transition-colors"
                 aria-label="Close Modal"
               >
@@ -378,10 +365,10 @@ export function PlansPricingCards() {
                       MEMBERSHIP ALLOCATION
                     </div>
                     <h3 className="font-display font-black text-2xl text-white uppercase tracking-tight">
-                      APPLY FOR {selectedTier.name} TIER
+                      APPLY FOR {selectedPlan.name} TIER
                     </h3>
                     <p className="text-xs font-sans text-core-muted font-light">
-                      {selectedTier.price} {selectedTier.period} • {selectedTier.description}
+                      {formatInrPrice(selectedPlan.price)} {selectedPlan.duration} • {selectedPlan.shortDescription}
                     </p>
                   </div>
 
@@ -454,7 +441,7 @@ export function PlansPricingCards() {
                       disabled={isSubmitting}
                       className="w-full py-3.5 rounded-xl bg-red-gradient text-white font-heading font-bold uppercase tracking-widest text-xs shadow-glow-red hover:brightness-110 transition-all disabled:opacity-50"
                     >
-                      {isSubmitting ? 'Transmitting Allocation...' : `Confirm ${selectedTier.name} Allocation`}
+                      {isSubmitting ? 'Transmitting Allocation...' : `Confirm ${selectedPlan.name} Allocation`}
                     </button>
 
                     {!isSignedIn && (
@@ -463,7 +450,7 @@ export function PlansPricingCards() {
                         <button
                           type="button"
                           onClick={() => {
-                            setSelectedTier(null);
+                            setSelectedPlan(null);
                             openModal('signIn');
                           }}
                           className="text-white underline hover:text-core-red transition-colors"
@@ -485,10 +472,10 @@ export function PlansPricingCards() {
                       ALLOCATION RECORDED
                     </span>
                     <h3 className="font-display font-black text-2xl text-white uppercase tracking-tight">
-                      {selectedTier.name} TIER RESERVED
+                      {selectedPlan.name} TIER RESERVED
                     </h3>
                     <p className="text-xs font-sans text-core-muted font-light leading-relaxed">
-                      Thank you, <span className="text-white font-semibold">{bookingForm.name}</span>. Your reservation for the {selectedTier.name} membership standard has been logged directly in the Admissions database.
+                      Thank you, <span className="text-white font-semibold">{bookingForm.name}</span>. Your reservation for the {selectedPlan.name} membership standard has been logged directly in the Admissions database.
                     </p>
                   </div>
 
@@ -508,7 +495,7 @@ export function PlansPricingCards() {
                   </div>
 
                   <button
-                    onClick={() => setSelectedTier(null)}
+                    onClick={() => setSelectedPlan(null)}
                     className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white font-heading font-bold uppercase tracking-widest text-xs shadow-[0_0_25px_rgba(16,185,129,0.35)] hover:shadow-[0_0_35px_rgba(16,185,129,0.55)] hover:brightness-110 transition-all"
                   >
                     Return to Plans

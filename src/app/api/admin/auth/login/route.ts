@@ -45,7 +45,11 @@ export async function POST(req: NextRequest) {
       role: admin.role || 'admin',
     });
 
+    const proto = req.headers.get('x-forwarded-proto') || req.nextUrl.protocol.replace(':', '');
+    const isHttps = proto === 'https';
     const isProduction = process.env.NODE_ENV === 'production';
+    const useSecureCookie = isProduction ? isHttps : false;
+
     const response = NextResponse.json({
       success: true,
       message: 'Admin authentication successful.',
@@ -57,12 +61,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Set HTTP-Only Secure Cookie
+    // Prevent caching of auth response
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+
+    // Set HTTP-Only Cookie with universal device compatibility
     response.cookies.set({
       name: ADMIN_COOKIE_NAME,
       value: token,
       httpOnly: true,
-      secure: isProduction,
+      secure: useSecureCookie,
       sameSite: 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60, // 7 days

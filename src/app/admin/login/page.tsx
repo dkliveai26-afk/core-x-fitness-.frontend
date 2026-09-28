@@ -3,11 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, Lock, Mail, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +25,11 @@ export default function AdminLoginPage() {
     try {
       const res = await fetch('/api/admin/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'same-origin',
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
@@ -37,10 +39,10 @@ export default function AdminLoginPage() {
         throw new Error(data.error || 'Invalid email or password.');
       }
 
-      // Success! Navigate directly to Admin Dashboard
-      router.push('/admin/dashboard');
-      router.refresh();
+      // Hard redirect to dashboard to ensure browser cookie jar is committed across all mobile browsers
+      window.location.href = '/admin/dashboard';
     } catch (err: any) {
+      console.error('Admin login error:', err);
       setErrorMessage(err.message || 'Authentication failed. Please check credentials.');
       setIsLoading(false);
     }
@@ -55,7 +57,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-5xl h-auto min-h-[580px] lg:h-[680px] bg-[#0A0D14] border border-white/5 rounded-3xl overflow-hidden flex flex-col lg:flex-row shadow-[0_40px_80px_rgba(0,0,0,0.95),0_0_50px_rgba(255,42,42,0.06)] relative z-10">
         
         {/* LEFT SIDE: Admin Login Form */}
-        <div className="w-full lg:w-[55%] p-8 sm:p-12 lg:p-14 flex flex-col justify-center relative bg-gradient-to-b from-[#0A0D14] to-[#050607]">
+        <div className="w-full lg:w-[55%] p-6 sm:p-12 lg:p-14 flex flex-col justify-center relative bg-gradient-to-b from-[#0A0D14] to-[#050607]">
           
           {/* Header Cluster */}
           <div className="w-full max-w-md mx-auto mb-6">
@@ -110,6 +112,7 @@ export default function AdminLoginPage() {
                 <input
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@corexfitness.com"
@@ -130,6 +133,7 @@ export default function AdminLoginPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
@@ -139,6 +143,7 @@ export default function AdminLoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>

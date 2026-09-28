@@ -1,6 +1,29 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_COOKIE_NAME } from "@/lib/admin-constants";
 
+/**
+ * Edge-safe token validity checker (structure & expiration check)
+ */
+function isTokenStructureValid(token?: string): boolean {
+  if (!token || typeof token !== 'string') return false;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (base64.length % 4) base64 += '=';
+    // Edge runtime provides atob
+    const jsonStr = atob(base64);
+    const payload = JSON.parse(jsonStr);
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) {
+      return false; // Expired
+    }
+    return Boolean(payload.id && payload.email);
+  } catch {
+    return false;
+  }
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const lowerPath = pathname.toLowerCase();
@@ -27,31 +50,44 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  // Check Admin Routes
+  const rawToken = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
+  const hasValidToken = isTokenStructureValid(rawToken);
+
+  // Check Admin Root Route (/admin or /admin/)
   if (lowerPath === "/admin" || lowerPath === "/admin/") {
-    const adminToken = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
     const url = req.nextUrl.clone();
-    url.pathname = adminToken ? "/admin/dashboard" : "/admin/login";
-    return NextResponse.redirect(url);
+    url.pathname = hasValidToken ? "/admin/dashboard" : "/admin/login";
+    const res = NextResponse.redirect(url);
+    if (rawToken && !hasValidToken) {
+      res.cookies.delete(ADMIN_COOKIE_NAME);
+    }
+    return res;
   }
 
-  // Protected Admin Routes Check
+  // Protected Admin Routes (/admin/dashboard, /admin/plans, /admin/bookings, etc.)
   if (lowerPath.startsWith("/admin/") && lowerPath !== "/admin/login") {
-    const adminToken = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
-    if (!adminToken) {
+    if (!hasValidToken) {
       const url = req.nextUrl.clone();
       url.pathname = "/admin/login";
-      return NextResponse.redirect(url);
+      const res = NextResponse.redirect(url);
+      if (rawToken) {
+        res.cookies.delete(ADMIN_COOKIE_NAME);
+      }
+      return res;
     }
   }
 
-  // If already logged in as admin and visiting /admin/login -> redirect to /admin/dashboard
+  // If already logged in with valid token and visiting /admin/login -> redirect to /admin/dashboard
   if (lowerPath === "/admin/login") {
-    const adminToken = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
-    if (adminToken) {
+    if (hasValidToken) {
       const url = req.nextUrl.clone();
       url.pathname = "/admin/dashboard";
       return NextResponse.redirect(url);
+    } else if (rawToken) {
+      // Clear expired or invalid token
+      const res = NextResponse.next();
+      res.cookies.delete(ADMIN_COOKIE_NAME);
+      return res;
     }
   }
 

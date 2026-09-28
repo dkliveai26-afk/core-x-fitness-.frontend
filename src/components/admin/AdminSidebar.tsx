@@ -6,12 +6,14 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
+  Dumbbell,
+  Tag,
   CalendarCheck,
   MessageSquare,
   Users,
   Settings,
   LogOut,
-  ShieldCheck,
+  X,
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -20,17 +22,21 @@ interface AdminSidebarProps {
     email: string;
     role: string;
   } | null;
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
 const navItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Plans CMS', href: '/admin/plans', icon: Dumbbell },
+  { name: 'Offer Banner', href: '/admin/offer-banner', icon: Tag },
   { name: 'Bookings', href: '/admin/bookings', icon: CalendarCheck },
   { name: 'Contact Messages', href: '/admin/contacts', icon: MessageSquare },
   { name: 'Members & Leads', href: '/admin/members', icon: Users },
   { name: 'System Settings', href: '/admin/settings', icon: Settings },
 ];
 
-export function AdminSidebar({ user }: AdminSidebarProps) {
+export function AdminSidebar({ user, isOpenMobile, onCloseMobile }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -39,33 +45,45 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
     try {
       setIsLoggingOut(true);
       await fetch('/api/admin/auth/logout', { method: 'POST' });
-      router.push('/admin/login');
-      router.refresh();
+      window.location.href = '/admin/login';
     } catch (err) {
       console.error('Logout error:', err);
       setIsLoggingOut(false);
     }
   };
 
-  return (
-    <aside className="w-64 bg-[#0A0D14] border-r border-white/5 flex flex-col h-screen shrink-0">
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
       {/* Brand Header */}
-      <div className="h-20 flex items-center px-6 border-b border-white/5 gap-3">
-        <Link href="/admin/dashboard" className="block">
-          <Image
-            src="/gymlogo1.png"
-            alt="CORE X FITNESS"
-            width={140}
-            height={40}
-            className="w-32 h-auto object-contain"
-          />
-        </Link>
-        <span className="px-2 py-0.5 rounded bg-core-red/10 border border-core-red/30 text-[9px] font-mono font-bold text-core-red uppercase tracking-widest">
-          ADMIN
-        </span>
+      <div className="h-20 flex items-center justify-between px-6 border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <Link href="/admin/dashboard" onClick={onCloseMobile} className="block">
+            <Image
+              src="/gymlogo1.png"
+              alt="CORE X FITNESS"
+              width={140}
+              height={40}
+              className="w-32 h-auto object-contain"
+            />
+          </Link>
+          <span className="px-2 py-0.5 rounded bg-core-red/10 border border-core-red/30 text-[9px] font-mono font-bold text-core-red uppercase tracking-widest">
+            ADMIN
+          </span>
+        </div>
+
+        {/* Close Button on Mobile Drawer */}
+        {onCloseMobile && (
+          <button
+            onClick={onCloseMobile}
+            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
-      {/* Navigation */}
+      {/* Navigation Links */}
       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1.5">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
@@ -73,6 +91,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onCloseMobile}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
                 isActive
                   ? 'bg-core-red/10 text-white border border-core-red/30 font-semibold shadow-[0_0_20px_rgba(255,42,42,0.15)]'
@@ -111,6 +130,31 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           <span>{isLoggingOut ? 'Signing Out...' : 'Log Out'}</span>
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Fixed Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-[#0A0D14] border-r border-white/5 flex-col h-screen shrink-0">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Drawer Backdrop & Slide-over */}
+      {isOpenMobile && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            onClick={onCloseMobile}
+          />
+
+          {/* Drawer Panel */}
+          <div className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-[#0A0D14] border-r border-white/10 shadow-2xl z-50 flex flex-col animate-in slide-in-from-left duration-200">
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

@@ -39,25 +39,34 @@ export interface BookingSubmission {
   updatedAt: string;
 }
 
-export interface PlanStat {
+export interface PlanItem {
   _id: string;
-  total: number;
-  active: number;
-  pending: number;
+  name: string;
+  badge: string;
+  shortDescription: string;
+  duration: string;
+  originalPrice: number;
+  price: number;
+  currency: 'INR';
+  discount?: string;
+  features: string[];
+  ctaText: string;
+  highlighted?: boolean;
+  displayOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface DashboardStats {
-  totalInquiries: number;
-  newInquiries: number;
-  activeBookings: number;
-  resolvedRequests: number;
-  totalBookings: number;
-  recentActivity: Array<{
-    id: string;
-    type: 'inquiry' | 'booking';
-    title: string;
-    subtitle: string;
-    timestamp: string;
-    status: string;
-  }>;
+export interface OfferBannerItem {
+  _id: string;
+  imageUrl: string;
+  title?: string;
+  optionalSubtitle?: string;
+  badgeText?: string;
+  linkUrl?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
+
