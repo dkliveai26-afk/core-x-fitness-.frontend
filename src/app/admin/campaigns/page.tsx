@@ -94,6 +94,7 @@ export default function AdminCampaignsPage() {
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [testEmailModalCampaignId, setTestEmailModalCampaignId] = useState<string | null>(null);
   const [testEmailInput, setTestEmailInput] = useState('');
+  const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [sendingCampaignId, setSendingCampaignId] = useState<string | null>(null);
 
@@ -214,6 +215,41 @@ export default function AdminCampaignsPage() {
     }
   };
 
+  const handleStartEditCampaign = (c: EmailCampaign) => {
+    setEditingCampaignId(c._id);
+    setFormTitle(c.title || '');
+    setFormSubject(c.subject || '');
+    setFormPreheader(c.preheader || '');
+    setFormHeading(c.heading || '');
+    setFormBodyMessage(c.bodyMessage || '');
+    setFormOfferBadge(c.offerBadge || 'EXCLUSIVE VIP ATHLETE ACCESS');
+    setFormImageUrl(c.imageUrl || '');
+    setFormCtaText(c.ctaText || 'Claim Exclusive Offer');
+    setFormCtaUrl(c.ctaUrl || 'https://core-x-fitness-frontend.vercel.app/plans?plan=performance#pricing-matrix');
+    setFormFooterNote(c.footerNote || '');
+    setFormAudience(c.targetAudience || 'ALL_OPTED_IN');
+    setFormIncludePricingCard(Boolean(c.includePricingCard));
+    if (c.pricingPlanId) {
+      setFormSelectedPlanId(c.pricingPlanId);
+    }
+    setActiveTab('CREATE');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCampaignId(null);
+    setFormTitle('');
+    setFormSubject('');
+    setFormPreheader('');
+    setFormHeading('');
+    setFormBodyMessage('');
+    setFormImageUrl('/plans-offer-banner.png');
+    setFormCtaText('Claim Exclusive Offer');
+    setFormCtaUrl('https://core-x-fitness-frontend.vercel.app/plans?plan=performance#pricing-matrix');
+    setFormFooterNote('Offer valid for registered athletes and VIP admissions applicants.');
+    setFormIncludePricingCard(true);
+    setFormSelectedPlanId('performance');
+  };
+
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formSubject.trim() || !formHeading.trim() || !formBodyMessage.trim()) {
@@ -244,43 +280,41 @@ export default function AdminCampaignsPage() {
             }
           : undefined;
 
-      const res = await fetch('/api/admin/campaigns', {
-        method: 'POST',
+      const payload = {
+        title: formTitle,
+        subject: formSubject,
+        preheader: formPreheader,
+        heading: formHeading,
+        bodyMessage: formBodyMessage,
+        offerBadge: formOfferBadge,
+        imageUrl: formImageUrl,
+        ctaText: formCtaText,
+        ctaUrl: formCtaUrl,
+        footerNote: formFooterNote,
+        targetAudience: formAudience,
+        includePricingCard: formIncludePricingCard,
+        pricingPlanId: formSelectedPlanId,
+        pricingPlanDetails,
+      };
+
+      const url = editingCampaignId ? `/api/admin/campaigns/${editingCampaignId}` : '/api/admin/campaigns';
+      const method = editingCampaignId ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({
-          title: formTitle,
-          subject: formSubject,
-          preheader: formPreheader,
-          heading: formHeading,
-          bodyMessage: formBodyMessage,
-          offerBadge: formOfferBadge,
-          imageUrl: formImageUrl,
-          ctaText: formCtaText,
-          ctaUrl: formCtaUrl,
-          footerNote: formFooterNote,
-          targetAudience: formAudience,
-          includePricingCard: formIncludePricingCard,
-          pricingPlanId: formSelectedPlanId,
-          pricingPlanDetails,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save campaign.');
 
-      setSuccessMsg('Campaign created successfully.');
+      setSuccessMsg(editingCampaignId ? 'Campaign changes saved successfully.' : 'Campaign created successfully.');
       setTimeout(() => setSuccessMsg(''), 4000);
 
       // Reset Form
-      setFormTitle('');
-      setFormSubject('');
-      setFormPreheader('');
-      setFormHeading('');
-      setFormBodyMessage('');
-      setFormImageUrl('');
-      setSelectedImageFile(null);
-      setImagePreviewUrl('');
+      handleCancelEdit();
       setActiveTab('CAMPAIGNS');
       fetchCampaignsAndStats();
     } catch (err: any) {
@@ -613,6 +647,16 @@ export default function AdminCampaignsPage() {
                           <span>Preview</span>
                         </button>
 
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => handleStartEditCampaign(c)}
+                          className="px-3.5 py-2 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-amber-300 text-xs font-mono uppercase flex items-center gap-1.5 transition-colors"
+                          title="Edit campaign draft"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Edit</span>
+                        </button>
+
                         {/* Send Test Email Button */}
                         <button
                           onClick={() => {
@@ -680,18 +724,32 @@ export default function AdminCampaignsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Left Form: Col 7 */}
             <div className="lg:col-span-7 bg-[#0D1117] border border-white/5 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
-              <div className="flex items-center gap-3 pb-4 border-b border-white/5">
-                <div className="p-2.5 rounded-xl bg-core-red/10 border border-core-red/20 text-core-red">
-                  <Sparkles className="w-5 h-5" />
+              <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-core-red/10 border border-core-red/20 text-core-red">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white uppercase font-heading">
+                      {editingCampaignId ? 'Edit Campaign Draft' : 'Compose Email Offer Campaign'}
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                      {editingCampaignId
+                        ? 'Modify campaign content, banner, pricing card, or audience and update draft.'
+                        : 'Draft, preview, and broadcast custom offers with banners and CTA buttons.'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-base font-bold text-white uppercase font-heading">
-                    Compose Email Offer Campaign
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    Draft, preview, and broadcast custom offers with banners and CTA buttons.
-                  </p>
-                </div>
+
+                {editingCampaignId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono uppercase"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
               </div>
 
               <form onSubmit={handleCreateCampaign} className="space-y-5 text-xs font-sans">
@@ -1029,7 +1087,7 @@ export default function AdminCampaignsPage() {
                     type="submit"
                     className="px-6 py-3 rounded-xl bg-red-gradient text-white font-heading font-bold text-xs uppercase tracking-widest shadow-glow-red hover:brightness-110 transition-all border border-core-red/50"
                   >
-                    Save Campaign Draft
+                    {editingCampaignId ? 'Update Campaign Draft' : 'Save Campaign Draft'}
                   </button>
                 </div>
               </form>

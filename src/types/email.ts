@@ -18,7 +18,9 @@ export type ContactSource =
   | 'BOOKING'
   | 'CONTACT'
   | 'REGISTRATION'
+  | 'CLERK_USER'
   | 'FOOTER_NEWSLETTER'
+  | 'NEWSLETTER'
   | 'MANUAL';
 
 export interface MarketingContact {

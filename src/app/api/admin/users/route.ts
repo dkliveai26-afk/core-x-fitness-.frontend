@@ -35,12 +35,12 @@ export async function GET(req: NextRequest) {
 
     const memberMap = new Map<string, AggregatedUserItem>();
 
-    // 1. Fetch Registered Users from Clerk
+    // 1. Fetch Registered Users from Clerk Auth
     const clerkKey = process.env.CLERK_SECRET_KEY;
     if (clerkKey) {
       try {
-        const clerk = createClerkClient({ secretKey: clerkKey });
-        const clerkUsers = await clerk.users.getUserList({ limit: 100 });
+        const clerk = createClerkClient({ secretKey: clerkKey.trim().replace(/^["']|["']$/g, '') });
+        const clerkUsers = await clerk.users.getUserList({ limit: 500 });
 
         for (const u of clerkUsers.data) {
           const primaryEmail =
@@ -82,141 +82,182 @@ export async function GET(req: NextRequest) {
             status: 'REGISTERED_USER',
           });
         }
-      } catch (clerkErr) {
-        console.warn('Notice: Clerk user aggregation warning:', clerkErr);
+      } catch (clerkErr: any) {
+        console.warn('Notice: Clerk user aggregation warning:', clerkErr?.message || clerkErr);
       }
     }
 
-    // 2. Fetch and Merge from MongoDB (Bookings, Inquiries, Contacts, Newsletter)
+    // 2. Fetch and Merge from MongoDB (Bookings, Inquiries, Contacts, Newsletter Subscribers)
     try {
       const db = await getDatabase();
 
-      // Query bookings
-      const bookingsCol = db.collection('bookings');
-      const allBookings = await bookingsCol.find().sort({ createdAt: -1 }).toArray();
+      // A. Query bookings collection
+      try {
+        const bookingsCol = db.collection('bookings');
+        const allBookings = await bookingsCol.find().sort({ createdAt: -1 }).toArray();
 
-      for (const b of allBookings) {
-        const email = (b.email || '').toLowerCase().trim();
-        if (!email) continue;
+        for (const b of allBookings) {
+          const email = (b.email || '').toLowerCase().trim();
+          if (!email) continue;
 
-        const bCreated = b.createdAt ? new Date(b.createdAt).toISOString() : new Date().toISOString();
+          const bCreated = b.createdAt ? new Date(b.createdAt).toISOString() : new Date().toISOString();
 
-        if (memberMap.has(email)) {
-          const existing = memberMap.get(email)!;
-          existing.totalBookings += 1;
-          if (!existing.sources.includes('Booking')) {
-            existing.sources.push('Booking');
+          if (memberMap.has(email)) {
+            const existing = memberMap.get(email)!;
+            existing.totalBookings += 1;
+            if (!existing.sources.includes('Booking')) {
+              existing.sources.push('Booking');
+            }
+            if (new Date(bCreated) > new Date(existing.lastActive)) {
+              existing.lastActive = bCreated;
+              existing.latestPlan = b.planName || existing.latestPlan;
+              existing.latestBookingStatus = b.status || existing.latestBookingStatus;
+            }
+            if ((existing.phone === 'N/A' || !existing.phone) && b.phone) {
+              existing.phone = b.phone;
+            }
+            if ((existing.fullName === 'Registered Athlete' || !existing.fullName) && b.customerName) {
+              existing.fullName = b.customerName;
+            }
+            existing.status = 'ACTIVE_MEMBER';
+          } else {
+            memberMap.set(email, {
+              id: b._id.toString(),
+              fullName: b.customerName || 'Athlete Member',
+              email: b.email,
+              phone: b.phone || 'N/A',
+              sources: ['Booking'],
+              firstSeen: bCreated,
+              lastActive: bCreated,
+              totalBookings: 1,
+              latestPlan: b.planName || 'Membership Allocation',
+              latestBookingStatus: b.status || 'CONFIRMED',
+              inquiryCount: 0,
+              marketingOptIn: b.marketingOptIn !== undefined ? Boolean(b.marketingOptIn) : true,
+              status: 'ACTIVE_MEMBER',
+            });
           }
-          if (new Date(bCreated) > new Date(existing.lastActive)) {
-            existing.lastActive = bCreated;
-            existing.latestPlan = b.planName || existing.latestPlan;
-            existing.latestBookingStatus = b.status || existing.latestBookingStatus;
-          }
-          if (existing.phone === 'N/A' && b.phone) {
-            existing.phone = b.phone;
-          }
-          if (existing.fullName === 'Registered Athlete' && b.customerName) {
-            existing.fullName = b.customerName;
-          }
-          existing.status = 'ACTIVE_MEMBER';
-        } else {
-          memberMap.set(email, {
-            id: b._id.toString(),
-            fullName: b.customerName || 'Athlete Member',
-            email: b.email,
-            phone: b.phone || 'N/A',
-            sources: ['Booking'],
-            firstSeen: bCreated,
-            lastActive: bCreated,
-            totalBookings: 1,
-            latestPlan: b.planName || 'Membership Allocation',
-            latestBookingStatus: b.status || 'CONFIRMED',
-            inquiryCount: 0,
-            marketingOptIn: b.marketingOptIn !== undefined ? Boolean(b.marketingOptIn) : true,
-            status: 'ACTIVE_MEMBER',
-          });
         }
+      } catch (bErr: any) {
+        console.warn('Notice: Bookings collection read notice:', bErr?.message);
       }
 
-      // Query contacts / inquiries
-      const contactsCol = db.collection('contacts');
-      const allContacts = await contactsCol.find().sort({ createdAt: -1 }).toArray();
+      // B. Query contacts collection
+      try {
+        const contactsCol = db.collection('contacts');
+        const allContacts = await contactsCol.find().sort({ createdAt: -1 }).toArray();
 
-      for (const c of allContacts) {
-        const email = (c.email || '').toLowerCase().trim();
-        if (!email) continue;
+        for (const c of allContacts) {
+          const email = (c.email || '').toLowerCase().trim();
+          if (!email) continue;
 
-        const cCreated = c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString();
+          const cCreated = c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString();
 
-        if (memberMap.has(email)) {
-          const existing = memberMap.get(email)!;
-          existing.inquiryCount += 1;
-          const sourceLabel = c.sources ? 'Contact Form' : 'Contact';
-          if (!existing.sources.includes(sourceLabel) && !existing.sources.includes('Contact')) {
-            existing.sources.push(sourceLabel);
+          if (memberMap.has(email)) {
+            const existing = memberMap.get(email)!;
+            existing.inquiryCount += 1;
+            if (!existing.sources.includes('Contact')) {
+              existing.sources.push('Contact');
+            }
+            if ((existing.phone === 'N/A' || !existing.phone) && c.phone) {
+              existing.phone = c.phone;
+            }
+            if ((existing.fullName === 'Registered Athlete' || !existing.fullName) && c.name) {
+              existing.fullName = c.name;
+            }
+            if (c.marketingOptIn !== undefined) {
+              existing.marketingOptIn = Boolean(c.marketingOptIn);
+              if (c.marketingOptOutAt) existing.marketingOptOutAt = c.marketingOptOutAt;
+            }
+          } else {
+            memberMap.set(email, {
+              id: c._id.toString(),
+              fullName: c.name || 'Inquiry Lead',
+              email: c.email,
+              phone: c.phone || 'N/A',
+              sources: ['Contact'],
+              firstSeen: cCreated,
+              lastActive: cCreated,
+              totalBookings: 0,
+              latestPlan: c.latestPlan || c.topic || 'General Inquiry',
+              latestBookingStatus: 'INQUIRY_ONLY',
+              inquiryCount: 1,
+              marketingOptIn: c.marketingOptIn !== undefined ? Boolean(c.marketingOptIn) : true,
+              marketingOptOutAt: c.marketingOptOutAt || null,
+              status: 'INQUIRY_CONTACT',
+            });
           }
-          if (existing.phone === 'N/A' && c.phone) {
-            existing.phone = c.phone;
-          }
-          if (c.marketingOptIn !== undefined) {
-            existing.marketingOptIn = Boolean(c.marketingOptIn);
-            if (c.marketingOptOutAt) existing.marketingOptOutAt = c.marketingOptOutAt;
-          }
-        } else {
-          memberMap.set(email, {
-            id: c._id.toString(),
-            fullName: c.name || 'Inquiry Lead',
-            email: c.email,
-            phone: c.phone || 'N/A',
-            sources: ['Contact'],
-            firstSeen: cCreated,
-            lastActive: cCreated,
-            totalBookings: 0,
-            latestPlan: c.latestPlan || c.topic || 'General Inquiry',
-            latestBookingStatus: 'INQUIRY_ONLY',
-            inquiryCount: 1,
-            marketingOptIn: c.marketingOptIn !== undefined ? Boolean(c.marketingOptIn) : true,
-            marketingOptOutAt: c.marketingOptOutAt || null,
-            status: 'INQUIRY_CONTACT',
-          });
         }
+      } catch (cErr: any) {
+        console.warn('Notice: Contacts collection read notice:', cErr?.message);
       }
 
-      // Query marketing_contacts / newsletter if present
+      // C. Query marketing_contacts collection (Subscribers, VIP Leads)
       try {
         const marketingCol = db.collection('marketing_contacts');
         const marketingDocs = await marketingCol.find().toArray();
+
         for (const m of marketingDocs) {
           const email = (m.email || '').toLowerCase().trim();
-          if (email && memberMap.has(email)) {
+          if (!email) continue;
+
+          const mCreated = m.createdAt ? new Date(m.createdAt).toISOString() : new Date().toISOString();
+
+          if (memberMap.has(email)) {
             const existing = memberMap.get(email)!;
+            if (!existing.sources.includes('Newsletter') && (m.sources?.includes('FOOTER_NEWSLETTER') || m.sources?.includes('NEWSLETTER'))) {
+              existing.sources.push('Newsletter');
+            }
             if (m.marketingOptIn !== undefined) {
               existing.marketingOptIn = Boolean(m.marketingOptIn);
             }
             if (m.marketingOptOutAt) {
               existing.marketingOptOutAt = m.marketingOptOutAt;
             }
+            if (m.name && (existing.fullName === 'Registered Athlete' || !existing.fullName)) {
+              existing.fullName = m.name;
+            }
+            if (m.phone && (existing.phone === 'N/A' || !existing.phone)) {
+              existing.phone = m.phone;
+            }
+          } else {
+            memberMap.set(email, {
+              id: m._id.toString(),
+              fullName: m.name || 'VIP Subscriber',
+              email: m.email,
+              phone: m.phone || 'N/A',
+              sources: ['Newsletter'],
+              firstSeen: mCreated,
+              lastActive: m.lastActiveAt ? new Date(m.lastActiveAt).toISOString() : mCreated,
+              totalBookings: m.totalBookings || 0,
+              latestPlan: m.latestPlan || 'VIP Newsletter Opt-In',
+              latestBookingStatus: 'SUBSCRIBED',
+              inquiryCount: m.totalInquiries || 0,
+              marketingOptIn: m.marketingOptIn !== undefined ? Boolean(m.marketingOptIn) : true,
+              marketingOptOutAt: m.marketingOptOutAt || null,
+              status: 'PROSPECTIVE_LEAD',
+            });
           }
         }
-      } catch (mErr) {
-        // Safe skip
+      } catch (mErr: any) {
+        console.warn('Notice: Marketing contacts collection read notice:', mErr?.message);
       }
-    } catch (dbErr) {
-      console.warn('MongoDB query notice in /api/admin/users:', dbErr);
+    } catch (dbErr: any) {
+      console.warn('Notice: MongoDB root query notice in /api/admin/users:', dbErr?.message);
     }
 
-    // Convert map to sorted array
+    // Convert map to sorted array (most recently active first)
     const usersData = Array.from(memberMap.values()).sort(
       (a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()
     );
 
-    // Provide stats
+    // Calculate live accurate audience stats
     const stats = {
       total: usersData.length,
       clerkUsers: usersData.filter((u) => u.sources.includes('Clerk Registered')).length,
       bookingsCount: usersData.filter((u) => u.totalBookings > 0).length,
-      optedInCount: usersData.filter((u) => u.marketingOptIn).length,
-      unsubscribedCount: usersData.filter((u) => !u.marketingOptIn || u.marketingOptOutAt).length,
+      optedInCount: usersData.filter((u) => u.marketingOptIn && !u.marketingOptOutAt).length,
+      unsubscribedCount: usersData.filter((u) => !u.marketingOptIn || Boolean(u.marketingOptOutAt)).length,
     };
 
     return NextResponse.json({
@@ -225,7 +266,7 @@ export async function GET(req: NextRequest) {
       total: usersData.length,
       stats,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('API /api/admin/users critical error:', error);
     return NextResponse.json(
       {
@@ -238,4 +279,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-

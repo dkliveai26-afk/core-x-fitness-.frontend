@@ -5,9 +5,17 @@ import { getEligibleCampaignRecipients } from './contacts-service';
 import { sendEmail } from './email-service';
 import { generateMarketingCampaignHtml } from './email-templates';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL || 'corexfitness.com'}`
-  : 'http://localhost:3000';
+function getBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'https://core-x-fitness-frontend.vercel.app';
+}
+
+const BASE_URL = getBaseUrl();
 
 /**
  * Creates a new email campaign draft

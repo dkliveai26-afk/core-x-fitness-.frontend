@@ -198,8 +198,40 @@ export async function getEligibleCampaignRecipients(
     const db = await getDatabase();
     const contactsCol = db.collection('marketing_contacts');
 
+    // Sync Clerk registered users to marketing_contacts if available
+    const clerkKey = process.env.CLERK_SECRET_KEY;
+    if (clerkKey) {
+      try {
+        const { createClerkClient } = await import('@clerk/backend');
+        const clerk = createClerkClient({ secretKey: clerkKey.trim().replace(/^["']|["']$/g, '') });
+        const clerkUsers = await clerk.users.getUserList({ limit: 500 });
+        for (const u of clerkUsers.data) {
+          const email =
+            u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)?.emailAddress ||
+            u.emailAddresses[0]?.emailAddress;
+          if (email) {
+            const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || u.username || 'Registered Athlete';
+            // Only insert if not already present, so we don't override previous opt-outs
+            const existing = await contactsCol.findOne({ email: normalizeEmail(email) });
+            if (!existing) {
+              await upsertContact({
+                email,
+                name: fullName,
+                source: 'CLERK_USER',
+                marketingOptIn: true,
+                latestPlan: 'Registered Athlete Account',
+              });
+            }
+          }
+        }
+      } catch (clerkSyncErr) {
+        console.warn('Notice: Clerk sync in getEligibleCampaignRecipients:', clerkSyncErr);
+      }
+    }
+
     const query: any = {
       marketingOptIn: true,
+      marketingOptOutAt: { $in: [null, undefined] },
       email: { $exists: true, $regex: /@/ },
     };
 
@@ -213,11 +245,20 @@ export async function getEligibleCampaignRecipients(
       .find(query, { projection: { email: 1, name: 1, unsubscribeToken: 1 } })
       .toArray();
 
-    return contacts.map((c) => ({
-      email: c.email,
-      name: c.name || 'Athlete',
-      unsubscribeToken: c.unsubscribeToken || generateUnsubscribeToken(),
-    }));
+    // Deduplicate by normalized lowercase email
+    const recipientMap = new Map<string, { email: string; name: string; unsubscribeToken: string }>();
+    for (const c of contacts) {
+      const cleanEmail = normalizeEmail(c.email);
+      if (cleanEmail && !recipientMap.has(cleanEmail)) {
+        recipientMap.set(cleanEmail, {
+          email: cleanEmail,
+          name: c.name || 'Athlete',
+          unsubscribeToken: c.unsubscribeToken || generateUnsubscribeToken(),
+        });
+      }
+    }
+
+    return Array.from(recipientMap.values());
   } catch (error) {
     console.error('Error fetching eligible campaign recipients:', error);
     return [];
