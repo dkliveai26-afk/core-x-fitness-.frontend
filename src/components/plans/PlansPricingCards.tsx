@@ -41,6 +41,7 @@ export function PlansPricingCards({
     email: '',
     phone: '',
     preferredDate: '',
+    marketingOptIn: true,
   });
   const [bookingError, setBookingError] = useState('');
 
@@ -79,6 +80,7 @@ export function PlansPricingCards({
         email: user.primaryEmailAddress?.emailAddress || '',
         phone: user.primaryPhoneNumber?.phoneNumber || '',
         preferredDate: new Date().toISOString().split('T')[0],
+        marketingOptIn: true,
       });
     } else {
       setBookingForm({
@@ -86,6 +88,7 @@ export function PlansPricingCards({
         email: '',
         phone: '',
         preferredDate: new Date().toISOString().split('T')[0],
+        marketingOptIn: true,
       });
     }
   };
@@ -114,6 +117,7 @@ export function PlansPricingCards({
           planPeriod: selectedPlan.duration,
           bookingType: 'MEMBERSHIP_ALLOCATION',
           preferredDate: bookingForm.preferredDate || new Date().toISOString(),
+          marketingOptIn: Boolean(bookingForm.marketingOptIn),
         }),
       });
 
@@ -434,6 +438,18 @@ export function PlansPricingCards({
                       />
                     </div>
                   </div>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer text-left pt-1">
+                    <input
+                      type="checkbox"
+                      checked={bookingForm.marketingOptIn}
+                      onChange={(e) => setBookingForm({ ...bookingForm, marketingOptIn: e.target.checked })}
+                      className="mt-0.5 w-4 h-4 rounded bg-white/[0.04] border-white/20 text-core-red focus:ring-core-red cursor-pointer accent-[#FF2A2A]"
+                    />
+                    <span className="text-[11px] font-sans text-slate-400 leading-tight select-none">
+                      Receive exclusive CORE X athlete offers, nutritional guides, and event invitations via email.
+                    </span>
+                  </label>
 
                   <div className="pt-2 space-y-2.5">
                     <button

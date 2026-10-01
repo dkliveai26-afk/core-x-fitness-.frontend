@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
 import { auth } from '@clerk/nextjs/server';
+import { upsertContact } from '@/lib/email/contacts-service';
+import {
+  sendCustomerBookingConfirmation,
+  sendAdminBookingNotification,
+} from '@/lib/email/email-service';
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +27,7 @@ export async function POST(req: NextRequest) {
       planPeriod,
       bookingType,
       preferredDate,
+      marketingOptIn,
     } = body;
 
     // Validate required fields
@@ -36,29 +42,85 @@ export async function POST(req: NextRequest) {
     const collection = db.collection('bookings');
 
     const now = new Date().toISOString();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = customerName.trim();
+    const cleanPhone = phone ? String(phone).trim() : '';
+    const cleanPlan = planName?.trim() || 'Apex Athletic Tier';
+    const cleanPrice = planPrice?.trim() || 'Custom';
+    const cleanPeriod = planPeriod?.trim() || '/month';
+    const cleanBookingType = bookingType || 'MEMBERSHIP_ALLOCATION';
+    const cleanPreferredDate = preferredDate || now;
+
     const newBooking = {
-      customerName: customerName.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone ? String(phone).trim() : '',
-      planName: planName?.trim() || 'Apex Athletic Tier',
-      planPrice: planPrice?.trim() || 'Custom',
-      planPeriod: planPeriod?.trim() || '/month',
-      bookingType: bookingType || 'MEMBERSHIP_ALLOCATION',
-      preferredDate: preferredDate || now,
+      customerName: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      planName: cleanPlan,
+      planPrice: cleanPrice,
+      planPeriod: cleanPeriod,
+      bookingType: cleanBookingType,
+      preferredDate: cleanPreferredDate,
       status: 'PENDING',
       clerkUserId: clerkUserId || null,
+      marketingOptIn: Boolean(marketingOptIn),
       notes: [],
       createdAt: now,
       updatedAt: now,
     };
 
     const result = await collection.insertOne(newBooking);
+    const bookingId = result.insertedId.toString();
+
+    // 1. Asynchronously store / normalize customer in marketing contacts registry
+    // Non-blocking: failures in contact upsert or email dispatch must never fail the booking
+    try {
+      await upsertContact({
+        email: cleanEmail,
+        name: cleanName,
+        phone: cleanPhone,
+        source: 'BOOKING',
+        marketingOptIn: Boolean(marketingOptIn),
+        latestPlan: cleanPlan,
+      });
+    } catch (contactErr) {
+      console.error('Non-critical: Failed to upsert contact from booking:', contactErr);
+    }
+
+    // 2. Asynchronously dispatch Customer Confirmation & Admin Notification
+    // Wrapped in Promise.allSettled so email server failure never crashes or blocks booking
+    Promise.allSettled([
+      sendCustomerBookingConfirmation({
+        _id: bookingId,
+        customerName: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        planName: cleanPlan,
+        planPrice: cleanPrice,
+        planPeriod: cleanPeriod,
+        bookingType: cleanBookingType,
+        preferredDate: cleanPreferredDate,
+      }),
+      sendAdminBookingNotification({
+        _id: bookingId,
+        customerName: cleanName,
+        email: cleanEmail,
+        phone: cleanPhone,
+        planName: cleanPlan,
+        planPrice: cleanPrice,
+        planPeriod: cleanPeriod,
+        bookingType: cleanBookingType,
+        preferredDate: cleanPreferredDate,
+        createdAt: now,
+      }),
+    ]).catch((err) => {
+      console.error('Non-critical: Booking email notification dispatch error:', err);
+    });
 
     return NextResponse.json(
       {
         success: true,
         message: 'Membership reservation logged with VIP concierge.',
-        id: result.insertedId.toString(),
+        id: bookingId,
       },
       { status: 201 }
     );

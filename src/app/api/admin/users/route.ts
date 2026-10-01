@@ -77,7 +77,16 @@ export async function GET() {
       }
     }
 
-    const usersData = Array.from(memberMap.values()).sort(
+    const contactsRegistry = await db.collection('marketing_contacts').find().toArray();
+    const consentMap = new Map<string, boolean>();
+    for (const cr of contactsRegistry) {
+      consentMap.set(cr.email.toLowerCase(), Boolean(cr.marketingOptIn));
+    }
+
+    const usersData = Array.from(memberMap.values()).map((user) => ({
+      ...user,
+      marketingOptIn: consentMap.get(user.email.toLowerCase()) || false,
+    })).sort(
       (a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()
     );
 

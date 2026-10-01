@@ -70,3 +70,4 @@ export interface OfferBannerItem {
   updatedAt: string;
 }
 
+export * from './email';

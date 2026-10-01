@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
+import { upsertContact } from '@/lib/email/contacts-service';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { name, email, phone, topic, service, message } = body;
+    const { name, email, phone, topic, service, message, marketingOptIn } = body;
 
     // Validate required fields
     if (!name || typeof name !== 'string' || !name.trim()) {
@@ -24,12 +25,19 @@ export async function POST(req: NextRequest) {
     const collection = db.collection('contacts');
 
     const now = new Date().toISOString();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = name.trim();
+    const cleanPhone = String(phone).trim();
+    const cleanTopic = (service || topic || 'Membership Admissions').trim();
+    const cleanMessage = message.trim();
+
     const newSubmission = {
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: String(phone).trim(),
-      topic: (service || topic || 'Membership Admissions').trim(),
-      message: message.trim(),
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      topic: cleanTopic,
+      message: cleanMessage,
+      marketingOptIn: Boolean(marketingOptIn),
       status: 'NEW',
       notes: [],
       createdAt: now,
@@ -37,6 +45,20 @@ export async function POST(req: NextRequest) {
     };
 
     const result = await collection.insertOne(newSubmission);
+
+    // Synchronize to marketing contacts registry safely
+    try {
+      await upsertContact({
+        email: cleanEmail,
+        name: cleanName,
+        phone: cleanPhone,
+        source: 'CONTACT',
+        marketingOptIn: Boolean(marketingOptIn),
+        latestPlan: cleanTopic,
+      });
+    } catch (contactErr) {
+      console.error('Non-critical: Contact registry upsert notice:', contactErr);
+    }
 
     return NextResponse.json(
       {

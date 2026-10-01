@@ -9,8 +9,33 @@ import { siteConfig } from '@/data/site';
 import { ArrowUp, Mail, MapPin, Phone, Clock, Instagram, Youtube, Twitter } from 'lucide-react';
 
 export function Footer() {
+  const [email, setEmail] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !email.includes('@')) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (res.ok) {
+        setIsSubmitted(true);
+        setEmail('');
+      }
+    } catch {}
+    finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -39,20 +64,33 @@ export function Footer() {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              aria-label="Enter your email for private tour concierge"
-              className="w-full sm:w-72 px-4 py-3.5 rounded-xl bg-core-surface border border-white/10 text-white placeholder-core-muted text-sm focus:outline-none focus:border-core-red font-sans"
-            />
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full sm:w-auto shrink-0"
-            >
-              Request Access
-            </Button>
+          <div className="w-full md:w-auto">
+            {isSubmitted ? (
+              <div className="px-5 py-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono">
+                Access requested. Our concierge will establish contact.
+              </div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  aria-label="Enter your email for private tour concierge"
+                  className="w-full sm:w-72 px-4 py-3.5 rounded-xl bg-core-surface border border-white/10 text-white placeholder-core-muted text-sm focus:outline-none focus:border-core-red font-sans"
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto shrink-0"
+                >
+                  {isSubmitting ? 'Requesting...' : 'Request Access'}
+                </Button>
+              </form>
+            )}
           </div>
         </motion.div>
 
