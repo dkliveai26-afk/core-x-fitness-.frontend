@@ -388,6 +388,7 @@ export function PlansPricingCards({
                 height={300}
                 className="w-full h-auto object-contain transition-transform duration-700 group-hover:scale-[1.015]"
                 priority
+                unoptimized={Boolean(offerBanner.imageUrl?.startsWith('data:'))}
               />
             </div>
 

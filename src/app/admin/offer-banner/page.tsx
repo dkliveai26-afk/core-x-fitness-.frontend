@@ -282,7 +282,7 @@ export default function AdminOfferBannerPage() {
                 width={996}
                 height={300}
                 className="w-full h-auto object-contain"
-                unoptimized={Boolean(previewUrl)}
+                unoptimized={Boolean(previewUrl || currentDisplayImage?.startsWith('data:'))}
               />
             </div>
 
