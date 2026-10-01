@@ -68,8 +68,8 @@ export function getClientPromise(): Promise<MongoClient> {
  */
 export async function getDatabase(dbName?: string): Promise<Db> {
   const clientInstance = await getClientPromise();
-  const defaultDb = process.env.MONGODB_DB || 'corexfitness';
-  return clientInstance.db(dbName || defaultDb);
+  const targetDb = dbName || process.env.MONGODB_DB || undefined;
+  return clientInstance.db(targetDb);
 }
 
 // Export a proxy/getter for default clientPromise to maintain backward compatibility without eager execution
