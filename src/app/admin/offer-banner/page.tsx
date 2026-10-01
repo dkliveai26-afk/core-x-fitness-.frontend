@@ -76,16 +76,19 @@ export default function AdminOfferBannerPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      setFormError('File size exceeds 5MB limit. Please upload an optimized banner image.');
+    // Validate size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      setFormError('File size exceeds 10MB limit. Please upload an optimized banner image.');
       return;
     }
 
-    // Validate type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'];
-    if (!validTypes.includes(file.type)) {
-      setFormError('Invalid file type. Allowed formats: PNG, JPG, JPEG, WEBP, SVG.');
+    // Validate type or extension
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif'];
+    const isAllowedExt = /\.(png|jpe?g|webp|svg|gif)$/i.test(file.name);
+    const isAllowedMime = validTypes.includes(file.type) || file.type.startsWith('image/');
+
+    if (!isAllowedMime && !isAllowedExt) {
+      setFormError('Invalid file type. Allowed formats: PNG, JPG, JPEG, WEBP, SVG, GIF.');
       return;
     }
 
@@ -98,8 +101,8 @@ export default function AdminOfferBannerPage() {
   const handleUploadBanner = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedFile && !banner?.imageUrl) {
-      setFormError('Please select a promotional banner image to upload.');
+    if (!selectedFile && !banner?.imageUrl && !previewUrl) {
+      setFormError('Please select a promotional banner image or enter an image URL.');
       return;
     }
 
@@ -110,6 +113,8 @@ export default function AdminOfferBannerPage() {
       const formData = new FormData();
       if (selectedFile) {
         formData.append('image', selectedFile);
+      } else if (previewUrl && !previewUrl.startsWith('blob:')) {
+        formData.append('imageUrl', previewUrl);
       } else if (banner?.imageUrl) {
         formData.append('imageUrl', banner.imageUrl);
       }
@@ -319,6 +324,43 @@ export default function AdminOfferBannerPage() {
           )}
 
           <form onSubmit={handleUploadBanner} className="space-y-6 text-xs font-sans">
+            {/* Quick-Pick Preset Banner Assets */}
+            <div className="space-y-2">
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+                Quick-Pick Preset Banner Asset (Optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setPreviewUrl('/plans-offer-banner.png');
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                    previewUrl === '/plans-offer-banner.png'
+                      ? 'bg-core-red text-white font-bold shadow-glow-red'
+                      : 'bg-white/5 text-slate-300 hover:bg-white/10'
+                  }`}
+                >
+                  Default Plans Offer Banner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setPreviewUrl('/gymlogo1.png');
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                    previewUrl === '/gymlogo1.png'
+                      ? 'bg-core-red text-white font-bold shadow-glow-red'
+                      : 'bg-white/5 text-slate-300 hover:bg-white/10'
+                  }`}
+                >
+                  Core X Brand Mark
+                </button>
+              </div>
+            </div>
+
             {/* File Dropzone */}
             <div
               onClick={() => fileInputRef.current?.click()}
@@ -327,7 +369,7 @@ export default function AdminOfferBannerPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
+                accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml, image/gif"
                 onChange={handleFileChange}
                 className="hidden"
               />
@@ -341,7 +383,7 @@ export default function AdminOfferBannerPage() {
                     {selectedFile ? selectedFile.name : 'Click to Select Banner Image'}
                   </p>
                   <p className="text-slate-500 text-[11px] mt-1 font-mono">
-                    PNG, WEBP, JPG up to 5MB
+                    PNG, WEBP, JPG up to 10MB
                   </p>
                 </div>
 

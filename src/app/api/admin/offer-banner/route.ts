@@ -16,9 +16,9 @@ export async function GET() {
 
     const banner = await getAdminOfferBanner();
     return NextResponse.json({ success: true, banner });
-  } catch (error) {
+  } catch (error: any) {
     console.error('API /api/admin/offer-banner GET error:', error);
-    return NextResponse.json({ error: 'Failed to fetch admin offer banner.' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to fetch admin offer banner.' }, { status: 500 });
   }
 }
 
@@ -49,33 +49,39 @@ export async function POST(req: NextRequest) {
       isActive = activeVal === null ? true : activeVal === 'true' || activeVal === '1';
 
       if (imageFile && imageFile.size > 0) {
-        // Validate MIME type
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml'];
-        if (!allowedTypes.includes(imageFile.type)) {
+        // Validate MIME type or filename extension
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif'];
+        const fileName = imageFile.name || 'banner.png';
+        const isAllowedExt = /\.(png|jpe?g|webp|svg|gif)$/i.test(fileName);
+        const isAllowedMime = allowedTypes.includes(imageFile.type) || imageFile.type.startsWith('image/');
+
+        if (!isAllowedMime && !isAllowedExt) {
           return NextResponse.json(
-            { error: 'Invalid file type. Allowed formats: PNG, JPG, JPEG, WEBP, SVG.' },
+            { error: 'Invalid file type. Allowed formats: PNG, JPG, JPEG, WEBP, SVG, GIF.' },
             { status: 400 }
           );
         }
 
-        // Validate size (5MB max)
-        const maxSizeBytes = 5 * 1024 * 1024;
+        // Validate size (10MB max)
+        const maxSizeBytes = 10 * 1024 * 1024;
         if (imageFile.size > maxSizeBytes) {
           return NextResponse.json(
-            { error: 'Image size exceeds the 5MB limit. Please upload an optimized banner.' },
+            { error: 'Image size exceeds the 10MB limit. Please upload an optimized banner.' },
             { status: 400 }
           );
         }
 
         const buffer = Buffer.from(await imageFile.arrayBuffer());
+        const mimeType = imageFile.type || (/\.png$/i.test(fileName) ? 'image/png' : 'image/jpeg');
         const base64Data = buffer.toString('base64');
-        const dataUri = `data:${imageFile.type};base64,${base64Data}`;
+        const dataUri = `data:${mimeType};base64,${base64Data}`;
         imageUrl = dataUri;
 
+        // In non-serverless local environments, optionally write file to disk
         try {
           const timestamp = Date.now();
-          const originalName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-          const filename = `banner_${timestamp}_${originalName}`;
+          const cleanName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const filename = `banner_${timestamp}_${cleanName}`;
 
           const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'banners');
           await fs.mkdir(uploadDir, { recursive: true });
@@ -84,8 +90,8 @@ export async function POST(req: NextRequest) {
           await fs.writeFile(filePath, buffer);
 
           imageUrl = `/uploads/banners/${filename}`;
-        } catch (fsErr) {
-          console.log('Serverless environment: stored banner as base64 data URI in MongoDB.');
+        } catch {
+          // In read-only serverless environments (Vercel/Lambda), safely persist as in-memory base64 data URI in MongoDB
           imageUrl = dataUri;
         }
       } else {
@@ -140,9 +146,9 @@ export async function POST(req: NextRequest) {
         _id: result.insertedId.toString(),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('API /api/admin/offer-banner POST error:', error);
-    return NextResponse.json({ error: 'Failed to update offer banner.' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to update offer banner.' }, { status: 500 });
   }
 }
 
@@ -163,10 +169,10 @@ export async function DELETE() {
 
     return NextResponse.json({
       success: true,
-      message: 'Offer banner deactivated and removed from public Plans page.',
+      message: 'Offer banner deactivated from website.',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('API /api/admin/offer-banner DELETE error:', error);
-    return NextResponse.json({ error: 'Failed to remove offer banner.' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to deactivate offer banner.' }, { status: 500 });
   }
 }
