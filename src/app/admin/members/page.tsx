@@ -99,7 +99,7 @@ export default function AdminMembersPage() {
   const filteredMembers = useMemo(() => {
     return members.filter((m) => {
       // 1. Source filter
-      if (sourceFilter === 'CLERK' && !m.sources.some((s) => s.toLowerCase().includes('clerk'))) return false;
+      if (sourceFilter === 'CLERK' && !m.sources.some((s) => s.toLowerCase().includes('clerk')) && !m.clerkUserId) return false;
       if (sourceFilter === 'BOOKING' && m.totalBookings === 0 && !m.sources.some((s) => s.toLowerCase().includes('booking'))) return false;
       if (sourceFilter === 'CONTACT' && !m.sources.some((s) => s.toLowerCase().includes('contact'))) return false;
       if (sourceFilter === 'NEWSLETTER' && !m.sources.some((s) => s.toLowerCase().includes('newsletter'))) return false;

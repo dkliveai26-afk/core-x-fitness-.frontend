@@ -35,52 +35,65 @@ export async function GET(req: NextRequest) {
 
     const memberMap = new Map<string, AggregatedUserItem>();
 
-    // 1. Fetch Registered Users from Clerk Auth
+    // 1. Fetch ALL Registered Users from Clerk Auth (Paginated loop to guarantee 100% user sync)
     const clerkKey = process.env.CLERK_SECRET_KEY;
     if (clerkKey) {
       try {
         const clerk = createClerkClient({ secretKey: clerkKey.trim().replace(/^["']|["']$/g, '') });
-        const clerkUsers = await clerk.users.getUserList({ limit: 500 });
+        let offset = 0;
+        const limit = 500;
+        let hasMore = true;
 
-        for (const u of clerkUsers.data) {
-          const primaryEmail =
-            u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)?.emailAddress ||
-            u.emailAddresses[0]?.emailAddress ||
-            '';
-          const email = primaryEmail.toLowerCase().trim();
-          if (!email) continue;
+        while (hasMore) {
+          const clerkUsersBatch = await clerk.users.getUserList({ limit, offset });
+          const users = clerkUsersBatch.data || [];
 
-          const primaryPhone =
-            u.phoneNumbers.find((p) => p.id === u.primaryPhoneNumberId)?.phoneNumber ||
-            u.phoneNumbers[0]?.phoneNumber ||
-            'N/A';
+          for (const u of users) {
+            const primaryEmail =
+              u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)?.emailAddress ||
+              u.emailAddresses[0]?.emailAddress ||
+              (u.username ? `${u.username}@clerk.user` : `user_${u.id.slice(-8)}@clerk.user`);
 
-          const fullName =
-            [u.firstName, u.lastName].filter(Boolean).join(' ').trim() ||
-            u.username ||
-            'Registered Athlete';
+            const email = primaryEmail.toLowerCase().trim();
+            if (!email) continue;
 
-          const createdDate = new Date(u.createdAt).toISOString();
-          const lastActiveDate = u.lastSignInAt
-            ? new Date(u.lastSignInAt).toISOString()
-            : createdDate;
+            const primaryPhone =
+              u.phoneNumbers.find((p) => p.id === u.primaryPhoneNumberId)?.phoneNumber ||
+              u.phoneNumbers[0]?.phoneNumber ||
+              'N/A';
 
-          memberMap.set(email, {
-            id: u.id,
-            clerkUserId: u.id,
-            fullName,
-            email,
-            phone: primaryPhone,
-            sources: ['Clerk Registered'],
-            firstSeen: createdDate,
-            lastActive: lastActiveDate,
-            totalBookings: 0,
-            latestPlan: 'Registered Account',
-            latestBookingStatus: 'REGISTERED',
-            inquiryCount: 0,
-            marketingOptIn: true,
-            status: 'REGISTERED_USER',
-          });
+            const fullName =
+              [u.firstName, u.lastName].filter(Boolean).join(' ').trim() ||
+              u.username ||
+              'Registered Athlete';
+
+            const createdDate = new Date(u.createdAt).toISOString();
+            const lastActiveDate = u.lastSignInAt
+              ? new Date(u.lastSignInAt).toISOString()
+              : createdDate;
+
+            memberMap.set(email, {
+              id: u.id,
+              clerkUserId: u.id,
+              fullName,
+              email,
+              phone: primaryPhone,
+              sources: ['Clerk Registered'],
+              firstSeen: createdDate,
+              lastActive: lastActiveDate,
+              totalBookings: 0,
+              latestPlan: 'Registered Account',
+              latestBookingStatus: 'REGISTERED',
+              inquiryCount: 0,
+              marketingOptIn: true,
+              status: 'REGISTERED_USER',
+            });
+          }
+
+          offset += users.length;
+          if (users.length < limit || offset >= (clerkUsersBatch.totalCount || 0)) {
+            hasMore = false;
+          }
         }
       } catch (clerkErr: any) {
         console.warn('Notice: Clerk user aggregation warning:', clerkErr?.message || clerkErr);
