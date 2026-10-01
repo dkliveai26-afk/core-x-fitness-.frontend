@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/mongodb';
 import {
-  ensureDefaultAdmin,
-  verifyPassword,
+  authenticateAdmin,
   createAdminToken,
   ADMIN_COOKIE_NAME,
 } from '@/lib/admin-auth';
@@ -21,28 +19,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Password is required.' }, { status: 400 });
     }
 
-    // Ensure initial admin accounts exist in database
-    await ensureDefaultAdmin();
+    const authResult = await authenticateAdmin(email, password);
 
-    const db = await getDatabase();
-    const adminsCol = db.collection('admins');
-
-    const admin = await adminsCol.findOne({ email: email.trim().toLowerCase() });
-
-    if (!admin || !admin.passwordHash) {
-      return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
+    if (!authResult.success || !authResult.user) {
+      return NextResponse.json(
+        { error: authResult.error || 'Invalid email or password.' },
+        { status: 401 }
+      );
     }
 
-    const isMatch = verifyPassword(password, admin.passwordHash);
-    if (!isMatch) {
-      return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
-    }
+    const admin = authResult.user;
 
     const token = createAdminToken({
-      id: admin._id.toString(),
+      id: admin.id,
       email: admin.email,
-      name: admin.name || 'Core X Administrator',
-      role: admin.role || 'admin',
+      name: admin.name,
+      role: admin.role,
     });
 
     const proto = req.headers.get('x-forwarded-proto') || req.nextUrl.protocol.replace(':', '');
@@ -54,10 +46,10 @@ export async function POST(req: NextRequest) {
       success: true,
       message: 'Admin authentication successful.',
       user: {
-        id: admin._id.toString(),
+        id: admin.id,
         email: admin.email,
-        name: admin.name || 'Core X Administrator',
-        role: admin.role || 'admin',
+        name: admin.name,
+        role: admin.role,
       },
     });
 
