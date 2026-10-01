@@ -65,6 +65,9 @@ export async function POST(req: NextRequest) {
       ctaUrl,
       footerNote,
       targetAudience,
+      includePricingCard,
+      pricingPlanId,
+      pricingPlanDetails,
     } = body;
 
     // Validation
@@ -93,6 +96,9 @@ export async function POST(req: NextRequest) {
       ctaUrl: ctaUrl ? ctaUrl.trim() : 'https://corexfitness.com/plans#pricing-matrix',
       footerNote: footerNote ? footerNote.trim() : undefined,
       targetAudience: targetAudience || 'ALL_OPTED_IN',
+      includePricingCard: Boolean(includePricingCard),
+      pricingPlanId: pricingPlanId || undefined,
+      pricingPlanDetails: includePricingCard && pricingPlanDetails ? pricingPlanDetails : undefined,
       createdBy: {
         id: session.user.id,
         name: session.user.name,

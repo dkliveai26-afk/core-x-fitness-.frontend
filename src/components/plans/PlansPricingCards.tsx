@@ -34,6 +34,7 @@ export function PlansPricingCards({
   });
 
   const [selectedPlan, setSelectedPlan] = useState<PlanItem | null>(null);
+  const [focusedPlanName, setFocusedPlanName] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [bookingForm, setBookingForm] = useState({
@@ -44,6 +45,45 @@ export function PlansPricingCards({
     marketingOptIn: true,
   });
   const [bookingError, setBookingError] = useState('');
+
+  // Handle URL deep-links from email campaigns (e.g. /plans?plan=performance#pricing-matrix)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const planParam = urlParams.get('plan') || urlParams.get('targetPlan');
+    const hash = window.location.hash.toLowerCase();
+
+    let targetPlanKey = planParam ? planParam.toLowerCase().trim() : null;
+    if (!targetPlanKey && hash.startsWith('#plan-')) {
+      targetPlanKey = hash.replace('#plan-', '').trim();
+    }
+
+    if (targetPlanKey) {
+      setFocusedPlanName(targetPlanKey);
+
+      // Smooth scroll to the specific plan card with offset
+      const timer = setTimeout(() => {
+        const targetElement =
+          document.getElementById(`plan-${targetPlanKey}`) ||
+          document.getElementById('pricing-matrix');
+
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 500);
+
+      // Auto-clear highlight after 6 seconds
+      const clearTimer = setTimeout(() => {
+        setFocusedPlanName(null);
+      }, 6000);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(clearTimer);
+      };
+    }
+  }, [plans]);
 
   // Client-side synchronization if initial props were not passed
   useEffect(() => {
@@ -170,10 +210,17 @@ export function PlansPricingCards({
 
             const isThirdOnTablet = index === 2 && plans.length === 3;
             const discountText = plan.discount || calculateDiscount(plan.originalPrice, plan.price);
+            const planSlug = plan.name.toLowerCase().replace(/\s+/g, '-');
+            const isCardFocused =
+              focusedPlanName &&
+              (focusedPlanName === planSlug ||
+                focusedPlanName === plan.name.toLowerCase() ||
+                focusedPlanName === plan._id);
 
             return (
               <motion.div
                 key={plan._id || plan.name}
+                id={`plan-${planSlug}`}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: '-60px' }}
@@ -182,20 +229,29 @@ export function PlansPricingCards({
                 className={`relative rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 flex flex-col justify-between transition-all duration-500 backdrop-blur-xl ${
                   isThirdOnTablet ? 'md:col-span-2 lg:col-span-1 md:max-w-md md:mx-auto md:w-full lg:max-w-none' : ''
                 } ${
-                  plan.highlighted
+                  isCardFocused
+                    ? 'ring-4 ring-core-red bg-gradient-to-b from-[#260E12] via-core-dark to-[#0C0E12] shadow-[0_0_60px_rgba(255,42,42,0.45)] scale-[1.02] -translate-y-3 z-30'
+                    : plan.highlighted
                     ? 'bg-gradient-to-b from-[#170E10] via-core-dark to-[#0C0E12] border-2 border-core-red shadow-[0_20px_50px_rgba(255,42,42,0.18)] lg:-translate-y-2'
                     : 'bg-core-dark/90 border border-white/10 hover:border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.8)]'
                 }`}
               >
-                {/* Popular Pill Marker for Highlighted Plan */}
-                {plan.highlighted && (
+                {/* Popular Pill Marker or Campaign Highlight Marker */}
+                {isCardFocused ? (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20">
+                    <span className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1 rounded-full bg-red-gradient text-[9px] sm:text-[10px] font-mono tracking-[0.2em] text-white uppercase font-bold shadow-glow-red animate-pulse whitespace-nowrap">
+                      <Sparkles className="w-3 h-3 text-white" />
+                      SELECTED CAMPAIGN OFFER
+                    </span>
+                  </div>
+                ) : plan.highlighted ? (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20">
                     <span className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-0.5 sm:py-1 rounded-full bg-red-gradient text-[9px] sm:text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.25em] text-white uppercase font-bold shadow-glow-red whitespace-nowrap">
                       <Sparkles className="w-3 h-3 text-white" />
                       MOST SOUGHT AFTER
                     </span>
                   </div>
-                )}
+                ) : null}
 
                 {/* Top Section matching reference layout */}
                 <div

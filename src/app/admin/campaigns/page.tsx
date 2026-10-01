@@ -63,6 +63,9 @@ export default function AdminCampaignsPage() {
   const [subscriberSearch, setSubscriberSearch] = useState('');
   const [subscriberFilter, setSubscriberFilter] = useState('ALL');
 
+  // Available Plans for Pricing Card insertion
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+
   // Campaign Form State
   const [formTitle, setFormTitle] = useState('');
   const [formSubject, setFormSubject] = useState('');
@@ -70,11 +73,15 @@ export default function AdminCampaignsPage() {
   const [formHeading, setFormHeading] = useState('');
   const [formBodyMessage, setFormBodyMessage] = useState('');
   const [formOfferBadge, setFormOfferBadge] = useState('EXCLUSIVE VIP ATHLETE ACCESS');
-  const [formImageUrl, setFormImageUrl] = useState('');
+  const [formImageUrl, setFormImageUrl] = useState('/plans-offer-banner.png');
   const [formCtaText, setFormCtaText] = useState('Claim Exclusive Offer');
-  const [formCtaUrl, setFormCtaUrl] = useState('https://corexfitness.com/plans#pricing-matrix');
+  const [formCtaUrl, setFormCtaUrl] = useState('https://core-x-fitness-frontend.vercel.app/plans?plan=performance#pricing-matrix');
   const [formFooterNote, setFormFooterNote] = useState('Offer valid for registered athletes and VIP admissions applicants.');
   const [formAudience, setFormAudience] = useState<'ALL_OPTED_IN' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY'>('ALL_OPTED_IN');
+  
+  // Pricing Card in Campaign State
+  const [formIncludePricingCard, setFormIncludePricingCard] = useState(true);
+  const [formSelectedPlanId, setFormSelectedPlanId] = useState('performance');
   
   // Image Upload State
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -89,6 +96,23 @@ export default function AdminCampaignsPage() {
   const [testEmailInput, setTestEmailInput] = useState('');
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [sendingCampaignId, setSendingCampaignId] = useState<string | null>(null);
+
+  const fetchPlans = useCallback(async () => {
+    try {
+      const res = await fetch('/api/plans');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.plans && data.plans.length > 0) {
+          setAvailablePlans(data.plans);
+          if (!formSelectedPlanId && data.plans[0]) {
+            setFormSelectedPlanId(data.plans[0].name.toLowerCase());
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Notice: Plans fetch fallback');
+    }
+  }, [formSelectedPlanId]);
 
   const fetchCampaignsAndStats = useCallback(async () => {
     try {
@@ -137,7 +161,8 @@ export default function AdminCampaignsPage() {
 
   useEffect(() => {
     fetchCampaignsAndStats();
-  }, [fetchCampaignsAndStats]);
+    fetchPlans();
+  }, [fetchCampaignsAndStats, fetchPlans]);
 
   useEffect(() => {
     if (activeTab === 'SUBSCRIBERS') fetchSubscribers();
@@ -198,6 +223,27 @@ export default function AdminCampaignsPage() {
 
     try {
       setIsLoading(true);
+
+      const selectedPlanObj = availablePlans.find(
+        (p) =>
+          p.name.toLowerCase() === formSelectedPlanId.toLowerCase() ||
+          p._id === formSelectedPlanId
+      ) || availablePlans[0];
+
+      const pricingPlanDetails =
+        formIncludePricingCard && selectedPlanObj
+          ? {
+              name: selectedPlanObj.name,
+              badge: selectedPlanObj.badge || 'MEMBERSHIP TIER',
+              price: selectedPlanObj.price,
+              originalPrice: selectedPlanObj.originalPrice,
+              duration: selectedPlanObj.duration || '/ MONTH',
+              features: selectedPlanObj.features || [],
+              shortDescription: selectedPlanObj.shortDescription || '',
+              discount: selectedPlanObj.discount || '',
+            }
+          : undefined;
+
       const res = await fetch('/api/admin/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -214,6 +260,9 @@ export default function AdminCampaignsPage() {
           ctaUrl: formCtaUrl,
           footerNote: formFooterNote,
           targetAudience: formAudience,
+          includePricingCard: formIncludePricingCard,
+          pricingPlanId: formSelectedPlanId,
+          pricingPlanDetails,
         }),
       });
 
@@ -742,10 +791,50 @@ export default function AdminCampaignsPage() {
                 </div>
 
                 {/* Campaign Image / Banner Upload */}
-                <div className="space-y-2">
-                  <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">
-                    Campaign Banner Graphic (Optional)
-                  </label>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+                      Campaign Banner Graphic (Optional)
+                    </label>
+                    <span className="text-[10px] font-mono text-emerald-400">Zero Server Storage / Serverless Safe</span>
+                  </div>
+
+                  {/* Preset Banner Quick-Picks */}
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl('/plans-offer-banner.png')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                        formImageUrl === '/plans-offer-banner.png'
+                          ? 'bg-core-red text-white font-bold shadow-glow-red'
+                          : 'bg-white/5 text-slate-300 hover:bg-white/10'
+                      }`}
+                    >
+                      Plans Offer Banner
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl('/gymlogo1.png')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                        formImageUrl === '/gymlogo1.png'
+                          ? 'bg-core-red text-white font-bold shadow-glow-red'
+                          : 'bg-white/5 text-slate-300 hover:bg-white/10'
+                      }`}
+                    >
+                      Core X Brand Mark
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl('')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                        !formImageUrl
+                          ? 'bg-slate-700 text-white font-bold'
+                          : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                      }`}
+                    >
+                      No Banner (Text Only)
+                    </button>
+                  </div>
                   
                   <div className="flex flex-col sm:flex-row gap-3 items-center">
                     <button
@@ -754,7 +843,7 @@ export default function AdminCampaignsPage() {
                       className="px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-mono text-xs uppercase flex items-center gap-2 transition-colors w-full sm:w-auto justify-center"
                     >
                       <Upload className="w-4 h-4 text-core-red" />
-                      <span>{selectedImageFile ? 'Change Graphic' : 'Upload Banner'}</span>
+                      <span>{selectedImageFile ? 'Change File' : 'Upload File'}</span>
                     </button>
                     <input
                       ref={imageInputRef}
@@ -768,13 +857,13 @@ export default function AdminCampaignsPage() {
                       type="text"
                       value={formImageUrl}
                       onChange={(e) => setFormImageUrl(e.target.value)}
-                      placeholder="Or paste direct image URL (/uploads/...)"
+                      placeholder="Or enter image URL (e.g. /plans-offer-banner.png or https://...)"
                       className="w-full sm:flex-1 bg-[#050607] border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-core-red font-mono"
                     />
                   </div>
 
                   {isUploadingImage && (
-                    <p className="text-[11px] font-mono text-amber-400 animate-pulse">Uploading banner graphic to server...</p>
+                    <p className="text-[11px] font-mono text-amber-400 animate-pulse">Processing banner in memory...</p>
                   )}
 
                   {formImageUrl && (
@@ -787,6 +876,69 @@ export default function AdminCampaignsPage() {
                         className="max-h-36 w-auto object-contain rounded"
                         unoptimized
                       />
+                    </div>
+                  )}
+                </div>
+
+                {/* NEW FEATURE: INCLUDE PRICING CARD */}
+                <div className="p-4 rounded-2xl bg-gradient-to-b from-[#161B22] to-[#0D1117] border border-core-red/30 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-core-red" />
+                      <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                        Include Membership Pricing Card in Email
+                      </span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formIncludePricingCard}
+                        onChange={(e) => setFormIncludePricingCard(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-core-red"></div>
+                    </label>
+                  </div>
+
+                  {formIncludePricingCard && (
+                    <div className="space-y-3 pt-2 border-t border-white/5">
+                      <p className="text-xs text-slate-400 font-sans leading-relaxed">
+                        Select an existing plan from the Plans CMS. The email will render a luxury responsive pricing card with live rates, features, and an automatic deep-link directly to that specific plan card on the website.
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {availablePlans.map((p) => {
+                          const isSelected = formSelectedPlanId.toLowerCase() === p.name.toLowerCase() || formSelectedPlanId === p._id;
+                          return (
+                            <div
+                              key={p._id || p.name}
+                              onClick={() => {
+                                setFormSelectedPlanId(p.name.toLowerCase());
+                                setFormCtaUrl(`https://core-x-fitness-frontend.vercel.app/plans?plan=${p.name.toLowerCase()}#pricing-matrix`);
+                              }}
+                              className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
+                                isSelected
+                                  ? 'bg-core-red/15 border-core-red shadow-[0_0_20px_rgba(255,42,42,0.2)]'
+                                  : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                              }`}
+                            >
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-mono text-core-red font-bold uppercase block">{p.badge || 'TIER'}</span>
+                                <h4 className="text-sm font-bold text-white uppercase">{p.name}</h4>
+                              </div>
+                              <div className="mt-2 pt-2 border-t border-white/5 flex items-baseline justify-between">
+                                <span className="text-sm font-black text-white">₹{p.price.toLocaleString('en-IN')}</span>
+                                <span className="text-[10px] font-mono text-slate-400">{p.duration || '/mo'}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400 flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>CTA automatically configured: Clicking &quot;Claim Offer&quot; will auto-scroll & highlight this card on the website.</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -808,13 +960,13 @@ export default function AdminCampaignsPage() {
 
                   <div>
                     <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1 font-bold">
-                      CTA Button Link / URL
+                      CTA Button Link / URL (Deep-Link)
                     </label>
                     <input
                       type="text"
                       value={formCtaUrl}
                       onChange={(e) => setFormCtaUrl(e.target.value)}
-                      placeholder="https://corexfitness.com/plans#pricing-matrix"
+                      placeholder="https://core-x-fitness-frontend.vercel.app/plans?plan=performance#pricing-matrix"
                       className="w-full bg-[#050607] border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-core-red font-mono"
                     />
                   </div>
@@ -839,6 +991,12 @@ export default function AdminCampaignsPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      const selectedPlanObj = availablePlans.find(
+                        (p) =>
+                          p.name.toLowerCase() === formSelectedPlanId.toLowerCase() ||
+                          p._id === formSelectedPlanId
+                      ) || availablePlans[0];
+
                       setPreviewCampaign({
                         heading: formHeading || 'Sample Offer Heading',
                         bodyMessage: formBodyMessage || 'Sample offer body message...',
@@ -848,6 +1006,17 @@ export default function AdminCampaignsPage() {
                         ctaUrl: formCtaUrl,
                         footerNote: formFooterNote,
                         subject: formSubject,
+                        includePricingCard: formIncludePricingCard,
+                        pricingPlanDetails: formIncludePricingCard && selectedPlanObj ? {
+                          name: selectedPlanObj.name,
+                          badge: selectedPlanObj.badge,
+                          price: selectedPlanObj.price,
+                          originalPrice: selectedPlanObj.originalPrice,
+                          duration: selectedPlanObj.duration,
+                          features: selectedPlanObj.features,
+                          shortDescription: selectedPlanObj.shortDescription,
+                          discount: selectedPlanObj.discount,
+                        } : undefined,
                       });
                     }}
                     className="px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-mono text-xs uppercase flex items-center gap-2"
@@ -934,6 +1103,38 @@ export default function AdminCampaignsPage() {
                     <p className="text-[11px] text-slate-300 font-sans leading-relaxed whitespace-pre-wrap">
                       {formBodyMessage || 'Your campaign offer text and message content will be formatted here beautifully across all email clients.'}
                     </p>
+
+                    {/* Interactive Embedded Pricing Card Preview */}
+                    {formIncludePricingCard && (() => {
+                      const selectedPlanObj = availablePlans.find(
+                        (p) => p.name.toLowerCase() === formSelectedPlanId.toLowerCase() || p._id === formSelectedPlanId
+                      ) || availablePlans[0];
+                      if (!selectedPlanObj) return null;
+                      return (
+                        <div className="my-3 p-3.5 rounded-xl bg-gradient-to-b from-[#1C0F12] to-[#12151B] border-2 border-core-red shadow-[0_4px_20px_rgba(255,42,42,0.2)] text-left space-y-2">
+                          <span className="inline-block px-2 py-0.5 rounded-full bg-core-red/20 text-core-red text-[8px] font-mono font-bold uppercase">
+                            {selectedPlanObj.badge || 'MEMBERSHIP TIER'}
+                          </span>
+                          <div className="flex items-baseline justify-between">
+                            <h4 className="text-sm font-black text-white uppercase">{selectedPlanObj.name} TIER</h4>
+                            <span className="text-base font-black text-white">₹{selectedPlanObj.price.toLocaleString('en-IN')}<span className="text-[9px] font-mono text-slate-400 font-normal">{selectedPlanObj.duration || '/mo'}</span></span>
+                          </div>
+                          {selectedPlanObj.shortDescription && (
+                            <p className="text-[10px] text-slate-300 font-sans">{selectedPlanObj.shortDescription}</p>
+                          )}
+                          {selectedPlanObj.features && selectedPlanObj.features.length > 0 && (
+                            <div className="pt-2 border-t border-white/5 space-y-1">
+                              {selectedPlanObj.features.slice(0, 3).map((f: string, idx: number) => (
+                                <div key={idx} className="flex items-center gap-1.5 text-[10px] text-slate-200">
+                                  <span className="text-core-red font-bold">✓</span>
+                                  <span>{f}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {formCtaText && (
                       <div className="pt-2 text-center">
@@ -1196,6 +1397,35 @@ export default function AdminCampaignsPage() {
                     <p className="text-xs text-slate-300 font-sans leading-relaxed whitespace-pre-wrap">
                       {previewCampaign.bodyMessage}
                     </p>
+
+                    {/* Embedded Pricing Card in Modal */}
+                    {previewCampaign.includePricingCard && previewCampaign.pricingPlanDetails && (
+                      <div className="my-4 p-4 rounded-2xl bg-gradient-to-b from-[#1C0F12] to-[#12151B] border-2 border-core-red shadow-[0_4px_25px_rgba(255,42,42,0.25)] text-left space-y-2.5">
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-core-red/20 text-core-red text-[9px] font-mono font-bold uppercase">
+                          {previewCampaign.pricingPlanDetails.badge || 'MEMBERSHIP TIER'}
+                        </span>
+                        <div className="flex items-baseline justify-between">
+                          <h4 className="text-base font-black text-white uppercase">{previewCampaign.pricingPlanDetails.name} TIER</h4>
+                          <span className="text-lg font-black text-white">
+                            ₹{previewCampaign.pricingPlanDetails.price.toLocaleString('en-IN')}
+                            <span className="text-[10px] font-mono text-slate-400 font-normal">{previewCampaign.pricingPlanDetails.duration || '/mo'}</span>
+                          </span>
+                        </div>
+                        {previewCampaign.pricingPlanDetails.shortDescription && (
+                          <p className="text-xs text-slate-300 font-sans">{previewCampaign.pricingPlanDetails.shortDescription}</p>
+                        )}
+                        {previewCampaign.pricingPlanDetails.features && previewCampaign.pricingPlanDetails.features.length > 0 && (
+                          <div className="pt-2 border-t border-white/5 space-y-1.5">
+                            {previewCampaign.pricingPlanDetails.features.slice(0, 4).map((f: string, idx: number) => (
+                              <div key={idx} className="flex items-center gap-2 text-xs text-slate-200">
+                                <span className="text-core-red font-bold">✓</span>
+                                <span>{f}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {previewCampaign.ctaText && (
                       <div className="pt-2 text-center">

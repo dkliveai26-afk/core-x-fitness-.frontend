@@ -68,17 +68,26 @@ export async function POST(req: NextRequest) {
         }
 
         const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const timestamp = Date.now();
-        const originalName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filename = `banner_${timestamp}_${originalName}`;
+        const base64Data = buffer.toString('base64');
+        const dataUri = `data:${imageFile.type};base64,${base64Data}`;
+        imageUrl = dataUri;
 
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'banners');
-        await fs.mkdir(uploadDir, { recursive: true });
+        try {
+          const timestamp = Date.now();
+          const originalName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const filename = `banner_${timestamp}_${originalName}`;
 
-        const filePath = path.join(uploadDir, filename);
-        await fs.writeFile(filePath, buffer);
+          const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'banners');
+          await fs.mkdir(uploadDir, { recursive: true });
 
-        imageUrl = `/uploads/banners/${filename}`;
+          const filePath = path.join(uploadDir, filename);
+          await fs.writeFile(filePath, buffer);
+
+          imageUrl = `/uploads/banners/${filename}`;
+        } catch (fsErr) {
+          console.log('Serverless environment: stored banner as base64 data URI in MongoDB.');
+          imageUrl = dataUri;
+        }
       } else {
         const existingUrl = formData.get('imageUrl') as string;
         if (existingUrl) {

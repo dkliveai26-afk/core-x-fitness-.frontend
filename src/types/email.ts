@@ -52,6 +52,18 @@ export interface EmailCampaign {
   ctaUrl?: string;
   footerNote?: string;
   targetAudience: 'ALL_OPTED_IN' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY';
+  includePricingCard?: boolean;
+  pricingPlanId?: string;
+  pricingPlanDetails?: {
+    name: string;
+    badge?: string;
+    price: number;
+    originalPrice?: number;
+    duration: string;
+    features: string[];
+    shortDescription?: string;
+    discount?: string;
+  };
   status: EmailDeliveryStatus;
   totalEligibleRecipients: number;
   sentCount: number;

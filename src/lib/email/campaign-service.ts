@@ -108,6 +108,8 @@ export async function sendTestCampaign(
     footerNote: campaign.footerNote,
     recipientName: 'Test Athlete (Admin Preview)',
     unsubscribeUrl: sampleUnsubscribeUrl,
+    includePricingCard: campaign.includePricingCard,
+    pricingPlanDetails: campaign.pricingPlanDetails,
   });
 
   return sendEmail({
@@ -183,6 +185,8 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
             footerNote: campaign.footerNote,
             recipientName: recipient.name,
             unsubscribeUrl,
+            includePricingCard: campaign.includePricingCard,
+            pricingPlanDetails: campaign.pricingPlanDetails,
           });
 
           const result = await sendEmail({

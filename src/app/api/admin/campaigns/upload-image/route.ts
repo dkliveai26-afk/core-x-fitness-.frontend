@@ -42,26 +42,34 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const timestamp = Date.now();
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `campaign_${timestamp}_${sanitizedName}`;
+    const base64Data = buffer.toString('base64');
+    const dataUri = `data:${file.type};base64,${base64Data}`;
+    let finalImageUrl = dataUri;
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'campaigns');
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    const filePath = path.join(uploadDir, filename);
-    await fs.writeFile(filePath, buffer);
-
-    const imageUrl = `/uploads/campaigns/${filename}`;
+    // Try local write only if filesystem is writable (development environment)
+    try {
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filename = `campaign_${timestamp}_${sanitizedName}`;
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'campaigns');
+      await fs.mkdir(uploadDir, { recursive: true });
+      const filePath = path.join(uploadDir, filename);
+      await fs.writeFile(filePath, buffer);
+      finalImageUrl = `/uploads/campaigns/${filename}`;
+    } catch (fsErr) {
+      // Running on read-only serverless environment (Vercel) - safely use memory Data URI
+      console.log('Serverless environment detected: using base64 data URI for campaign image.');
+      finalImageUrl = dataUri;
+    }
 
     return NextResponse.json({
       success: true,
-      imageUrl,
-      filename,
+      imageUrl: finalImageUrl,
+      filename: file.name,
       size: file.size,
     });
   } catch (error: any) {
     console.error('API /api/admin/campaigns/upload-image error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to upload image.' }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to process image.' }, { status: 500 });
   }
 }

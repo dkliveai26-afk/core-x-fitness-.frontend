@@ -374,6 +374,8 @@ export function generateMarketingCampaignHtml({
   footerNote,
   recipientName = 'Athlete',
   unsubscribeUrl,
+  includePricingCard,
+  pricingPlanDetails,
 }: {
   heading: string;
   bodyMessage: string;
@@ -384,12 +386,111 @@ export function generateMarketingCampaignHtml({
   footerNote?: string;
   recipientName?: string;
   unsubscribeUrl: string;
+  includePricingCard?: boolean;
+  pricingPlanDetails?: {
+    name: string;
+    badge?: string;
+    price: number;
+    originalPrice?: number;
+    duration: string;
+    features: string[];
+    shortDescription?: string;
+    discount?: string;
+  };
 }): { html: string; text: string } {
   // Convert newlines to formatted HTML paragraphs safely
   const formattedBody = bodyMessage
     .split(/\n\n+/)
     .map((p) => `<p style="font-size: 15px; line-height: 1.7; color: #CBD5E1; margin: 0 0 16px 0;">${p.replace(/\n/g, '<br/>')}</p>`)
     .join('');
+
+  // Generate Email Pricing Card HTML if requested
+  let pricingCardHtml = '';
+  if (includePricingCard && pricingPlanDetails) {
+    const {
+      name,
+      badge,
+      price,
+      originalPrice,
+      duration,
+      features = [],
+      shortDescription,
+      discount,
+    } = pricingPlanDetails;
+
+    const formattedPrice = `₹${price.toLocaleString('en-IN')}`;
+    const formattedOriginal = originalPrice ? `₹${originalPrice.toLocaleString('en-IN')}` : '';
+
+    pricingCardHtml = `
+      <!-- Embedded Membership Plan Card -->
+      <div style="margin: 28px 0; background: linear-gradient(180deg, #1C0F12 0%, #12151B 100%); border: 2px solid #FF2A2A; border-radius: 18px; padding: 24px; box-shadow: 0 15px 35px rgba(255,42,42,0.18);">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td>
+              <!-- Badge & Plan Name -->
+              <div style="margin-bottom: 12px;">
+                <span style="display: inline-block; padding: 3px 10px; border-radius: 999px; background-color: rgba(255,42,42,0.2); border: 1px solid rgba(255,42,42,0.4); font-size: 9px; font-family: monospace; font-weight: 700; color: #FF2A2A; letter-spacing: 0.15em; text-transform: uppercase;">
+                  ${badge || 'OFFICIAL MEMBERSHIP TIER'}
+                </span>
+                <h3 style="margin: 8px 0 0 0; font-size: 22px; font-weight: 900; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.05em;">
+                  ${name} TIER
+                </h3>
+              </div>
+
+              <!-- Price Cluster -->
+              <div style="margin-bottom: 14px;">
+                ${formattedOriginal ? `
+                  <div style="margin-bottom: 4px;">
+                    <span style="font-family: monospace; font-size: 13px; text-decoration: line-through; color: #94A3B8;">${formattedOriginal}</span>
+                    ${discount ? `
+                      <span style="margin-left: 6px; padding: 2px 8px; border-radius: 999px; background-color: rgba(255,42,42,0.25); color: #FF2A2A; font-size: 9px; font-family: monospace; font-weight: 700; text-transform: uppercase;">
+                        ${discount}
+                      </span>
+                    ` : ''}
+                  </div>
+                ` : ''}
+                <div>
+                  <span style="font-size: 32px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.02em;">
+                    ${formattedPrice}
+                  </span>
+                  <span style="font-size: 13px; color: #94A3B8; font-family: monospace; text-transform: uppercase; margin-left: 4px;">
+                    ${duration || '/ MONTH'}
+                  </span>
+                </div>
+              </div>
+
+              ${shortDescription ? `
+                <p style="font-size: 13px; color: #CBD5E1; margin: 0 0 18px 0; line-height: 1.5;">
+                  ${shortDescription}
+                </p>
+              ` : ''}
+
+              <!-- Features List -->
+              ${features && features.length > 0 ? `
+                <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; margin-bottom: 20px;">
+                  <span style="font-size: 10px; font-family: monospace; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; display: block; margin-bottom: 10px;">
+                    INCLUDED PRIVILEGES:
+                  </span>
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                    ${features.map((f) => `
+                      <tr>
+                        <td style="width: 20px; vertical-align: top; padding-bottom: 8px; color: #FF2A2A; font-size: 14px; font-weight: bold;">
+                          ✓
+                        </td>
+                        <td style="vertical-align: top; padding-bottom: 8px; font-size: 12px; color: #E2E8F0; line-height: 1.4;">
+                          ${f}
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </table>
+                </div>
+              ` : ''}
+            </td>
+          </tr>
+        </table>
+      </div>
+    `;
+  }
 
   const html = `
 <!DOCTYPE html>
@@ -446,13 +547,16 @@ export function generateMarketingCampaignHtml({
                 ${heading}
               </h2>
 
-              <div style="margin-bottom: 28px;">
+              <div style="margin-bottom: 20px;">
                 ${formattedBody}
               </div>
 
+              <!-- Included Pricing Plan Card -->
+              ${pricingCardHtml}
+
               <!-- CTA Button -->
               ${ctaText && ctaUrl ? `
-              <div style="text-align: center; margin: 32px 0 28px 0;">
+              <div style="text-align: center; margin: 28px 0 24px 0;">
                 <a href="${ctaUrl}" class="btn-primary" target="_blank" style="background: linear-gradient(135deg, #FF2A2A 0%, #D80000 100%); background-color: #FF2A2A; color: #FFFFFF !important; text-decoration: none; font-weight: 700; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 32px; border-radius: 12px; display: inline-block; border: 1px solid rgba(255, 42, 42, 0.4); box-shadow: 0 10px 25px rgba(255,42,42,0.3);">
                   ${ctaText}
                 </a>
@@ -501,6 +605,15 @@ ${offerBadge ? `[${offerBadge}]\n` : ''}
 ${heading}
 
 ${bodyMessage}
+
+${includePricingCard && pricingPlanDetails ? `
+[FEATURED MEMBERSHIP TIER]
+${pricingPlanDetails.name} Tier (${pricingPlanDetails.badge || 'Official Plan'})
+Price: ₹${pricingPlanDetails.price.toLocaleString('en-IN')} ${pricingPlanDetails.duration || '/ MONTH'}
+${pricingPlanDetails.shortDescription || ''}
+Privileges:
+${(pricingPlanDetails.features || []).map((f) => `- ${f}`).join('\n')}
+` : ''}
 
 ${ctaText && ctaUrl ? `\n--> ${ctaText}: ${ctaUrl}\n` : ''}
 ${footerNote ? `\nNote: ${footerNote}\n` : ''}
