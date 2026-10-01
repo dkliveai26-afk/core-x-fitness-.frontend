@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { getDatabase } from '@/lib/mongodb';
 import {
   EmailLogEntry,
@@ -17,12 +18,12 @@ const DEFAULT_FROM_NAME = process.env.EMAIL_FROM_NAME || 'CORE X FITNESS';
 const DEFAULT_FROM_ADDRESS =
   process.env.EMAIL_FROM_ADDRESS ||
   process.env.RESEND_FROM_EMAIL ||
-  'concierge@corexfitness.com';
+  'onboarding@resend.dev';
 
 const ADMIN_NOTIFICATION_RECIPIENT =
   process.env.ADMIN_NOTIFICATION_EMAIL ||
   process.env.ADMIN_EMAILS?.split(',')[0]?.trim() ||
-  'dilkhushdeveloper@gmail.com';
+  'd.klive.ai26@gmail.com';
 
 /**
  * Identify the active email provider configuration
@@ -72,38 +73,47 @@ export function getActiveEmailProvider(): {
 }
 
 /**
- * Send email via Resend API
+ * Send email via Resend official SDK with domain fallback
  */
 async function sendViaResend(
   payload: SendEmailPayload,
   apiKey: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
-    const from = `${payload.fromName || DEFAULT_FROM_NAME} <${payload.fromEmail || DEFAULT_FROM_ADDRESS}>`;
+    const resend = new Resend(apiKey);
+    const fromAddress = payload.fromEmail || DEFAULT_FROM_ADDRESS;
+    const fromName = payload.fromName || DEFAULT_FROM_NAME;
+    const from = `${fromName} <${fromAddress}>`;
     const to = Array.isArray(payload.to) ? payload.to : [payload.to];
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from,
-        to,
-        subject: payload.subject,
-        html: payload.html,
-        text: payload.text,
-        reply_to: payload.replyTo,
-      }),
+    const result = await resend.emails.send({
+      from,
+      to,
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+      replyTo: payload.replyTo,
     });
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      return { success: false, error: data.message || `Resend API error (${res.status})` };
+    if (result.error) {
+      // If error is domain verification related and we tried a custom domain, fallback to onboarding@resend.dev
+      if (fromAddress !== 'onboarding@resend.dev' && (result.error.message?.includes('domain') || result.error.message?.includes('verify'))) {
+        const fallbackResult = await resend.emails.send({
+          from: `${fromName} <onboarding@resend.dev>`,
+          to,
+          subject: payload.subject,
+          html: payload.html,
+          text: payload.text,
+          replyTo: payload.replyTo,
+        });
+        if (fallbackResult.data?.id) {
+          return { success: true, messageId: fallbackResult.data.id };
+        }
+      }
+      return { success: false, error: result.error.message || 'Resend delivery error' };
     }
 
-    return { success: true, messageId: data.id || `resend_${Date.now()}` };
+    return { success: true, messageId: result.data?.id || `resend_${Date.now()}` };
   } catch (error: any) {
     return { success: false, error: error.message || 'Network error communicating with Resend' };
   }

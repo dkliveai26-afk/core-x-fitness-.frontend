@@ -24,6 +24,7 @@ interface MemberItem {
   latestPlan: string;
   latestBookingStatus: string;
   inquiryCount: number;
+  marketingOptIn?: boolean;
 }
 
 export default function AdminMembersPage() {
@@ -177,11 +178,22 @@ export default function AdminMembersPage() {
                         {m.lastActive ? new Date(m.lastActive).toLocaleDateString() : 'N/A'}
                       </td>
 
-                      {/* Status */}
+                      {/* Status & Marketing Consent */}
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          {m.latestBookingStatus}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            {m.latestBookingStatus}
+                          </span>
+                          {m.marketingOptIn ? (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" title="Subscribed to Marketing Offers">
+                              OPTED-IN
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-mono uppercase bg-slate-500/10 text-slate-500 border border-slate-500/20" title="No Marketing Consent">
+                              NO CONSENT
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
