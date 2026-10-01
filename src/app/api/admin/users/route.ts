@@ -192,7 +192,7 @@ export async function GET(req: NextRequest) {
         console.warn('Notice: Contacts collection read notice:', cErr?.message);
       }
 
-      // C. Query marketing_contacts collection (Subscribers, VIP Leads)
+      // C. Query marketing_contacts collection (Subscribers, VIP Leads, Direct Registry)
       try {
         const marketingCol = db.collection('marketing_contacts');
         const marketingDocs = await marketingCol.find().toArray();
@@ -202,11 +202,33 @@ export async function GET(req: NextRequest) {
           if (!email) continue;
 
           const mCreated = m.createdAt ? new Date(m.createdAt).toISOString() : new Date().toISOString();
+          const mLastActive = m.lastActiveAt ? new Date(m.lastActiveAt).toISOString() : mCreated;
+
+          // Convert internal sources to user-facing labels
+          const rawSources: string[] = Array.isArray(m.sources) ? m.sources : [];
+          const convertedSources: string[] = [];
+          for (const s of rawSources) {
+            const sUpper = String(s).toUpperCase();
+            if (sUpper.includes('CLERK') && !convertedSources.includes('Clerk Registered')) {
+              convertedSources.push('Clerk Registered');
+            } else if (sUpper.includes('BOOKING') && !convertedSources.includes('Booking')) {
+              convertedSources.push('Booking');
+            } else if (sUpper.includes('CONTACT') && !convertedSources.includes('Contact')) {
+              convertedSources.push('Contact');
+            } else if ((sUpper.includes('NEWSLETTER') || sUpper.includes('FOOTER')) && !convertedSources.includes('Newsletter')) {
+              convertedSources.push('Newsletter');
+            }
+          }
+          if (convertedSources.length === 0) {
+            convertedSources.push('Newsletter');
+          }
 
           if (memberMap.has(email)) {
             const existing = memberMap.get(email)!;
-            if (!existing.sources.includes('Newsletter') && (m.sources?.includes('FOOTER_NEWSLETTER') || m.sources?.includes('NEWSLETTER'))) {
-              existing.sources.push('Newsletter');
+            for (const src of convertedSources) {
+              if (!existing.sources.includes(src)) {
+                existing.sources.push(src);
+              }
             }
             if (m.marketingOptIn !== undefined) {
               existing.marketingOptIn = Boolean(m.marketingOptIn);
@@ -214,28 +236,55 @@ export async function GET(req: NextRequest) {
             if (m.marketingOptOutAt) {
               existing.marketingOptOutAt = m.marketingOptOutAt;
             }
-            if (m.name && (existing.fullName === 'Registered Athlete' || !existing.fullName)) {
+            if (m.name && (existing.fullName === 'Registered Athlete' || !existing.fullName || existing.fullName === 'Athlete')) {
               existing.fullName = m.name;
             }
             if (m.phone && (existing.phone === 'N/A' || !existing.phone)) {
               existing.phone = m.phone;
             }
+            if (new Date(mLastActive) > new Date(existing.lastActive)) {
+              existing.lastActive = mLastActive;
+            }
+            if (new Date(mCreated) < new Date(existing.firstSeen)) {
+              existing.firstSeen = mCreated;
+            }
+            if (m.totalBookings && m.totalBookings > existing.totalBookings) {
+              existing.totalBookings = m.totalBookings;
+            }
+            if (m.totalInquiries && m.totalInquiries > existing.inquiryCount) {
+              existing.inquiryCount = m.totalInquiries;
+            }
+            if (existing.totalBookings > 0) {
+              existing.status = 'ACTIVE_MEMBER';
+            }
           } else {
+            const isBooking = convertedSources.includes('Booking') || (m.totalBookings || 0) > 0;
+            const isClerk = convertedSources.includes('Clerk Registered');
+            const isContact = convertedSources.includes('Contact') || (m.totalInquiries || 0) > 0;
+
+            const resolvedStatus: AggregatedUserItem['status'] = isBooking
+              ? 'ACTIVE_MEMBER'
+              : isClerk
+              ? 'REGISTERED_USER'
+              : isContact
+              ? 'INQUIRY_CONTACT'
+              : 'PROSPECTIVE_LEAD';
+
             memberMap.set(email, {
               id: m._id.toString(),
-              fullName: m.name || 'VIP Subscriber',
+              fullName: m.name || (email.split('@')[0] ? email.split('@')[0].toUpperCase() : 'VIP Lead'),
               email: m.email,
               phone: m.phone || 'N/A',
-              sources: ['Newsletter'],
+              sources: convertedSources,
               firstSeen: mCreated,
-              lastActive: m.lastActiveAt ? new Date(m.lastActiveAt).toISOString() : mCreated,
+              lastActive: mLastActive,
               totalBookings: m.totalBookings || 0,
-              latestPlan: m.latestPlan || 'VIP Newsletter Opt-In',
-              latestBookingStatus: 'SUBSCRIBED',
+              latestPlan: m.latestPlan || (isBooking ? 'Membership Allocation' : isContact ? 'General Inquiry' : 'VIP Newsletter Opt-In'),
+              latestBookingStatus: isBooking ? 'CONFIRMED' : isContact ? 'INQUIRY_ONLY' : 'SUBSCRIBED',
               inquiryCount: m.totalInquiries || 0,
               marketingOptIn: m.marketingOptIn !== undefined ? Boolean(m.marketingOptIn) : true,
               marketingOptOutAt: m.marketingOptOutAt || null,
-              status: 'PROSPECTIVE_LEAD',
+              status: resolvedStatus,
             });
           }
         }
@@ -255,7 +304,7 @@ export async function GET(req: NextRequest) {
     const stats = {
       total: usersData.length,
       clerkUsers: usersData.filter((u) => u.sources.includes('Clerk Registered')).length,
-      bookingsCount: usersData.filter((u) => u.totalBookings > 0).length,
+      bookingsCount: usersData.filter((u) => u.totalBookings > 0 || u.sources.includes('Booking')).length,
       optedInCount: usersData.filter((u) => u.marketingOptIn && !u.marketingOptOutAt).length,
       unsubscribedCount: usersData.filter((u) => !u.marketingOptIn || Boolean(u.marketingOptOutAt)).length,
     };
@@ -271,7 +320,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to retrieve members list',
+        error: error?.message || 'Failed to retrieve members list',
         users: [],
         total: 0,
       },
