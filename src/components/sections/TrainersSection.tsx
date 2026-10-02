@@ -59,7 +59,7 @@ export function TrainersSection() {
               </div>
 
               {/* Information Container */}
-              <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between">
+              <div className="p-5 sm:p-8 flex-1 flex flex-col justify-between">
                 <div>
                   <span className="text-xs font-mono uppercase tracking-widest text-core-red font-bold">
                     {trainer.role}

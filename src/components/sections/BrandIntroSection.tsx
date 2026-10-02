@@ -19,7 +19,7 @@ export function BrandIntroSection() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative min-h-0 lg:min-h-screen w-full bg-core-void py-14 sm:py-20 lg:py-32 px-6 sm:px-12 overflow-hidden flex flex-col justify-center"
+      className="relative min-h-0 lg:min-h-screen w-full bg-core-void py-14 sm:py-20 lg:py-32 px-4 sm:px-12 overflow-hidden flex flex-col justify-center"
     >
       {/* Background Accent Lines */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
@@ -32,7 +32,7 @@ export function BrandIntroSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/10 border border-core-red/30 text-[11px] font-mono tracking-[0.3em] text-core-red uppercase font-bold"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/10 border border-core-red/30 text-[11px] font-mono tracking-[0.2em] sm:tracking-[0.3em] text-core-red uppercase font-bold"
           >
             BRAND ARCHITECTURE
           </motion.div>
@@ -54,7 +54,7 @@ export function BrandIntroSection() {
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 1.1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="text-xs font-mono tracking-[0.3em] text-core-red uppercase block mb-2 font-bold">
+              <span className="text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-core-red uppercase block mb-2 font-bold">
                 01 / ARCHITECTURE
               </span>
               <p className="text-sm font-sans text-core-muted leading-relaxed font-light">
@@ -68,7 +68,7 @@ export function BrandIntroSection() {
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 1.1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="text-xs font-mono tracking-[0.3em] text-core-red uppercase block mb-2 font-bold">
+              <span className="text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-core-red uppercase block mb-2 font-bold">
                 02 / METHODOLOGY
               </span>
               <p className="text-sm font-sans text-core-muted leading-relaxed font-light">
@@ -102,7 +102,7 @@ export function BrandIntroSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute bottom-6 left-6 right-6 p-4 rounded-xl bg-core-void/90 backdrop-blur-md border border-white/10 flex items-center justify-between"
+              className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 p-3 sm:p-4 rounded-xl bg-core-void/90 backdrop-blur-md border border-white/10 flex items-center justify-between"
             >
               <div>
                 <span className="text-xs font-heading font-bold text-white uppercase tracking-widest block">

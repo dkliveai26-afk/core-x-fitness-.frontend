@@ -27,10 +27,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const sizeClasses = {
-      sm: 'px-3.5 py-1.5 text-xs font-semibold tracking-wider rounded-md gap-1.5',
-      md: 'px-5 py-2.5 text-sm font-semibold tracking-wider rounded-lg gap-2',
-      lg: 'px-7 py-3.5 text-base font-bold tracking-widest rounded-lg gap-2.5',
-      xl: 'px-9 py-4 text-lg font-extrabold tracking-widest rounded-xl gap-3',
+      sm: 'px-3 py-1.5 text-xs font-semibold tracking-wider rounded-md gap-1.5',
+      md: 'px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold tracking-wider rounded-lg gap-2',
+      lg: 'px-5 sm:px-7 py-2.5 sm:py-3.5 text-sm sm:text-base font-bold tracking-wider sm:tracking-widest rounded-lg gap-2 sm:gap-2.5',
+      xl: 'px-5 sm:px-9 py-3 sm:py-4 text-sm sm:text-lg font-extrabold tracking-wider sm:tracking-widest rounded-xl gap-2 sm:gap-3',
     };
 
     const variantClasses = {
@@ -51,7 +51,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={cn(
-          'inline-flex items-center justify-center font-heading uppercase transition-all duration-300 select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-core-red/70 focus-visible:ring-offset-2 focus-visible:ring-offset-core-void',
+          'inline-flex items-center justify-center font-heading uppercase transition-all duration-300 select-none cursor-pointer max-w-full disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-core-red/70 focus-visible:ring-offset-2 focus-visible:ring-offset-core-void',
           sizeClasses[size],
           variantClasses[variant],
           className

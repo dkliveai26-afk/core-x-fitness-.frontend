@@ -190,7 +190,7 @@ export function DietBowl3DScroll() {
             {/* Ambient Red Radial Halo */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 sm:w-88 h-72 sm:h-88 bg-gradient-radial from-core-red/30 via-transparent to-transparent rounded-full blur-[80px] pointer-events-none" />
 
-            <div className="relative w-[280px] sm:w-[350px] lg:w-[400px] aspect-square flex items-center justify-center [transform-style:preserve-3d] cursor-pointer group">
+            <div className="relative w-[230px] xs:w-[270px] sm:w-[350px] lg:w-[400px] aspect-square flex items-center justify-center [transform-style:preserve-3d] cursor-pointer group">
               {/* Grounding Shadow */}
               <div className="absolute inset-x-6 -bottom-3 h-8 bg-black/90 rounded-full blur-xl pointer-events-none" />
 

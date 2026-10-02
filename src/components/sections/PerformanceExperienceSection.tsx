@@ -57,9 +57,9 @@ export function PerformanceExperienceSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 1.1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white max-w-full"
+            className="font-display font-black text-2xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white max-w-full break-words px-2"
           >
-            THE ATHLETIC <span className="text-core-red inline-block whitespace-nowrap">ATMOSPHERE</span>
+            THE ATHLETIC <span className="text-core-red inline-block">ATMOSPHERE</span>
           </motion.h2>
 
           <motion.p
@@ -67,7 +67,7 @@ export function PerformanceExperienceSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 1.0, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xs font-mono text-core-muted tracking-[0.25em] uppercase font-light"
+            className="text-xs font-mono text-core-muted tracking-[0.12em] sm:tracking-[0.25em] uppercase font-light px-2"
           >
             CRAFTED FOR UNFORGIVING DISCIPLINE AND ABSOLUTE FOCUS
           </motion.p>
@@ -84,7 +84,7 @@ export function PerformanceExperienceSection() {
         </motion.div>
 
         {/* Metrics Grid (Minimal Cards with Staggered Slow Entrance) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 pt-4">
           {performanceMetrics.map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -92,13 +92,13 @@ export function PerformanceExperienceSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-60px' }}
               transition={{ duration: 1.0, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="p-8 rounded-2xl bg-core-dark/70 backdrop-blur-xl border border-white/10 hover:border-core-red/40 transition-all duration-500 flex flex-col justify-between group shadow-xl"
+              className="p-5 sm:p-8 rounded-2xl bg-core-dark/70 backdrop-blur-xl border border-white/10 hover:border-core-red/40 transition-all duration-500 flex flex-col justify-between group shadow-xl"
             >
               <div>
-                <span className="text-[10px] font-mono tracking-[0.3em] text-core-muted uppercase block mb-4">
+                <span className="text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.3em] text-core-muted uppercase block mb-3 sm:mb-4">
                   METRIC 0{index + 1}
                 </span>
-                <div className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight group-hover:text-core-red transition-colors duration-500">
+                <div className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-white tracking-tight group-hover:text-core-red transition-colors duration-500">
                   {stat.value}
                 </div>
                 <div className="text-xs font-mono text-core-red tracking-widest uppercase font-bold mt-1">
@@ -106,7 +106,7 @@ export function PerformanceExperienceSection() {
                 </div>
               </div>
 
-              <div className="pt-8 border-t border-white/10 mt-8">
+              <div className="pt-5 sm:pt-8 border-t border-white/10 mt-5 sm:mt-8">
                 <span className="text-xs font-heading font-bold text-white uppercase tracking-widest block">
                   {stat.label}
                 </span>

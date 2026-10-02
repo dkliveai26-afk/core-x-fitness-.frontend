@@ -218,10 +218,10 @@ export function GalleryHero() {
         )}
 
         {/* Top-Left Minimalist Archive Tag */}
-        <div className="absolute top-24 sm:top-28 inset-x-0 px-6 sm:px-12 z-20 flex items-center justify-between max-w-7xl mx-auto pointer-events-none">
+        <div className="absolute top-24 sm:top-28 inset-x-0 px-4 sm:px-12 z-20 flex items-center justify-between max-w-7xl mx-auto pointer-events-none">
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-core-red animate-pulse" />
-            <span className="text-[11px] font-mono tracking-[0.35em] uppercase text-white/90 drop-shadow-md">
+            <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] sm:tracking-[0.35em] uppercase text-white/90 drop-shadow-md">
               VISUAL ARCHIVE // 01
             </span>
           </div>
@@ -243,12 +243,12 @@ export function GalleryHero() {
         >
           <div className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center">
             {/* Minimal Sub-Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-core-red/15 border border-core-red/30 text-[11px] font-mono tracking-[0.35em] text-core-red uppercase font-bold backdrop-blur-md mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-core-red/15 border border-core-red/30 text-[10px] sm:text-[11px] font-mono tracking-[0.2em] sm:tracking-[0.35em] text-core-red uppercase font-bold backdrop-blur-md mb-4 sm:mb-6 max-w-full text-center">
               EXHIBITION // ATHLETIC FORM
             </div>
 
             {/* Main Short Strong Heading */}
-            <h1 className="font-display font-black text-[clamp(1.75rem,5vw,5rem)] uppercase tracking-tight leading-[1.05] drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)]">
+            <h1 className="font-display font-black text-[clamp(1.75rem,5vw,5rem)] uppercase tracking-tight leading-[1.05] drop-shadow-[0_15px_45px_rgba(0,0,0,0.95)] max-w-full break-words px-2">
               <span className="block text-white">
                 FORGED IN TENSION.
               </span>
@@ -264,7 +264,7 @@ export function GalleryHero() {
           style={{ opacity: hintOpacity }}
           className="absolute bottom-10 inset-x-0 flex flex-col items-center gap-2 z-20 pointer-events-none"
         >
-          <span className="text-[10px] font-mono tracking-[0.4em] text-white/80 uppercase drop-shadow-md">
+          <span className="text-[10px] font-mono tracking-[0.2em] sm:tracking-[0.4em] text-white/80 uppercase drop-shadow-md">
             SCROLL TO ENTER ARCHIVE
           </span>
           <ChevronDown className="w-4 h-4 text-core-red animate-bounce drop-shadow-md" />
@@ -273,18 +273,18 @@ export function GalleryHero() {
         {/* Culminating Entrance Statement (Appears at end of scrub) */}
         <motion.div
           style={{ opacity: finalTitleOpacity, y: finalTitleY }}
-          className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center z-20 pointer-events-none max-w-4xl mx-auto"
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center z-20 pointer-events-none max-w-4xl mx-auto"
         >
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/20 border border-core-red/40 text-xs font-mono tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/20 border border-core-red/40 text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
               THE CORE X MONOLITH
             </div>
 
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black uppercase tracking-tight text-white leading-[1.08] drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)]">
+            <h2 className="text-2xl sm:text-5xl md:text-6xl font-display font-black uppercase tracking-tight text-white leading-[1.08] drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)] max-w-full break-words px-2">
               WHERE DISCIPLINE MEETS <span className="text-core-red">GEOMETRY.</span>
             </h2>
 
-            <p className="text-xs sm:text-sm font-mono tracking-[0.3em] text-core-muted uppercase max-w-xl mx-auto leading-relaxed drop-shadow-md">
+            <p className="text-xs sm:text-sm font-mono tracking-[0.14em] sm:tracking-[0.3em] text-core-muted uppercase max-w-xl mx-auto leading-relaxed drop-shadow-md px-2">
               EXPLORE THE VISUAL SANCTUARY OF ELITE ATHLETICISM.
             </p>
           </div>

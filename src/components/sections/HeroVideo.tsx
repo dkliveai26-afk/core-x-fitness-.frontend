@@ -223,11 +223,11 @@ export function HeroVideo() {
           className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 text-center z-30 pointer-events-none"
         >
           <div className="space-y-3.5 sm:space-y-5 lg:space-y-6 max-w-3xl mx-auto flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-[10px] sm:text-xs font-mono tracking-[0.25em] sm:tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/15 border border-core-red/30 text-[10px] sm:text-xs font-mono tracking-[0.16em] sm:tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md max-w-full text-center">
               ATHLETIC EXCELLENCE REIMAGINED
             </div>
 
-            <h1 className="font-display font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tight text-white leading-[1.08] drop-shadow-[0_12px_35px_rgba(0,0,0,0.95)]">
+            <h1 className="font-display font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tight text-white leading-[1.08] drop-shadow-[0_12px_35px_rgba(0,0,0,0.95)] max-w-full break-words px-2">
               <span className="block">
                 FORGED IN <span className="text-core-red">DISCIPLINE.</span>
               </span>
@@ -239,14 +239,14 @@ export function HeroVideo() {
               </span>
             </h1>
 
-            <p className="text-[11px] sm:text-xs md:text-sm font-mono tracking-[0.16em] sm:tracking-[0.22em] text-core-muted uppercase max-w-sm sm:max-w-lg lg:max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+            <p className="text-[11px] sm:text-xs md:text-sm font-mono tracking-[0.12em] sm:tracking-[0.22em] text-core-muted uppercase max-w-sm sm:max-w-lg lg:max-w-2xl mx-auto leading-relaxed drop-shadow-md px-2">
               AN UNCOMPROMISING ATHLETIC CLUB AND HIGH-PERFORMANCE FACILITY.
             </p>
 
-            <div className="pt-2 sm:pt-4 pointer-events-auto">
+            <div className="pt-2 sm:pt-4 pointer-events-auto w-full sm:w-auto flex justify-center">
               <Link
                 href="/plans"
-                className="inline-flex items-center gap-2 px-7 py-2.5 sm:px-8 sm:py-3.5 rounded-full bg-red-gradient text-white text-xs sm:text-sm font-heading font-bold uppercase tracking-widest hover:shadow-glow-red hover:scale-105 active:scale-95 transition-all duration-300 border border-core-red/50 shadow-[0_0_25px_rgba(255,42,42,0.4)]"
+                className="inline-flex items-center justify-center gap-2 px-7 py-2.5 sm:px-8 sm:py-3.5 rounded-full bg-red-gradient text-white text-xs sm:text-sm font-heading font-bold uppercase tracking-widest hover:shadow-glow-red hover:scale-105 active:scale-95 transition-all duration-300 border border-core-red/50 shadow-[0_0_25px_rgba(255,42,42,0.4)] w-full sm:w-auto max-w-xs"
               >
                 <span>GET ACCESS</span>
                 <span className="text-sm sm:text-base">↗</span>

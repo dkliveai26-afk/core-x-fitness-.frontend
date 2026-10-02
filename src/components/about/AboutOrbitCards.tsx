@@ -147,8 +147,8 @@ export function AboutOrbitCards() {
 
   // Responsive Ellipse Radii:
   // Mobile: tight radius; Tablet: medium; Desktop: wide dramatic orbit
-  const radiusX = viewportWidth < 380 ? 105 : viewportWidth < 480 ? 135 : viewportWidth < 640 ? 180 : viewportWidth < 1024 ? 300 : 450;
-  const radiusZ = viewportWidth < 380 ? 80 : viewportWidth < 480 ? 100 : viewportWidth < 640 ? 140 : viewportWidth < 1024 ? 220 : 320;
+  const radiusX = viewportWidth < 360 ? 75 : viewportWidth < 480 ? 105 : viewportWidth < 640 ? 160 : viewportWidth < 1024 ? 300 : 450;
+  const radiusZ = viewportWidth < 360 ? 60 : viewportWidth < 480 ? 80 : viewportWidth < 640 ? 120 : viewportWidth < 1024 ? 220 : 320;
 
   return (
     <section
@@ -172,7 +172,7 @@ export function AboutOrbitCards() {
         >
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-core-red" />
-            <span className="text-xs font-mono tracking-[0.3em] uppercase text-white/90">
+            <span className="text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] uppercase text-white/90">
               SECTION 02 // 3D GYM ORBIT
             </span>
           </div>
@@ -259,8 +259,8 @@ export function AboutOrbitCards() {
                 key={card.id}
                 className="absolute pointer-events-auto transition-shadow duration-300"
                 style={{
-                  width: 'clamp(175px, 22vw, 330px)',
-                  height: 'clamp(255px, 44vh, 460px)',
+                  width: 'clamp(140px, 22vw, 330px)',
+                  height: 'clamp(215px, 44vh, 460px)',
                   transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rotateY}deg) scale(${scale})`,
                   opacity,
                   zIndex,

@@ -70,7 +70,7 @@ export function PhilosophyTeaser() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="relative p-6 sm:p-8 rounded-2xl bg-core-surface/60 border border-white/5 hover:border-core-red/40 hover:bg-core-surface transition-all duration-300 group flex flex-col justify-between"
+                className="relative p-5 sm:p-8 rounded-2xl bg-core-surface/60 border border-white/5 hover:border-core-red/40 hover:bg-core-surface transition-all duration-300 group flex flex-col justify-between"
               >
                 {/* Number Watermark */}
                 <div className="absolute top-4 right-6 text-4xl font-display font-black text-white/5 group-hover:text-core-red/15 transition-colors select-none">
@@ -86,7 +86,7 @@ export function PhilosophyTeaser() {
                     {pillar.title}
                   </h3>
 
-                  <p className="text-xs sm:text-sm text-core-muted leading-relaxed font-sans">
+                  <p className="text-xs sm:text-sm text-core-muted leading-relaxed font-sans font-light">
                     {pillar.description}
                   </p>
                 </div>
@@ -101,9 +101,9 @@ export function PhilosophyTeaser() {
         </div>
 
         {/* Large Architectural Quote Banner */}
-        <div className="mt-20 p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-core-surface via-core-dark to-core-surface border border-white/10 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="relative z-10 max-w-2xl">
-            <span className="text-xs font-mono uppercase tracking-[0.3em] text-core-red font-bold">
+        <div className="mt-16 sm:mt-20 p-5 sm:p-8 lg:p-12 rounded-3xl bg-gradient-to-r from-core-surface via-core-dark to-core-surface border border-white/10 relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
+          <div className="relative z-10 max-w-2xl text-center lg:text-left">
+            <span className="text-xs font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em] text-core-red font-bold">
               THE CORE X MANIFESTO
             </span>
             <p className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-white mt-3 italic leading-snug">
@@ -111,10 +111,11 @@ export function PhilosophyTeaser() {
             </p>
           </div>
 
-          <div className="relative z-10 shrink-0">
+          <div className="relative z-10 w-full sm:w-auto shrink-0 flex justify-center">
             <Button
               variant="primary"
               size="lg"
+              className="w-full sm:w-auto"
               rightIcon={<ArrowUpRight className="w-5 h-5" />}
               onClick={() => {
                 const target = document.querySelector('#memberships');

@@ -155,7 +155,7 @@ export function AboutStorySection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-            className="group relative rounded-3xl bg-core-dark border border-white/10 p-6 sm:p-8 flex flex-col justify-between hover:border-core-red/40 transition-all duration-500 shadow-glass-card"
+            className="group relative rounded-3xl bg-core-dark border border-white/10 p-5 sm:p-8 flex flex-col justify-between hover:border-core-red/40 transition-all duration-500 shadow-glass-card"
           >
             <div>
               <div className="flex items-center justify-between mb-8">
@@ -194,7 +194,7 @@ export function AboutStorySection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 1.0, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="group relative rounded-3xl bg-core-dark border border-white/10 p-6 sm:p-8 flex flex-col justify-between hover:border-core-red/40 transition-all duration-500 shadow-glass-card"
+            className="group relative rounded-3xl bg-core-dark border border-white/10 p-5 sm:p-8 flex flex-col justify-between hover:border-core-red/40 transition-all duration-500 shadow-glass-card"
           >
             <div>
               <div className="flex items-center justify-between mb-8">
@@ -233,7 +233,7 @@ export function AboutStorySection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 1.0, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="sm:col-span-2 lg:col-span-1 group relative rounded-3xl bg-core-dark border border-white/10 p-6 sm:p-8 flex flex-col justify-between hover:border-core-red/40 transition-all duration-500 shadow-glass-card"
+            className="sm:col-span-2 lg:col-span-1 group relative rounded-3xl bg-core-dark border border-white/10 p-5 sm:p-8 flex flex-col justify-between hover:border-core-red/40 transition-all duration-500 shadow-glass-card"
           >
             <div>
               <div className="flex items-center justify-between mb-8">

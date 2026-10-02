@@ -168,11 +168,11 @@ export function DietHero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.0, delay: 0.52, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-center gap-3.5 pt-2"
+              className="flex flex-wrap items-center gap-3.5 pt-2"
             >
               <button
                 onClick={scrollToNext}
-                className="px-5 py-3 rounded-xl bg-core-red hover:bg-[#E61E1E] text-white font-display font-black text-xs tracking-widest uppercase transition-all duration-300 shadow-[0_10px_30px_rgba(255,42,42,0.4)] hover:shadow-[0_15px_35px_rgba(255,42,42,0.6)] active:scale-[0.98] inline-flex items-center gap-2 cursor-pointer"
+                className="px-5 py-3 rounded-xl bg-core-red hover:bg-[#E61E1E] text-white font-display font-black text-xs tracking-widest uppercase transition-all duration-300 shadow-[0_10px_30px_rgba(255,42,42,0.4)] hover:shadow-[0_15px_35px_rgba(255,42,42,0.6)] active:scale-[0.98] inline-flex items-center gap-2 cursor-pointer w-full sm:w-auto justify-center"
               >
                 <span>EXPLORE 3D NUTRITION</span>
                 <ArrowDown className="w-3.5 h-3.5 animate-bounce" />
@@ -180,7 +180,7 @@ export function DietHero() {
 
               <Link
                 href="/contact"
-                className="px-5 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-display font-bold text-xs tracking-widest uppercase transition-colors"
+                className="px-5 py-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-display font-bold text-xs tracking-widest uppercase transition-colors w-full sm:w-auto text-center"
               >
                 CONSULT DIETITIAN
               </Link>
@@ -197,7 +197,7 @@ export function DietHero() {
               initial={{ opacity: 0, scale: 0.88, y: 35 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 1.2, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-[280px] sm:w-[350px] lg:w-[400px] aspect-square flex items-center justify-center cursor-pointer group"
+              className="relative w-[230px] xs:w-[270px] sm:w-[350px] lg:w-[400px] aspect-square flex items-center justify-center cursor-pointer group"
             >
               {/* Grounding Shadow */}
               <div className="absolute inset-x-8 -bottom-3 h-8 bg-black/90 rounded-full blur-xl pointer-events-none" />

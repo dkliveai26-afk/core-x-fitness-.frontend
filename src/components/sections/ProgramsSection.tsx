@@ -89,16 +89,16 @@ export function ProgramsSection() {
                   </div>
 
                   {/* Metrics Overlay Pills */}
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3">
+                  <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2 sm:gap-3">
                     {program.metrics.map((metric) => (
                       <div
                         key={metric.label}
-                        className="px-3 py-1.5 rounded-xl bg-core-dark/80 backdrop-blur-md border border-white/10 flex items-center gap-2"
+                        className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-core-dark/80 backdrop-blur-md border border-white/10 flex items-center gap-1.5 sm:gap-2"
                       >
-                        <span className="text-[10px] font-mono text-core-muted uppercase tracking-wider">
+                        <span className="text-[9px] sm:text-[10px] font-mono text-core-muted uppercase tracking-wider">
                           {metric.label}:
                         </span>
-                        <span className="text-xs font-mono font-bold text-white">
+                        <span className="text-[11px] sm:text-xs font-mono font-bold text-white">
                           {metric.value}
                         </span>
                       </div>
@@ -107,7 +107,7 @@ export function ProgramsSection() {
                 </div>
 
                 {/* Content Container */}
-                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between">
+                <div className="p-5 sm:p-8 flex-1 flex flex-col justify-between">
                   <div>
                     <h3 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-wide group-hover:text-core-accent transition-colors">
                       {program.title}

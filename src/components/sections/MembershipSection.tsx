@@ -34,10 +34,10 @@ export function MembershipSection() {
           </p>
 
           {/* Billing Toggle Capsule */}
-          <div className="mt-8 inline-flex items-center gap-3 p-1.5 rounded-full bg-core-surface border border-white/10 shadow-inner-bevel">
+          <div className="mt-8 inline-flex items-center justify-center gap-2 sm:gap-3 p-1.5 rounded-full bg-core-surface border border-white/10 shadow-inner-bevel max-w-full flex-wrap sm:flex-nowrap">
             <button
               onClick={() => setIsAnnual(false)}
-              className={`px-5 py-2 rounded-full text-xs font-heading font-bold uppercase tracking-wider transition-all duration-300 ${
+              className={`px-4 sm:px-5 py-2 rounded-full text-xs font-heading font-bold uppercase tracking-wider transition-all duration-300 ${
                 !isAnnual
                   ? 'bg-red-gradient text-white shadow-glow-red'
                   : 'text-core-muted hover:text-white'
@@ -47,14 +47,14 @@ export function MembershipSection() {
             </button>
             <button
               onClick={() => setIsAnnual(true)}
-              className={`px-5 py-2 rounded-full text-xs font-heading font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 ${
+              className={`px-4 sm:px-5 py-2 rounded-full text-xs font-heading font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 ${
                 isAnnual
                   ? 'bg-red-gradient text-white shadow-glow-red'
                   : 'text-core-muted hover:text-white'
               }`}
             >
               <span>Annual Protocol</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 SAVE 20%
               </span>
             </button>
@@ -75,7 +75,7 @@ export function MembershipSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ duration: 0.6, delay: idx * 0.15 }}
-                className={`relative rounded-3xl p-8 sm:p-10 flex flex-col justify-between transition-all duration-500 ${
+                className={`relative rounded-3xl p-5 sm:p-8 lg:p-10 flex flex-col justify-between transition-all duration-500 ${
                   isPopular
                     ? 'bg-core-surface border-2 border-core-red shadow-[0_0_50px_rgba(255,42,42,0.25)] lg:-translate-y-4'
                     : isBlack
@@ -85,16 +85,16 @@ export function MembershipSection() {
               >
                 {/* Popular Pill */}
                 {isPopular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-red-gradient text-white text-[11px] font-mono font-bold uppercase tracking-widest shadow-glow-red flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>MOST SELECTED BY ATHLETES</span>
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1 rounded-full bg-red-gradient text-white text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider sm:tracking-widest shadow-glow-red flex items-center gap-1.5 whitespace-nowrap max-w-[95%]">
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">MOST SELECTED BY ATHLETES</span>
                   </div>
                 )}
 
                 {isBlack && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-mono font-bold uppercase tracking-widest flex items-center gap-1.5">
-                    <Crown className="w-3.5 h-3.5" />
-                    <span>LIMITED TO 75 SLOTS</span>
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-3 sm:px-4 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider sm:tracking-widest flex items-center gap-1.5 whitespace-nowrap max-w-[95%]">
+                    <Crown className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">LIMITED TO 75 SLOTS</span>
                   </div>
                 )}
 

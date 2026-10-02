@@ -74,7 +74,7 @@ export function ExperienceSection() {
         </div>
 
         {/* Space Selector Tabs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-8 sm:mt-10">
           {spaces.map((space) => {
             const Icon = space.icon;
             const isActive = activeSpace.id === space.id;
@@ -82,28 +82,28 @@ export function ExperienceSection() {
               <button
                 key={space.id}
                 onClick={() => setActiveSpace(space)}
-                className={`p-4 rounded-2xl border text-left transition-all duration-300 flex items-center gap-3.5 ${
+                className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-300 flex items-center gap-2 sm:gap-3.5 ${
                   isActive
                     ? 'bg-core-surface border-core-red shadow-glow-red'
                     : 'bg-core-surface/40 border-white/5 hover:border-white/20 hover:bg-core-surface/70'
                 }`}
               >
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                     isActive ? 'bg-red-gradient text-white' : 'bg-core-dark text-core-muted'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <span
-                    className={`block text-xs font-heading font-extrabold uppercase tracking-widest ${
+                    className={`block text-[10px] sm:text-xs font-heading font-extrabold uppercase tracking-wider sm:tracking-widest truncate ${
                       isActive ? 'text-white' : 'text-slate-300'
                     }`}
                   >
                     {space.label}
                   </span>
-                  <span className="text-[10px] font-mono text-core-muted uppercase">
+                  <span className="text-[9px] sm:text-[10px] font-mono text-core-muted uppercase">
                     EXPLORE ZONE
                   </span>
                 </div>
@@ -140,18 +140,18 @@ export function ExperienceSection() {
               </div>
 
               {/* Information Column */}
-              <div className="lg:col-span-5 p-8 sm:p-12 flex flex-col justify-between bg-core-surface relative z-10">
+              <div className="lg:col-span-5 p-5 sm:p-8 lg:p-12 flex flex-col justify-between bg-core-surface relative z-10">
                 <div>
                   <div className="flex items-center gap-2 text-xs font-mono text-core-red uppercase tracking-widest font-bold mb-3">
                     <ShieldCheck className="w-4 h-4" />
                     <span>FACILITY SPECIFICATION</span>
                   </div>
 
-                  <h3 className="text-2xl sm:text-3xl font-display font-black text-white uppercase tracking-tight leading-snug">
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-display font-black text-white uppercase tracking-tight leading-snug break-words">
                     {activeSpace.title}
                   </h3>
 
-                  <p className="mt-4 text-sm sm:text-base text-core-muted font-sans leading-relaxed">
+                  <p className="mt-4 text-xs sm:text-sm lg:text-base text-core-muted font-sans leading-relaxed font-light">
                     {activeSpace.subtitle}
                   </p>
 
@@ -162,18 +162,19 @@ export function ExperienceSection() {
                         key={spec}
                         className="flex items-center gap-3 p-3 rounded-xl bg-core-dark/80 border border-white/5 text-xs font-mono text-slate-200"
                       >
-                        <span className="w-2 h-2 rounded-full bg-core-red" />
+                        <span className="w-2 h-2 rounded-full bg-core-red shrink-0" />
                         <span>{spec}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-xs font-mono text-core-muted">AVAILABLE 7 DAYS</span>
+                <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-between">
+                  <span className="text-xs font-mono text-core-muted text-center sm:text-left">AVAILABLE 7 DAYS</span>
                   <Button
                     variant="primary"
                     size="md"
+                    className="w-full sm:w-auto"
                     rightIcon={<ArrowRight className="w-4 h-4" />}
                     onClick={() => {
                       const target = document.querySelector('#memberships');

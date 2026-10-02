@@ -198,10 +198,10 @@ export function AboutVideoSection() {
         )}
 
         {/* Fixed Section Index Header */}
-        <div className="absolute top-8 sm:top-10 inset-x-0 px-6 sm:px-12 z-20 flex items-center justify-between max-w-7xl mx-auto pointer-events-none">
+        <div className="absolute top-8 sm:top-10 inset-x-0 px-4 sm:px-12 z-20 flex items-center justify-between max-w-7xl mx-auto pointer-events-none">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-core-red animate-pulse" />
-            <span className="text-xs font-mono tracking-[0.3em] uppercase text-white/90 drop-shadow-md">
+            <span className="text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] uppercase text-white/90 drop-shadow-md">
               SECTION 04 // THE ARCHITECTURAL FILM
             </span>
           </div>
@@ -215,13 +215,13 @@ export function AboutVideoSection() {
         {/* Narrative Milestone 1: Beginning of Film */}
         <motion.div
           style={{ opacity: introOverlayOpacity, y: introOverlayY }}
-          className="absolute inset-x-0 top-1/3 px-6 text-center z-20 pointer-events-none max-w-3xl mx-auto"
+          className="absolute inset-x-0 top-1/3 px-4 sm:px-6 text-center z-20 pointer-events-none max-w-3xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/20 border border-core-red/40 text-xs font-mono tracking-[0.25em] text-white uppercase font-bold backdrop-blur-md mb-4">
-            <Sparkles className="w-3.5 h-3.5 text-core-red" />
-            THE SANCTUARY IN MOTION
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-core-red/20 border border-core-red/40 text-[10px] sm:text-xs font-mono tracking-[0.2em] sm:tracking-[0.25em] text-white uppercase font-bold backdrop-blur-md mb-4 max-w-full text-center">
+            <Sparkles className="w-3.5 h-3.5 text-core-red shrink-0" />
+            <span>THE SANCTUARY IN MOTION</span>
           </div>
-          <h3 className="text-2xl sm:text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-white leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)]">
+          <h3 className="text-2xl sm:text-4xl md:text-5xl font-display font-black uppercase tracking-tight text-white leading-tight drop-shadow-[0_10px_30px_rgba(0,0,0,0.95)] max-w-full break-words px-2">
             CRAFTED FOR HEAVY RESISTANCE.
           </h3>
         </motion.div>
@@ -231,14 +231,14 @@ export function AboutVideoSection() {
           style={{ opacity: midOverlayOpacity, y: midOverlayY }}
           className="absolute bottom-20 sm:bottom-24 left-4 sm:left-12 lg:left-24 right-4 sm:right-auto z-20 pointer-events-none max-w-md"
         >
-          <div className="p-6 rounded-2xl bg-core-dark/85 backdrop-blur-xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.9)]">
+          <div className="p-5 sm:p-6 rounded-2xl bg-core-dark/85 backdrop-blur-xl border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.9)]">
             <div className="text-3xl font-display font-black text-white">
               100<span className="text-core-red">%</span>
             </div>
             <div className="text-xs font-mono font-bold uppercase tracking-widest text-white mt-1">
               SWEDISH OLYMPIC CALIBRATION
             </div>
-            <p className="text-xs text-core-muted mt-2 font-sans leading-relaxed">
+            <p className="text-xs text-core-muted mt-2 font-sans leading-relaxed font-light">
               Every bar tested for tensile deflection, knurling depth, and zero sleeve friction under heavy loads.
             </p>
           </div>
@@ -247,18 +247,18 @@ export function AboutVideoSection() {
         {/* Narrative Milestone 3: Exact Final Frame */}
         <motion.div
           style={{ opacity: finalOverlayOpacity, y: finalOverlayY }}
-          className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center z-30 pointer-events-none max-w-4xl mx-auto"
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center z-30 pointer-events-none max-w-4xl mx-auto"
         >
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/20 border border-core-red/40 text-xs font-mono tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-core-red/20 border border-core-red/40 text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-core-red uppercase font-bold backdrop-blur-md">
               ATHLETIC SINGULARITY
             </div>
 
-            <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black uppercase tracking-tight text-white leading-[1.05] drop-shadow-[0_15px_40px_rgba(0,0,0,0.95)]">
+            <h2 className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black uppercase tracking-tight text-white leading-[1.05] drop-shadow-[0_15px_40px_rgba(0,0,0,0.95)] max-w-full break-words px-2">
               WHERE DISCIPLINE BECOMES <span className="text-core-red">PERMANENCE.</span>
             </h2>
 
-            <p className="text-xs sm:text-sm md:text-base font-mono tracking-[0.25em] text-core-muted uppercase max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+            <p className="text-xs sm:text-sm md:text-base font-mono tracking-[0.14em] sm:tracking-[0.25em] text-core-muted uppercase max-w-2xl mx-auto leading-relaxed drop-shadow-md px-2">
               THE BENCHMARK OF MODERN STRENGTH ARCHITECTURE.
             </p>
           </div>

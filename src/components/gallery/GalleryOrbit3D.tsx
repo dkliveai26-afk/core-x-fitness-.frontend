@@ -80,8 +80,8 @@ export function GalleryOrbit3D() {
 
   // Responsive 3D Ellipse Radii:
   // Mobile: tight compact orbit; Tablet: medium; Desktop: dramatic wide spatial orbit
-  const radiusX = viewportWidth < 380 ? 105 : viewportWidth < 480 ? 135 : viewportWidth < 640 ? 180 : viewportWidth < 1024 ? 300 : 460;
-  const radiusZ = viewportWidth < 380 ? 80 : viewportWidth < 480 ? 100 : viewportWidth < 640 ? 135 : viewportWidth < 1024 ? 210 : 310;
+  const radiusX = viewportWidth < 360 ? 75 : viewportWidth < 480 ? 105 : viewportWidth < 640 ? 160 : viewportWidth < 1024 ? 280 : 460;
+  const radiusZ = viewportWidth < 360 ? 60 : viewportWidth < 480 ? 80 : viewportWidth < 640 ? 120 : viewportWidth < 1024 ? 200 : 310;
 
   return (
     <section
@@ -104,7 +104,7 @@ export function GalleryOrbit3D() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/10 border border-core-red/30 text-[11px] font-mono tracking-[0.35em] text-core-red uppercase font-bold"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-core-red/10 border border-core-red/30 text-[11px] font-mono tracking-[0.2em] sm:tracking-[0.35em] text-core-red uppercase font-bold"
             >
               <Orbit className="w-3.5 h-3.5 text-core-red animate-spin" style={{ animationDuration: '14s' }} />
               03 // 3D ORBITAL TRAJECTORY
@@ -126,7 +126,7 @@ export function GalleryOrbit3D() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xs font-mono text-core-muted tracking-[0.25em] uppercase max-w-sm sm:text-right font-light"
+            className="text-xs font-mono text-core-muted tracking-[0.15em] sm:tracking-[0.25em] uppercase max-w-sm sm:text-right font-light"
           >
             CONTINUOUS 3D CURVED TRACK TRAVERSING DEPTH, LIGHT, AND PERSPECTIVE.
           </motion.p>
@@ -197,8 +197,8 @@ export function GalleryOrbit3D() {
                 key={card.id}
                 className="absolute pointer-events-auto select-none"
                 style={{
-                  width: 'clamp(175px, 22vw, 320px)',
-                  height: 'clamp(255px, 44vh, 440px)',
+                  width: 'clamp(140px, 22vw, 320px)',
+                  height: 'clamp(215px, 44vh, 440px)',
                   transform: `translate3d(${x}px, 0px, ${z}px) rotateY(${rotateY}deg) scale(${scale})`,
                   opacity,
                   zIndex,

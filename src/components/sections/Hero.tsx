@@ -116,6 +116,7 @@ export function Hero() {
             <Button
               variant="primary"
               size="lg"
+              className="w-full sm:w-auto"
               rightIcon={<ArrowRight className="w-5 h-5" />}
               onClick={() => {
                 const target = document.querySelector('#memberships');
@@ -128,6 +129,7 @@ export function Hero() {
             <Button
               variant="secondary"
               size="lg"
+              className="w-full sm:w-auto"
               leftIcon={
                 <span className="w-6 h-6 rounded-full bg-core-red/20 text-core-red flex items-center justify-center border border-core-red/40 group-hover:bg-core-red group-hover:text-white transition-colors">
                   <Play className="w-3 h-3 fill-current ml-0.5" />

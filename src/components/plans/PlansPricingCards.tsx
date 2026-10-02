@@ -420,16 +420,16 @@ export function PlansPricingCards({
       {/* Interactive Reservation Modal for Visitors & Members */}
       <AnimatePresence>
         {selectedPlan && (
-          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl bg-core-dark border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_50px_rgba(255,42,42,0.2)] text-left space-y-5"
+              className="relative w-full max-w-lg p-4 sm:p-8 rounded-2xl sm:rounded-3xl bg-core-dark border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.95),0_0_50px_rgba(255,42,42,0.2)] text-left space-y-4 sm:space-y-5 max-h-[92vh] overflow-y-auto"
             >
               <button
                 onClick={() => setSelectedPlan(null)}
-                className="absolute top-5 right-5 p-2 rounded-full bg-white/5 text-core-muted hover:text-white hover:bg-white/10 transition-colors"
+                className="absolute top-4 right-4 sm:top-5 sm:right-5 p-2 rounded-full bg-white/5 text-core-muted hover:text-white hover:bg-white/10 transition-colors"
                 aria-label="Close Modal"
               >
                 <X className="w-4 h-4" />

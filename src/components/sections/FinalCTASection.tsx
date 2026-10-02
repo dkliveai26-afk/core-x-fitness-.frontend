@@ -35,14 +35,14 @@ export function FinalCTASection() {
             </Badge>
           </div>
 
-          <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tight text-white leading-[0.92]">
-            THE THRESHOLD OF YOUR <br />
+          <h2 className="text-3xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tight text-white leading-[0.92] max-w-full break-words px-2">
+            THE THRESHOLD OF YOUR <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-core-red via-core-accent to-white drop-shadow-[0_0_40px_rgba(255,42,42,0.4)]">
               STRONGEST SELF.
             </span>
           </h2>
 
-          <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-sans leading-relaxed">
+          <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-sans leading-relaxed font-light px-2">
             Join a collective of relentless athletes, executives, and leaders. Step onto the platform and experience what true physical calibration feels like.
           </p>
 
@@ -50,6 +50,7 @@ export function FinalCTASection() {
             <Button
               variant="primary"
               size="xl"
+              className="w-full sm:w-auto"
               rightIcon={<ArrowRight className="w-5 h-5" />}
               onClick={() => {
                 const target = document.querySelector('#memberships');
@@ -62,6 +63,7 @@ export function FinalCTASection() {
             <Button
               variant="secondary"
               size="xl"
+              className="w-full sm:w-auto"
               onClick={() => {
                 const target = document.querySelector('#facility');
                 target?.scrollIntoView({ behavior: 'smooth' });

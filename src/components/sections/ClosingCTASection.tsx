@@ -27,19 +27,19 @@ export function ClosingCTASection() {
   return (
     <section
       id="contact"
-      className="relative min-h-0 lg:min-h-[80vh] w-full bg-core-void py-14 sm:py-20 lg:py-32 px-6 sm:px-12 border-t border-white/5 overflow-hidden flex flex-col justify-center items-center text-center"
+      className="relative min-h-0 lg:min-h-[80vh] w-full bg-core-void py-12 sm:py-20 lg:py-32 px-4 sm:px-12 border-t border-white/5 overflow-hidden flex flex-col justify-center items-center text-center"
     >
       {/* Radial Crimson Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-core-red/10 rounded-full blur-[160px] pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto space-y-10 z-10">
+      <div className="max-w-4xl mx-auto space-y-6 sm:space-y-10 z-10 w-full">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono tracking-[0.3em] text-core-red uppercase">
+          <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-[11px] font-mono tracking-[0.2em] sm:tracking-[0.3em] text-core-red uppercase">
             <ShieldCheck className="w-3.5 h-3.5" />
             FINAL THRESHOLD
           </span>
@@ -50,7 +50,7 @@ export function ClosingCTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 1.2, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display font-black text-4xl sm:text-7xl md:text-8xl uppercase tracking-wider text-white leading-none"
+          className="font-display font-black text-3xl sm:text-6xl md:text-7xl lg:text-8xl uppercase tracking-tight sm:tracking-wider text-white leading-tight break-words max-w-full px-2"
         >
           FORGED IN <span className="text-core-red">DISCIPLINE.</span>
         </motion.h2>
@@ -60,7 +60,7 @@ export function ClosingCTASection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 1.1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="text-xs sm:text-sm font-mono tracking-[0.3em] text-core-muted uppercase max-w-xl mx-auto font-light"
+          className="text-xs sm:text-sm font-mono tracking-[0.14em] sm:tracking-[0.3em] text-core-muted uppercase max-w-xl mx-auto font-light leading-relaxed px-2"
         >
           EXPERIENCE THE UNCOMPROMISING ATHLETIC STANDARD AT CORE X FITNESS.
         </motion.p>
@@ -70,13 +70,14 @@ export function ClosingCTASection() {
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 1.0, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center justify-center gap-4 px-2"
         >
           <Button
             variant="primary"
             size="xl"
-            rightIcon={<ArrowUpRight className="w-6 h-6" />}
+            rightIcon={<ArrowUpRight className="w-5 h-5 sm:w-6 sm:h-6" />}
             onClick={() => setModalOpen(true)}
+            className="w-full sm:w-auto"
           >
             Claim Access Pass
           </Button>

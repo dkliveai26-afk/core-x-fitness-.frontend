@@ -43,7 +43,7 @@ export function TrainingDisciplinesSection() {
     <section
       id="programs"
       ref={containerRef}
-      className="relative min-h-0 lg:min-h-screen w-full bg-core-void py-14 sm:py-20 lg:py-32 px-6 sm:px-12 border-t border-white/5 overflow-hidden"
+      className="relative min-h-0 lg:min-h-screen w-full bg-core-void py-14 sm:py-20 lg:py-32 px-4 sm:px-12 border-t border-white/5 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto space-y-20 z-10 relative">
         {/* Section Header */}
@@ -55,7 +55,7 @@ export function TrainingDisciplinesSection() {
             transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-3"
           >
-            <span className="text-xs font-mono tracking-[0.35em] text-core-red uppercase font-bold block">
+            <span className="text-xs font-mono tracking-[0.2em] sm:tracking-[0.35em] text-core-red uppercase font-bold block">
               02 / TRAINING DISCIPLINES
             </span>
             <h2 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white max-w-full break-words">
@@ -94,7 +94,7 @@ export function TrainingDisciplinesSection() {
                     <span className="font-display font-black text-4xl sm:text-6xl text-core-red tracking-wider">
                       {item.id}
                     </span>
-                    <span className="text-xs font-mono text-core-muted tracking-[0.3em] uppercase">
+                    <span className="text-xs font-mono text-core-muted tracking-[0.14em] sm:tracking-[0.3em] uppercase">
                       {item.subtitle}
                     </span>
                   </div>

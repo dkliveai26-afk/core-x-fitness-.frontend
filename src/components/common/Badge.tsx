@@ -24,14 +24,14 @@ export function Badge({
   };
 
   const sizeStyles = {
-    sm: 'text-[10px] px-2.5 py-0.5 tracking-[0.2em]',
-    md: 'text-xs px-3 py-1 tracking-[0.25em]',
+    sm: 'text-[10px] px-2.5 py-0.5 tracking-[0.12em] sm:tracking-[0.2em]',
+    md: 'text-xs px-3 py-1 tracking-[0.14em] sm:tracking-[0.25em]',
   };
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 font-mono font-semibold uppercase rounded-full border backdrop-blur-md',
+        'inline-flex items-center gap-1.5 font-mono font-semibold uppercase rounded-full border backdrop-blur-md max-w-full text-center break-words',
         variantStyles[variant],
         sizeStyles[size],
         className
