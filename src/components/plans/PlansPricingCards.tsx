@@ -565,7 +565,7 @@ export function PlansPricingCards({
                       {selectedPlan.name} TIER RESERVED
                     </h3>
                     <p className="text-xs font-sans text-core-muted font-light leading-relaxed">
-                      Thank you, <span className="text-white font-semibold">{bookingForm.name}</span>. Your reservation for the {selectedPlan.name} membership standard has been logged directly in the Admissions database.
+                      Thank you, <span className="text-white font-semibold">{bookingForm.name}</span>. Your {selectedPlan.name} membership booking has been successfully received. Our team will review your request and confirm your membership shortly.
                     </p>
                   </div>
 
