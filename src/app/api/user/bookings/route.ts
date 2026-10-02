@@ -5,11 +5,14 @@ import { getAuthenticatedClerkUser } from '@/lib/server-auth';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+  const requestPath = '/api/user/bookings';
+
   try {
     // 1. Strict Multi-Layer Server-Side Authentication via Clerk
     const { userId, verifiedEmails } = await getAuthenticatedClerkUser(req);
 
     if (!userId) {
+      console.warn(`[AUTH] Path: ${requestPath} | Authenticated: NO | Status: 401 Unauthorized`);
       return NextResponse.json(
         { error: 'Unauthorized: You must be logged in to view your membership allocations.' },
         { status: 401 }
@@ -17,7 +20,9 @@ export async function GET(req: NextRequest) {
     }
 
     const db = await getDatabase();
-    const collection = db.collection('bookings');
+    const dbName = db.databaseName || 'corexfitness';
+    const collectionName = 'bookings';
+    const collection = db.collection(collectionName);
 
     // 2. Safe backward compatibility: associate unlinked historical bookings matching verified email
     if (verifiedEmails.length > 0) {
@@ -44,6 +49,10 @@ export async function GET(req: NextRequest) {
       .find({ clerkUserId: userId })
       .sort({ createdAt: -1 })
       .toArray();
+
+    console.log(
+      `[AUTH] Path: ${requestPath} | Authenticated: YES | User ID: ${userId} | Database: ${dbName} | Collection: ${collectionName} | Results: ${bookingsRaw.length}`
+    );
 
     // 4. Transform and normalize booking data for client display
     const bookings = bookingsRaw.map((doc) => ({
@@ -75,7 +84,7 @@ export async function GET(req: NextRequest) {
       count: bookings.length,
     });
   } catch (error: any) {
-    console.error('API /api/user/bookings error:', error);
+    console.error(`[AUTH ERROR] Path: ${requestPath} | Error:`, error?.message || error);
     const isConnError =
       error?.name === 'MongoServerSelectionError' ||
       error?.message?.includes('ECONNREFUSED') ||

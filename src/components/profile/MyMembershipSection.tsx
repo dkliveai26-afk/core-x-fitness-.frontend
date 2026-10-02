@@ -71,10 +71,16 @@ export function MyMembershipSection({
       try {
         // Retrieve fresh Clerk JWT token to ensure server-side auth is 100% available
         let token: string | null = null;
-        try {
-          token = await getToken();
-        } catch (tokenErr) {
-          console.warn('Notice: getToken lookup notice:', tokenErr);
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            token = await getToken();
+            if (token) break;
+          } catch (tokenErr) {
+            console.warn(`getToken attempt ${attempt + 1} notice:`, tokenErr);
+          }
+          if (attempt < 2) {
+            await new Promise((r) => setTimeout(r, 200));
+          }
         }
 
         const headers: Record<string, string> = {
@@ -87,7 +93,7 @@ export function MyMembershipSection({
         const res = await fetch('/api/user/bookings', {
           method: 'GET',
           headers,
-          credentials: 'same-origin',
+          credentials: 'include',
           cache: 'no-store',
         });
 
