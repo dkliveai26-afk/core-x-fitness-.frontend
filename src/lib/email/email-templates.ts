@@ -1,7 +1,17 @@
 /**
  * High-performance, bulletproof responsive HTML email templates for Core X Fitness.
- * Compatible with Gmail, Apple Mail, Outlook, Yahoo, and mobile clients.
+ * Fully compatible with Gmail, Apple Mail, Outlook, Yahoo, and mobile email clients.
  */
+
+function getBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'https://core-x-fitness-frontend.vercel.app';
+}
 
 const BASE_STYLES = `
   body {
@@ -47,6 +57,218 @@ const BASE_STYLES = `
 `;
 
 /**
+ * Sign-Up / Account Creation Welcome Confirmation Email Template
+ */
+export function generateWelcomeConfirmationHtml({
+  customerName,
+  email,
+  appUrl,
+}: {
+  customerName?: string;
+  email: string;
+  appUrl?: string;
+}): { html: string; text: string } {
+  const baseUrl = appUrl || getBaseUrl();
+  const logoUrl = `${baseUrl}/gymlogo1.png`;
+  const name = customerName && customerName.trim() ? customerName.trim() : 'Athlete';
+  const portalUrl = `${baseUrl}/plans`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to CORE X FITNESS — Your Account is Ready</title>
+  <style>${BASE_STYLES}</style>
+</head>
+<body style="background-color: #050607; margin: 0; padding: 30px 10px;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center">
+        <!-- Container Card -->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #0D1117; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.85);">
+          
+          <!-- Top Red Accent Glow Bar -->
+          <tr>
+            <td style="height: 4px; background: linear-gradient(90deg, #FF2A2A 0%, #FF6B6B 50%, #FF2A2A 100%);"></td>
+          </tr>
+
+          <!-- Header / Brand Logo -->
+          <tr>
+            <td style="padding: 36px 36px 20px 36px; text-align: center;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 12px;">
+                    <img src="${logoUrl}" alt="CORE X FITNESS" width="130" style="display: block; margin: 0 auto; max-width: 140px; height: auto; border: 0;" />
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <h1 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 0.15em; color: #FFFFFF; text-transform: uppercase;">
+                      CORE <span style="color: #FF2A2A;">X</span> FITNESS
+                    </h1>
+                    <div style="margin-top: 8px;">
+                      <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background-color: rgba(255,42,42,0.12); border: 1px solid rgba(255,42,42,0.3); font-size: 10px; font-family: monospace; font-weight: 700; color: #FF2A2A; letter-spacing: 0.18em; text-transform: uppercase;">
+                        ACCOUNT CONFIRMATION // VERIFIED
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 0 36px 36px 36px;">
+              <p style="font-size: 18px; color: #FFFFFF; font-weight: 700; margin: 0 0 14px 0;">
+                Welcome to Core X Fitness, ${name}!
+              </p>
+              
+              <p style="font-size: 14px; color: #CBD5E1; line-height: 1.7; margin: 0 0 16px 0;">
+                Thanks for creating your account. We're excited to have you with us.
+              </p>
+
+              <p style="font-size: 14px; color: #94A3B8; line-height: 1.7; margin: 0 0 24px 0;">
+                Your Core X Fitness account is now ready to use. You have full access to our high-performance athletic club platform, membership allocations, personalized diet protocols, and VIP admissions.
+              </p>
+
+              <!-- Account Summary Box -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #161B22; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td style="padding-bottom: 10px; font-size: 11px; font-family: monospace; color: #64748B; text-transform: uppercase; letter-spacing: 0.1em;">
+                          REGISTERED EMAIL:
+                        </td>
+                        <td style="padding-bottom: 10px; text-align: right; font-size: 13px; font-family: monospace; font-weight: 700; color: #FFFFFF;">
+                          ${email}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding-bottom: 10px; font-size: 11px; font-family: monospace; color: #64748B; text-transform: uppercase; letter-spacing: 0.1em;">
+                          MEMBER STATUS:
+                        </td>
+                        <td style="padding-bottom: 10px; text-align: right; font-size: 12px; font-family: monospace; font-weight: 700; color: #10B981;">
+                          ● ACTIVE / READY TO USE
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 11px; font-family: monospace; color: #64748B; text-transform: uppercase; letter-spacing: 0.1em;">
+                          FACILITY ACCESS:
+                        </td>
+                        <td style="text-align: right; font-size: 12px; color: #E2E8F0;">
+                          Flagship Facility (Noida, Sector 14)
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- What You Can Do Next -->
+              <h2 style="font-size: 12px; font-family: monospace; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.12em; margin: 0 0 12px 0;">
+                What You Can Do Now:
+              </h2>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 28px;">
+                <tr>
+                  <td style="padding-bottom: 10px; width: 24px; vertical-align: top; color: #FF2A2A; font-size: 14px; font-weight: bold;">
+                    ✓
+                  </td>
+                  <td style="padding-bottom: 10px; font-size: 13px; color: #CBD5E1; line-height: 1.5;">
+                    <strong style="color: #FFFFFF;">Explore Membership Tiers:</strong> Compare Olympic lifting, executive coaching, and recovery passes.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom: 10px; width: 24px; vertical-align: top; color: #FF2A2A; font-size: 14px; font-weight: bold;">
+                    ✓
+                  </td>
+                  <td style="padding-bottom: 10px; font-size: 13px; color: #CBD5E1; line-height: 1.5;">
+                    <strong style="color: #FFFFFF;">Custom Nutrition Protocols:</strong> Calculate target macros and periodized meal plans.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="width: 24px; vertical-align: top; color: #FF2A2A; font-size: 14px; font-weight: bold;">
+                    ✓
+                  </td>
+                  <td style="font-size: 13px; color: #CBD5E1; line-height: 1.5;">
+                    <strong style="color: #FFFFFF;">Book Facility Orientation:</strong> Reserve a 1-on-1 equipment calibration and biometric scan with our coaches.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin: 28px 0 24px 0;">
+                <a href="${portalUrl}" class="btn-primary" target="_blank" style="background: linear-gradient(135deg, #FF2A2A 0%, #D80000 100%); background-color: #FF2A2A; color: #FFFFFF !important; text-decoration: none; font-weight: 700; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 32px; border-radius: 12px; display: inline-block; border: 1px solid rgba(255, 42, 42, 0.4); box-shadow: 0 10px 25px rgba(255,42,42,0.3);">
+                  Explore Memberships &amp; Plans &rarr;
+                </a>
+              </div>
+
+              <!-- Sign-off Note -->
+              <p style="font-size: 13px; color: #94A3B8; margin: 24px 0 0 0; line-height: 1.6;">
+                Need assistance? Our admissions concierge is available around the clock at <a href="mailto:support@corexfitness.com" style="color: #FF2A2A; text-decoration: none;">support@corexfitness.com</a> or call <strong style="color: #FFFFFF;">+91 98765 43210</strong>.
+              </p>
+              
+              <p style="font-size: 13px; color: #64748B; margin: 12px 0 0 0;">
+                &mdash; Core X Fitness
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 36px; background-color: #090C10; border-top: 1px solid rgba(255,255,255,0.04); text-align: center;">
+              <p style="margin: 0 0 6px 0; font-size: 11px; color: #64748B; font-family: monospace;">
+                CORE X FITNESS // PREMIER HIGH-PERFORMANCE TRAINING
+              </p>
+              <p style="margin: 0 0 8px 0; font-size: 11px; color: #475569;">
+                Sector 14, Main Athletic Boulevard, Noida, UP, India
+              </p>
+              <p style="margin: 0; font-size: 10px; color: #475569;">
+                This transactional email was sent to ${email} to confirm your Core X Fitness account creation.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+
+  const text = `
+Welcome to Core X Fitness!
+
+Thanks for creating your account. We're excited to have you with us.
+
+Your Core X Fitness account is now ready to use.
+
+Account Details:
+- Registered Email: ${email}
+- Status: Active & Ready to Use
+- Portal Access: ${portalUrl}
+
+What You Can Do Now:
+1. Explore Membership Tiers: Compare Olympic lifting, executive coaching, and recovery passes.
+2. Custom Nutrition Protocols: Calculate target macros and periodized meal plans.
+3. Book Facility Orientation: Reserve a 1-on-1 equipment calibration and biometric scan with our coaches.
+
+Get Started: ${portalUrl}
+
+Need help? Contact our Concierge Desk at support@corexfitness.com or +91 98765 43210.
+
+— Core X Fitness
+Sector 14, Noida, UP, India
+  `.trim();
+
+  return { html, text };
+}
+
+/**
  * Customer Booking Confirmation Email Template
  */
 export function generateBookingConfirmationHtml({
@@ -70,6 +292,8 @@ export function generateBookingConfirmationHtml({
   preferredDate?: string;
   bookingId: string;
 }): { html: string; text: string } {
+  const baseUrl = getBaseUrl();
+  const logoUrl = `${baseUrl}/gymlogo1.png`;
   const shortId = bookingId ? bookingId.slice(-8).toUpperCase() : 'VIP-RESERVE';
   const formattedDate = preferredDate ? new Date(preferredDate).toLocaleDateString('en-IN', {
     weekday: 'long',
@@ -102,12 +326,23 @@ export function generateBookingConfirmationHtml({
           <!-- Header / Brand -->
           <tr>
             <td style="padding: 36px 36px 20px 36px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 0.15em; color: #FFFFFF; text-transform: uppercase;">
-                CORE <span style="color: #FF2A2A;">X</span> FITNESS
-              </h1>
-              <p style="margin: 6px 0 0 0; font-size: 11px; font-family: monospace; letter-spacing: 0.2em; color: #94A3B8; text-transform: uppercase;">
-                VIP ATHLETE RESERVATION // CONFIRMED
-              </p>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 12px;">
+                    <img src="${logoUrl}" alt="CORE X FITNESS" width="120" style="display: block; margin: 0 auto; max-width: 130px; height: auto; border: 0;" />
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 0.15em; color: #FFFFFF; text-transform: uppercase;">
+                      CORE <span style="color: #FF2A2A;">X</span> FITNESS
+                    </h1>
+                    <p style="margin: 6px 0 0 0; font-size: 11px; font-family: monospace; letter-spacing: 0.2em; color: #94A3B8; text-transform: uppercase;">
+                      VIP ATHLETE RESERVATION // CONFIRMED
+                    </p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
@@ -258,6 +493,8 @@ export function generateAdminBookingNotificationHtml({
   bookingId: string;
   createdAt: string;
 }): { html: string; text: string } {
+  const baseUrl = getBaseUrl();
+  const logoUrl = `${baseUrl}/gymlogo1.png`;
   const shortId = bookingId ? bookingId.slice(-8).toUpperCase() : 'VIP-ENTRY';
 
   const html = `
@@ -280,12 +517,21 @@ export function generateAdminBookingNotificationHtml({
 
           <tr>
             <td style="padding: 28px 32px 16px 32px;">
-              <span style="font-size: 11px; font-family: monospace; color: #FF2A2A; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;">
-                [NEW ATHLETE RESERVATION LOGGED]
-              </span>
-              <h1 style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #FFFFFF;">
-                ${customerName} booked ${planName}
-              </h1>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td>
+                    <span style="font-size: 11px; font-family: monospace; color: #FF2A2A; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;">
+                      [NEW ATHLETE RESERVATION LOGGED]
+                    </span>
+                    <h1 style="margin: 8px 0 0 0; font-size: 20px; font-weight: 800; color: #FFFFFF;">
+                      ${customerName} booked ${planName}
+                    </h1>
+                  </td>
+                  <td align="right" style="width: 70px;">
+                    <img src="${logoUrl}" alt="CORE X" width="55" style="display: block; border: 0;" />
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
@@ -368,6 +614,8 @@ export function generateMarketingCampaignHtml({
   heading,
   bodyMessage,
   offerBadge,
+  discountCode,
+  expiryDate,
   imageUrl,
   ctaText,
   ctaUrl,
@@ -380,6 +628,8 @@ export function generateMarketingCampaignHtml({
   heading: string;
   bodyMessage: string;
   offerBadge?: string;
+  discountCode?: string;
+  expiryDate?: string;
   imageUrl?: string;
   ctaText?: string;
   ctaUrl?: string;
@@ -398,11 +648,34 @@ export function generateMarketingCampaignHtml({
     discount?: string;
   };
 }): { html: string; text: string } {
+  const baseUrl = getBaseUrl();
+  const logoUrl = `${baseUrl}/gymlogo1.png`;
+
   // Convert newlines to formatted HTML paragraphs safely
   const formattedBody = bodyMessage
     .split(/\n\n+/)
     .map((p) => `<p style="font-size: 15px; line-height: 1.7; color: #CBD5E1; margin: 0 0 16px 0;">${p.replace(/\n/g, '<br/>')}</p>`)
     .join('');
+
+  // Format Expiry Date if provided
+  let formattedExpiry = '';
+  if (expiryDate) {
+    try {
+      const exp = new Date(expiryDate);
+      if (!isNaN(exp.getTime())) {
+        formattedExpiry = exp.toLocaleDateString('en-IN', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+      } else {
+        formattedExpiry = expiryDate;
+      }
+    } catch {
+      formattedExpiry = expiryDate;
+    }
+  }
 
   // Generate Email Pricing Card HTML if requested
   let pricingCardHtml = '';
@@ -492,6 +765,9 @@ export function generateMarketingCampaignHtml({
     `;
   }
 
+  // Banner image resolution
+  const resolvedImageUrl = imageUrl && imageUrl.startsWith('/') ? `${baseUrl}${imageUrl}` : imageUrl;
+
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -515,26 +791,37 @@ export function generateMarketingCampaignHtml({
 
           <!-- Brand Logo Header -->
           <tr>
-            <td style="padding: 32px 32px 20px 32px; text-align: center;">
-              <h1 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 0.15em; color: #FFFFFF; text-transform: uppercase;">
-                CORE <span style="color: #FF2A2A;">X</span> FITNESS
-              </h1>
-              ${offerBadge ? `
-                <div style="margin-top: 10px;">
-                  <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background-color: rgba(255,42,42,0.12); border: 1px solid rgba(255,42,42,0.35); font-size: 10px; font-family: monospace; font-weight: 700; color: #FF2A2A; letter-spacing: 0.15em; text-transform: uppercase;">
-                    ${offerBadge}
-                  </span>
-                </div>
-              ` : ''}
+            <td style="padding: 32px 32px 18px 32px; text-align: center;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td align="center" style="padding-bottom: 10px;">
+                    <img src="${logoUrl}" alt="CORE X FITNESS" width="120" style="display: block; margin: 0 auto; max-width: 130px; height: auto; border: 0;" />
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <h1 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 0.15em; color: #FFFFFF; text-transform: uppercase;">
+                      CORE <span style="color: #FF2A2A;">X</span> FITNESS
+                    </h1>
+                    ${offerBadge ? `
+                      <div style="margin-top: 8px;">
+                        <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; background-color: rgba(255,42,42,0.12); border: 1px solid rgba(255,42,42,0.35); font-size: 10px; font-family: monospace; font-weight: 700; color: #FF2A2A; letter-spacing: 0.15em; text-transform: uppercase;">
+                          ${offerBadge}
+                        </span>
+                      </div>
+                    ` : ''}
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
           <!-- Campaign Banner Image (if provided) -->
-          ${imageUrl ? `
+          ${resolvedImageUrl ? `
           <tr>
             <td style="padding: 0 20px 24px 20px; text-align: center;">
               <div style="border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background-color: #000000;">
-                <img src="${imageUrl}" alt="${heading}" style="width: 100%; height: auto; display: block; border: 0;" />
+                <img src="${resolvedImageUrl}" alt="${heading}" style="width: 100%; height: auto; display: block; border: 0;" />
               </div>
             </td>
           </tr>
@@ -543,6 +830,16 @@ export function generateMarketingCampaignHtml({
           <!-- Campaign Content -->
           <tr>
             <td style="padding: 0 36px 36px 36px;">
+              
+              <!-- Expiry Alert Banner (if set) -->
+              ${formattedExpiry ? `
+              <div style="margin-bottom: 20px; padding: 10px 16px; border-radius: 10px; background-color: rgba(255,42,42,0.08); border: 1px solid rgba(255,42,42,0.25); display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 11px; font-family: monospace; font-weight: 700; color: #FF2A2A; text-transform: uppercase; letter-spacing: 0.1em;">
+                  ⏰ LIMITED TIME OFFER &bull; EXPIRES: ${formattedExpiry}
+                </span>
+              </div>
+              ` : ''}
+
               <h2 style="font-size: 20px; font-weight: 800; color: #FFFFFF; margin: 0 0 16px 0; line-height: 1.3;">
                 ${heading}
               </h2>
@@ -551,6 +848,21 @@ export function generateMarketingCampaignHtml({
                 ${formattedBody}
               </div>
 
+              <!-- Discount Voucher Box (if set) -->
+              ${discountCode ? `
+              <div style="margin: 24px 0; padding: 18px; border-radius: 12px; background-color: #161B22; border: 2px dashed rgba(255,42,42,0.5); text-align: center;">
+                <span style="font-size: 10px; font-family: monospace; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 6px;">
+                  YOUR EXCLUSIVE PROMO CODE:
+                </span>
+                <span style="font-size: 20px; font-family: monospace; font-weight: 900; color: #FF2A2A; letter-spacing: 0.2em; display: inline-block; padding: 4px 14px; background: rgba(255,42,42,0.1); border-radius: 6px;">
+                  ${discountCode.toUpperCase()}
+                </span>
+                <span style="font-size: 11px; color: #64748B; display: block; margin-top: 6px;">
+                  Apply at checkout or present to our Admissions Concierge.
+                </span>
+              </div>
+              ` : ''}
+
               <!-- Included Pricing Plan Card -->
               ${pricingCardHtml}
 
@@ -558,7 +870,7 @@ export function generateMarketingCampaignHtml({
               ${ctaText && ctaUrl ? `
               <div style="text-align: center; margin: 28px 0 24px 0;">
                 <a href="${ctaUrl}" class="btn-primary" target="_blank" style="background: linear-gradient(135deg, #FF2A2A 0%, #D80000 100%); background-color: #FF2A2A; color: #FFFFFF !important; text-decoration: none; font-weight: 700; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; padding: 14px 32px; border-radius: 12px; display: inline-block; border: 1px solid rgba(255, 42, 42, 0.4); box-shadow: 0 10px 25px rgba(255,42,42,0.3);">
-                  ${ctaText}
+                  ${ctaText} &rarr;
                 </a>
               </div>
               ` : ''}
@@ -583,7 +895,7 @@ export function generateMarketingCampaignHtml({
                 Sector 14, Main Athletic Boulevard, Noida, UP, India
               </p>
               <p style="margin: 0; font-size: 11px; color: #64748B;">
-                You received this email because you opted into Core X Fitness dispatches. 
+                You received this offer because you are registered with Core X Fitness with marketing updates enabled. 
                 <a href="${unsubscribeUrl}" style="color: #94A3B8; text-decoration: underline; margin-left: 4px;">Unsubscribe immediately</a>
               </p>
             </td>
@@ -605,6 +917,9 @@ ${offerBadge ? `[${offerBadge}]\n` : ''}
 ${heading}
 
 ${bodyMessage}
+
+${discountCode ? `\nPROMO CODE: ${discountCode.toUpperCase()}\n` : ''}
+${formattedExpiry ? `\nOFFER EXPIRES: ${formattedExpiry}\n` : ''}
 
 ${includePricingCard && pricingPlanDetails ? `
 [FEATURED MEMBERSHIP TIER]

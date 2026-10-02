@@ -76,6 +76,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+import { AuthSyncHandler } from '@/components/auth/AuthSyncHandler';
+
 export default function RootLayout({
   children,
 }: {
@@ -146,6 +148,7 @@ export default function RootLayout({
             },
           }}
         >
+          <AuthSyncHandler />
           {children}
         </ClerkProvider>
       </body>

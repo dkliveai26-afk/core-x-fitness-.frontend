@@ -110,6 +110,8 @@ export async function sendTestCampaign(
     heading: campaign.heading,
     bodyMessage: campaign.bodyMessage,
     offerBadge: campaign.offerBadge,
+    discountCode: campaign.discountCode,
+    expiryDate: campaign.expiryDate,
     imageUrl: campaign.imageUrl,
     ctaText: campaign.ctaText,
     ctaUrl: campaign.ctaUrl,
@@ -132,7 +134,7 @@ export async function sendTestCampaign(
 }
 
 /**
- * Background Asynchronous Worker to dispatch campaign batches to eligible recipients
+ * Background Asynchronous Worker to dispatch campaign batches to ALL eligible recipients
  */
 export async function dispatchCampaignInBackground(campaignId: string): Promise<void> {
   try {
@@ -158,7 +160,7 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
 
     const recipients = await getEligibleCampaignRecipients(campaign.targetAudience);
 
-    // Update total recipients count
+    // Update total recipients count in database
     await campaignsCol.updateOne(
       { _id: new ObjectId(campaignId) },
       { $set: { totalEligibleRecipients: recipients.length } }
@@ -175,41 +177,48 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
     let sentCount = 0;
     let failedCount = 0;
 
-    // Process in batches of 5 concurrent dispatches with slight throttling
+    // Process in safe concurrent batches of 5 with 300ms throttling between batches
     const BATCH_SIZE = 5;
     for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
       const batch = recipients.slice(i, i + BATCH_SIZE);
 
       await Promise.all(
         batch.map(async (recipient) => {
-          const unsubscribeUrl = `${BASE_URL}/unsubscribe?token=${recipient.unsubscribeToken}`;
-          const { html, text } = generateMarketingCampaignHtml({
-            heading: campaign.heading,
-            bodyMessage: campaign.bodyMessage,
-            offerBadge: campaign.offerBadge,
-            imageUrl: campaign.imageUrl,
-            ctaText: campaign.ctaText,
-            ctaUrl: campaign.ctaUrl,
-            footerNote: campaign.footerNote,
-            recipientName: recipient.name,
-            unsubscribeUrl,
-            includePricingCard: campaign.includePricingCard,
-            pricingPlanDetails: campaign.pricingPlanDetails,
-          });
+          try {
+            const unsubscribeUrl = `${BASE_URL}/unsubscribe?token=${recipient.unsubscribeToken}`;
+            const { html, text } = generateMarketingCampaignHtml({
+              heading: campaign.heading,
+              bodyMessage: campaign.bodyMessage,
+              offerBadge: campaign.offerBadge,
+              discountCode: campaign.discountCode,
+              expiryDate: campaign.expiryDate,
+              imageUrl: campaign.imageUrl,
+              ctaText: campaign.ctaText,
+              ctaUrl: campaign.ctaUrl,
+              footerNote: campaign.footerNote,
+              recipientName: recipient.name,
+              unsubscribeUrl,
+              includePricingCard: campaign.includePricingCard,
+              pricingPlanDetails: campaign.pricingPlanDetails,
+            });
 
-          const result = await sendEmail({
-            to: recipient.email,
-            subject: campaign.subject,
-            html,
-            text,
-            emailType: 'MARKETING_CAMPAIGN',
-            campaignId: campaign._id,
-            recipientName: recipient.name,
-          });
+            const result = await sendEmail({
+              to: recipient.email,
+              subject: campaign.subject,
+              html,
+              text,
+              emailType: 'MARKETING_CAMPAIGN',
+              campaignId: campaign._id,
+              recipientName: recipient.name,
+            });
 
-          if (result.success) {
-            sentCount++;
-          } else {
+            if (result.success) {
+              sentCount++;
+            } else {
+              failedCount++;
+            }
+          } catch (itemErr) {
+            console.error(`Error sending campaign to recipient ${recipient.email}:`, itemErr);
             failedCount++;
           }
         })
@@ -217,7 +226,7 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
 
       // Throttling delay between batches
       if (i + BATCH_SIZE < recipients.length) {
-        await new Promise((resolve) => setTimeout(resolve, 350));
+        await new Promise((resolve) => setTimeout(resolve, 300));
       }
 
       // Update live progress in DB
@@ -262,3 +271,4 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
     } catch {}
   }
 }
+

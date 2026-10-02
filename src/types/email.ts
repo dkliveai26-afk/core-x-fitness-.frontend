@@ -2,6 +2,8 @@ export type EmailType =
   | 'BOOKING_CONFIRMATION'
   | 'ADMIN_NOTIFICATION'
   | 'MARKETING_CAMPAIGN'
+  | 'WELCOME_CONFIRMATION'
+  | 'ACCOUNT_CONFIRMATION'
   | 'TEST_EMAIL';
 
 export type EmailDeliveryStatus =
@@ -32,6 +34,7 @@ export interface MarketingContact {
   marketingOptIn: boolean;
   marketingOptInAt?: string;
   marketingOptOutAt?: string;
+  welcomeEmailSentAt?: string;
   unsubscribeToken: string;
   totalBookings: number;
   totalInquiries: number;
@@ -49,11 +52,13 @@ export interface EmailCampaign {
   heading: string;
   bodyMessage: string;
   offerBadge?: string;
+  discountCode?: string;
+  expiryDate?: string;
   imageUrl?: string;
   ctaText?: string;
   ctaUrl?: string;
   footerNote?: string;
-  targetAudience: 'ALL_OPTED_IN' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY';
+  targetAudience: 'ALL_OPTED_IN' | 'REGISTERED_USERS' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY';
   includePricingCard?: boolean;
   pricingPlanId?: string;
   pricingPlanDetails?: {
@@ -115,3 +120,4 @@ export interface SendEmailResult {
   provider: EmailProviderName;
   error?: string;
 }
+

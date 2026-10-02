@@ -73,12 +73,19 @@ export default function AdminCampaignsPage() {
   const [formHeading, setFormHeading] = useState('');
   const [formBodyMessage, setFormBodyMessage] = useState('');
   const [formOfferBadge, setFormOfferBadge] = useState('EXCLUSIVE VIP ATHLETE ACCESS');
+  const [formDiscountCode, setFormDiscountCode] = useState('');
+  const [formExpiryDate, setFormExpiryDate] = useState('');
   const [formImageUrl, setFormImageUrl] = useState('/plans-offer-banner.png');
   const [formCtaText, setFormCtaText] = useState('Claim Exclusive Offer');
   const [formCtaUrl, setFormCtaUrl] = useState('https://core-x-fitness-frontend.vercel.app/plans?plan=performance#pricing-matrix');
   const [formFooterNote, setFormFooterNote] = useState('Offer valid for registered athletes and VIP admissions applicants.');
-  const [formAudience, setFormAudience] = useState<'ALL_OPTED_IN' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY'>('ALL_OPTED_IN');
+  const [formAudience, setFormAudience] = useState<'ALL_OPTED_IN' | 'REGISTERED_USERS' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY'>('ALL_OPTED_IN');
   
+  // Live Audience Count Preview
+  const [liveAudienceCount, setLiveAudienceCount] = useState<number | null>(null);
+  const [liveSampleRecipients, setLiveSampleRecipients] = useState<Array<{ email: string; name: string }>>([]);
+  const [isFetchingAudienceCount, setIsFetchingAudienceCount] = useState(false);
+
   // Pricing Card in Campaign State
   const [formIncludePricingCard, setFormIncludePricingCard] = useState(true);
   const [formSelectedPlanId, setFormSelectedPlanId] = useState('performance');
@@ -97,6 +104,23 @@ export default function AdminCampaignsPage() {
   const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [sendingCampaignId, setSendingCampaignId] = useState<string | null>(null);
+  const [confirmBroadcastCampaign, setConfirmBroadcastCampaign] = useState<EmailCampaign | null>(null);
+
+  const fetchLiveAudienceCount = useCallback(async (aud: string) => {
+    try {
+      setIsFetchingAudienceCount(true);
+      const res = await fetch(`/api/admin/campaigns/preview-count?audience=${aud}`, { credentials: 'same-origin' });
+      if (res.ok) {
+        const data = await res.json();
+        setLiveAudienceCount(data.count ?? 0);
+        setLiveSampleRecipients(data.sampleRecipients || []);
+      }
+    } catch (e) {
+      console.warn('Notice: Audience preview count fetch error:', e);
+    } finally {
+      setIsFetchingAudienceCount(false);
+    }
+  }, []);
 
   const fetchPlans = useCallback(async () => {
     try {
@@ -168,13 +192,15 @@ export default function AdminCampaignsPage() {
   useEffect(() => {
     if (activeTab === 'SUBSCRIBERS') fetchSubscribers();
     if (activeTab === 'LOGS') fetchLogs();
-  }, [activeTab, fetchSubscribers, fetchLogs]);
+    if (activeTab === 'CREATE') fetchLiveAudienceCount(formAudience);
+  }, [activeTab, fetchSubscribers, fetchLogs, fetchLiveAudienceCount, formAudience]);
 
   const handleRefreshAll = () => {
     setIsRefreshing(true);
     fetchCampaignsAndStats();
     if (activeTab === 'SUBSCRIBERS') fetchSubscribers();
     if (activeTab === 'LOGS') fetchLogs();
+    if (activeTab === 'CREATE') fetchLiveAudienceCount(formAudience);
   };
 
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -223,6 +249,8 @@ export default function AdminCampaignsPage() {
     setFormHeading(c.heading || '');
     setFormBodyMessage(c.bodyMessage || '');
     setFormOfferBadge(c.offerBadge || 'EXCLUSIVE VIP ATHLETE ACCESS');
+    setFormDiscountCode(c.discountCode || '');
+    setFormExpiryDate(c.expiryDate || '');
     setFormImageUrl(c.imageUrl || '');
     setFormCtaText(c.ctaText || 'Claim Exclusive Offer');
     setFormCtaUrl(c.ctaUrl || 'https://core-x-fitness-frontend.vercel.app/plans?plan=performance#pricing-matrix');
@@ -242,6 +270,9 @@ export default function AdminCampaignsPage() {
     setFormPreheader('');
     setFormHeading('');
     setFormBodyMessage('');
+    setFormOfferBadge('EXCLUSIVE VIP ATHLETE ACCESS');
+    setFormDiscountCode('');
+    setFormExpiryDate('');
     setFormImageUrl('/plans-offer-banner.png');
     setFormCtaText('Claim Exclusive Offer');
     setFormCtaUrl('https://core-x-fitness-frontend.vercel.app/plans?plan=performance#pricing-matrix');
@@ -287,6 +318,8 @@ export default function AdminCampaignsPage() {
         heading: formHeading,
         bodyMessage: formBodyMessage,
         offerBadge: formOfferBadge,
+        discountCode: formDiscountCode ? formDiscountCode.trim() : undefined,
+        expiryDate: formExpiryDate ? formExpiryDate.trim() : undefined,
         imageUrl: formImageUrl,
         ctaText: formCtaText,
         ctaUrl: formCtaUrl,
@@ -352,15 +385,15 @@ export default function AdminCampaignsPage() {
     }
   };
 
-  const handleBroadcastCampaign = async (campaign: EmailCampaign) => {
-    const recipientCount = stats.optedIn;
-    if (!confirm(`Are you sure you want to broadcast "${campaign.title}" to ${recipientCount} eligible opted-in recipients now?`)) {
-      return;
-    }
+  const handleConfirmBroadcast = async () => {
+    if (!confirmBroadcastCampaign) return;
 
+    const campaignId = confirmBroadcastCampaign._id;
     try {
-      setSendingCampaignId(campaign._id);
-      const res = await fetch(`/api/admin/campaigns/${campaign._id}/send`, {
+      setSendingCampaignId(campaignId);
+      setConfirmBroadcastCampaign(null);
+
+      const res = await fetch(`/api/admin/campaigns/${campaignId}/send`, {
         method: 'POST',
         credentials: 'same-origin',
       });
@@ -368,17 +401,18 @@ export default function AdminCampaignsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to initialize broadcast.');
 
-      setSuccessMsg('Campaign broadcast started in background. Real-time metrics will update.');
-      setTimeout(() => setSuccessMsg(''), 4000);
+      setSuccessMsg('Campaign broadcast dispatched in background. Reaching all eligible opted-in athletes.');
+      setTimeout(() => setSuccessMsg(''), 4500);
 
       // Update local status to SENDING
       setCampaigns((prev) =>
-        prev.map((c) => (c._id === campaign._id ? { ...c, status: 'SENDING' } : c))
+        prev.map((c) => (c._id === campaignId ? { ...c, status: 'SENDING' } : c))
       );
 
       // Trigger periodic refreshes
       setTimeout(fetchCampaignsAndStats, 2000);
       setTimeout(fetchCampaignsAndStats, 5000);
+      setTimeout(fetchCampaignsAndStats, 10000);
     } catch (err: any) {
       alert(err.message || 'Broadcast error.');
     } finally {
@@ -673,7 +707,7 @@ export default function AdminCampaignsPage() {
                         {/* Broadcast Send Button */}
                         {c.status !== 'SENDING' && (
                           <button
-                            onClick={() => handleBroadcastCampaign(c)}
+                            onClick={() => setConfirmBroadcastCampaign(c)}
                             disabled={sendingCampaignId === c._id}
                             className="px-4 py-2 rounded-xl bg-core-red/20 hover:bg-core-red/30 border border-core-red/40 text-white text-xs font-mono font-bold uppercase flex items-center gap-1.5 transition-colors"
                           >
@@ -770,22 +804,35 @@ export default function AdminCampaignsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1 font-bold">
-                      Target Audience *
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+                        Target Audience *
+                      </label>
+                      <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                        {isFetchingAudienceCount ? (
+                          <span className="animate-pulse">Counting eligible...</span>
+                        ) : (
+                          <>
+                            <UserCheck className="w-3 h-3" />
+                            <span>{liveAudienceCount !== null ? `${liveAudienceCount} Eligible Users` : `${stats.optedIn} Opted-In`}</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
                     <select
                       value={formAudience}
                       onChange={(e: any) => setFormAudience(e.target.value)}
                       className="w-full bg-[#050607] border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-core-red cursor-pointer"
                     >
-                      <option value="ALL_OPTED_IN">All Opted-in Athletes ({stats.optedIn})</option>
+                      <option value="ALL_OPTED_IN">All Opted-in Athletes & Inquiries ({stats.optedIn})</option>
+                      <option value="REGISTERED_USERS">Registered Accounts Only (Marketing Consent = True)</option>
                       <option value="BOOKINGS_ONLY">Booked Members Only</option>
                       <option value="CONTACTS_ONLY">Contact Inquiries Only</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Email Subject & Offer Badge */}
+                {/* Email Subject & Top Offer Ribbon */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1 font-bold">
@@ -812,6 +859,43 @@ export default function AdminCampaignsPage() {
                       placeholder="e.g. LIMITED VIP ATHLETE ACCESS"
                       className="w-full bg-[#050607] border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-core-red font-mono uppercase"
                     />
+                  </div>
+                </div>
+
+                {/* Promo / Discount Code & Expiry Date */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
+                  <div>
+                    <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1 font-bold flex items-center justify-between">
+                      <span>Promo / Discount Voucher Code</span>
+                      <span className="text-[10px] text-slate-500 font-normal">Optional</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formDiscountCode}
+                      onChange={(e) => setFormDiscountCode(e.target.value)}
+                      placeholder="e.g. CORE20 or VIPFITNESS"
+                      className="w-full bg-[#050607] border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-core-red font-mono uppercase tracking-wider"
+                    />
+                    <span className="text-[10px] font-mono text-slate-500 mt-1 block">
+                      Renders a high-contrast voucher box in email.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1 font-bold flex items-center justify-between">
+                      <span>Offer Expiry Date / Notice</span>
+                      <span className="text-[10px] text-slate-500 font-normal">Optional</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formExpiryDate}
+                      onChange={(e) => setFormExpiryDate(e.target.value)}
+                      placeholder="e.g. Sunday, October 12th or Valid 7 Days"
+                      className="w-full bg-[#050607] border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs focus:outline-none focus:border-core-red font-mono"
+                    />
+                    <span className="text-[10px] font-mono text-slate-500 mt-1 block">
+                      Displays urgency countdown ribbon.
+                    </span>
                   </div>
                 </div>
 
@@ -1059,6 +1143,8 @@ export default function AdminCampaignsPage() {
                         heading: formHeading || 'Sample Offer Heading',
                         bodyMessage: formBodyMessage || 'Sample offer body message...',
                         offerBadge: formOfferBadge,
+                        discountCode: formDiscountCode ? formDiscountCode.trim() : undefined,
+                        expiryDate: formExpiryDate ? formExpiryDate.trim() : undefined,
                         imageUrl: formImageUrl,
                         ctaText: formCtaText,
                         ctaUrl: formCtaUrl,
@@ -1155,12 +1241,32 @@ export default function AdminCampaignsPage() {
 
                   {/* Body Content */}
                   <div className="p-4 space-y-3">
+                    {/* Expiry Badge */}
+                    {formExpiryDate && (
+                      <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 flex items-center justify-center gap-1.5">
+                        <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                        <span>OFFER EXPIRES: <span className="font-bold uppercase text-white">{formExpiryDate}</span></span>
+                      </div>
+                    )}
+
                     <h3 className="text-xs font-bold text-white font-heading leading-tight">
                       {formHeading || 'Your Offer Heading Appears Here'}
                     </h3>
                     <p className="text-[11px] text-slate-300 font-sans leading-relaxed whitespace-pre-wrap">
                       {formBodyMessage || 'Your campaign offer text and message content will be formatted here beautifully across all email clients.'}
                     </p>
+
+                    {/* Voucher Box */}
+                    {formDiscountCode && (
+                      <div className="my-2 p-2.5 rounded-xl bg-white/[0.02] border border-dashed border-core-red/50 text-center space-y-1">
+                        <span className="text-[8px] font-mono text-slate-400 uppercase tracking-widest block font-bold">
+                          PROMO / VOUCHER CODE
+                        </span>
+                        <span className="inline-block px-3 py-1 rounded bg-[#0D1117] border border-core-red text-core-red font-mono font-black text-xs tracking-wider">
+                          {formDiscountCode}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Interactive Embedded Pricing Card Preview */}
                     {formIncludePricingCard && (() => {
@@ -1449,12 +1555,32 @@ export default function AdminCampaignsPage() {
                   )}
 
                   <div className="p-6 space-y-4">
+                    {/* Expiry Badge */}
+                    {previewCampaign.expiryDate && (
+                      <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 flex items-center justify-center gap-1.5">
+                        <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                        <span>OFFER EXPIRES: <span className="font-bold uppercase text-white">{previewCampaign.expiryDate}</span></span>
+                      </div>
+                    )}
+
                     <h3 className="text-base font-bold text-white font-heading">
                       {previewCampaign.heading}
                     </h3>
                     <p className="text-xs text-slate-300 font-sans leading-relaxed whitespace-pre-wrap">
                       {previewCampaign.bodyMessage}
                     </p>
+
+                    {/* Voucher Box */}
+                    {previewCampaign.discountCode && (
+                      <div className="my-2 p-3 rounded-xl bg-white/[0.02] border border-dashed border-core-red/50 text-center space-y-1">
+                        <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block font-bold">
+                          PROMO / VOUCHER CODE
+                        </span>
+                        <span className="inline-block px-3 py-1 rounded bg-[#0D1117] border border-core-red text-core-red font-mono font-black text-xs tracking-wider">
+                          {previewCampaign.discountCode}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Embedded Pricing Card in Modal */}
                     {previewCampaign.includePricingCard && previewCampaign.pricingPlanDetails && (
@@ -1557,6 +1683,84 @@ export default function AdminCampaignsPage() {
                   className="px-5 py-2 rounded-xl bg-red-gradient text-white font-heading font-bold text-xs uppercase tracking-wider disabled:opacity-50 flex items-center gap-2"
                 >
                   {isSendingTest ? 'Dispatching...' : 'Send Test Email'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Confirm Broadcast to 100% Eligible Database Users */}
+        {confirmBroadcastCampaign && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#0D1117] border border-core-red/40 rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <div className="flex items-center gap-2 text-core-red font-heading font-bold text-sm uppercase">
+                  <Send className="w-5 h-5" />
+                  <span>Confirm Mass Campaign Broadcast</span>
+                </div>
+                <button
+                  onClick={() => setConfirmBroadcastCampaign(null)}
+                  className="p-1 text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">CAMPAIGN TITLE</span>
+                  <p className="text-sm font-bold text-white font-heading">{confirmBroadcastCampaign.title}</p>
+                  <p className="text-xs text-slate-300 font-mono flex items-center gap-2">
+                    <span className="text-slate-500">Subject:</span>
+                    <span>{confirmBroadcastCampaign.subject}</span>
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+                  <div className="flex items-center justify-between text-emerald-400 font-mono text-xs font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <UserCheck className="w-4 h-4" />
+                      <span>TARGET AUDIENCE VERIFIED</span>
+                    </span>
+                    <span>100% Database Reach</span>
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    The campaign engine will fetch all eligible users matching:
+                  </p>
+                  <ul className="text-[11px] font-mono text-emerald-300 space-y-1">
+                    <li>✓ Registered account / contact exists in MongoDB & Clerk</li>
+                    <li>✓ Valid email format verified</li>
+                    <li>✓ Marketing consent = true</li>
+                    <li>✓ Unsubscribed = false (opted-out users strictly excluded)</li>
+                  </ul>
+                </div>
+
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] font-mono text-amber-300 flex items-start gap-2">
+                  <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    Batching engine will process recipients in throttled groups with rate-limit protection and real-time telemetry logging.
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmBroadcastCampaign(null)}
+                  className="px-4 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 font-mono text-xs uppercase"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={sendingCampaignId === confirmBroadcastCampaign._id}
+                  onClick={handleConfirmBroadcast}
+                  className="px-6 py-2.5 rounded-xl bg-red-gradient text-white font-heading font-bold text-xs uppercase tracking-wider shadow-glow-red hover:brightness-110 flex items-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>
+                    {sendingCampaignId === confirmBroadcastCampaign._id ? 'Initiating Broadcast...' : 'Confirm & Launch Broadcast'}
+                  </span>
                 </button>
               </div>
             </div>

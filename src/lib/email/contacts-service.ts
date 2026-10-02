@@ -189,39 +189,58 @@ export async function setMarketingConsent(
 }
 
 /**
- * Retrieve eligible recipients for an email campaign based on marketing consent and audience filter
+ * Retrieve eligible recipients for an email campaign based on marketing consent and audience filter.
+ * Targets ALL eligible registered and opted-in users in the database while strictly excluding unsubscribed users.
  */
 export async function getEligibleCampaignRecipients(
-  targetAudience: 'ALL_OPTED_IN' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY' = 'ALL_OPTED_IN'
+  targetAudience: 'ALL_OPTED_IN' | 'REGISTERED_USERS' | 'BOOKINGS_ONLY' | 'CONTACTS_ONLY' = 'ALL_OPTED_IN'
 ): Promise<Array<{ email: string; name: string; unsubscribeToken: string }>> {
   try {
     const db = await getDatabase();
     const contactsCol = db.collection('marketing_contacts');
 
-    // Sync Clerk registered users to marketing_contacts if available
+    // Sync ALL Clerk registered users to marketing_contacts (Full paginated loop)
     const clerkKey = process.env.CLERK_SECRET_KEY;
     if (clerkKey) {
       try {
         const { createClerkClient } = await import('@clerk/backend');
         const clerk = createClerkClient({ secretKey: clerkKey.trim().replace(/^["']|["']$/g, '') });
-        const clerkUsers = await clerk.users.getUserList({ limit: 500 });
-        for (const u of clerkUsers.data) {
-          const email =
-            u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)?.emailAddress ||
-            u.emailAddresses[0]?.emailAddress;
-          if (email) {
-            const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || u.username || 'Registered Athlete';
-            // Only insert if not already present, so we don't override previous opt-outs
-            const existing = await contactsCol.findOne({ email: normalizeEmail(email) });
-            if (!existing) {
-              await upsertContact({
-                email,
-                name: fullName,
-                source: 'CLERK_USER',
-                marketingOptIn: true,
-                latestPlan: 'Registered Athlete Account',
-              });
+        let offset = 0;
+        const limit = 500;
+        let hasMore = true;
+
+        while (hasMore) {
+          const clerkUsersBatch = await clerk.users.getUserList({ limit, offset });
+          const users = clerkUsersBatch.data || [];
+
+          for (const u of users) {
+            const email =
+              u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)?.emailAddress ||
+              u.emailAddresses[0]?.emailAddress;
+
+            if (email) {
+              const fullName =
+                [u.firstName, u.lastName].filter(Boolean).join(' ').trim() ||
+                u.username ||
+                'Registered Athlete';
+
+              // Only insert if not already present, preserving user opt-out status if already configured
+              const existing = await contactsCol.findOne({ email: normalizeEmail(email) });
+              if (!existing) {
+                await upsertContact({
+                  email,
+                  name: fullName,
+                  source: 'CLERK_USER',
+                  marketingOptIn: true,
+                  latestPlan: 'Registered Athlete Account',
+                });
+              }
             }
+          }
+
+          offset += users.length;
+          if (users.length < limit || offset >= (clerkUsersBatch.totalCount || 0)) {
+            hasMore = false;
           }
         }
       } catch (clerkSyncErr) {
@@ -229,13 +248,19 @@ export async function getEligibleCampaignRecipients(
       }
     }
 
+    // Build database query for eligible recipients:
+    // 1. Valid email exists
+    // 2. marketingOptIn === true
+    // 3. User has NOT unsubscribed (marketingOptOutAt is null/undefined)
     const query: any = {
       marketingOptIn: true,
-      marketingOptOutAt: { $in: [null, undefined] },
+      marketingOptOutAt: { $in: [null, undefined, ''] },
       email: { $exists: true, $regex: /@/ },
     };
 
-    if (targetAudience === 'BOOKINGS_ONLY') {
+    if (targetAudience === 'REGISTERED_USERS') {
+      query.sources = { $in: ['REGISTRATION', 'CLERK_USER'] };
+    } else if (targetAudience === 'BOOKINGS_ONLY') {
       query.sources = 'BOOKING';
     } else if (targetAudience === 'CONTACTS_ONLY') {
       query.sources = 'CONTACT';
@@ -273,6 +298,7 @@ export async function getAudienceStats(): Promise<{
   optedIn: number;
   unsubscribed: number;
   notOptedIn: number;
+  registeredCount: number;
   bookingsCount: number;
   contactsCount: number;
 }> {
@@ -285,13 +311,15 @@ export async function getAudienceStats(): Promise<{
     await contactsCol.createIndex({ marketingOptIn: 1 }).catch(() => {});
     await contactsCol.createIndex({ unsubscribeToken: 1 }).catch(() => {});
 
-    const [totalContacts, optedIn, unsubscribed, bookingsCount, contactsCount] = await Promise.all([
-      contactsCol.countDocuments(),
-      contactsCol.countDocuments({ marketingOptIn: true }),
-      contactsCol.countDocuments({ marketingOptOutAt: { $exists: true, $ne: null } }),
-      contactsCol.countDocuments({ sources: 'BOOKING' }),
-      contactsCol.countDocuments({ sources: 'CONTACT' }),
-    ]);
+    const [totalContacts, optedIn, unsubscribed, registeredCount, bookingsCount, contactsCount] =
+      await Promise.all([
+        contactsCol.countDocuments(),
+        contactsCol.countDocuments({ marketingOptIn: true, marketingOptOutAt: { $in: [null, undefined, ''] } }),
+        contactsCol.countDocuments({ marketingOptOutAt: { $exists: true, $nin: [null, undefined, ''] } }),
+        contactsCol.countDocuments({ sources: { $in: ['REGISTRATION', 'CLERK_USER'] } }),
+        contactsCol.countDocuments({ sources: 'BOOKING' }),
+        contactsCol.countDocuments({ sources: 'CONTACT' }),
+      ]);
 
     const notOptedIn = Math.max(0, totalContacts - optedIn);
 
@@ -300,6 +328,7 @@ export async function getAudienceStats(): Promise<{
       optedIn,
       unsubscribed,
       notOptedIn,
+      registeredCount,
       bookingsCount,
       contactsCount,
     };
@@ -310,8 +339,10 @@ export async function getAudienceStats(): Promise<{
       optedIn: 0,
       unsubscribed: 0,
       notOptedIn: 0,
+      registeredCount: 0,
       bookingsCount: 0,
       contactsCount: 0,
     };
   }
 }
+

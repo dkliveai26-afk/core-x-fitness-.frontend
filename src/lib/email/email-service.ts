@@ -11,6 +11,7 @@ import {
   generateBookingConfirmationHtml,
   generateAdminBookingNotificationHtml,
   generateMarketingCampaignHtml,
+  generateWelcomeConfirmationHtml,
 } from './email-templates';
 
 // Configurable sender details
@@ -385,3 +386,86 @@ export async function sendAdminBookingNotification(booking: {
     recipientName: 'Core X Admin Concierge',
   });
 }
+
+/**
+ * Dispatches Branded Customer Sign-Up Welcome / Account Confirmation Email
+ */
+export async function sendUserSignupWelcomeEmail({
+  email,
+  name,
+  userId,
+}: {
+  email: string;
+  name?: string;
+  userId?: string;
+}): Promise<SendEmailResult> {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    return {
+      success: false,
+      provider: 'DEVELOPMENT_SIMULATED',
+      error: 'Invalid or missing recipient email address.',
+    };
+  }
+
+  // Check if welcome email was already dispatched to prevent duplicate sends
+  try {
+    const db = await getDatabase();
+    const contactsCol = db.collection('marketing_contacts');
+    const existing = await contactsCol.findOne({ email: cleanEmail });
+
+    if (existing && existing.welcomeEmailSentAt) {
+      return {
+        success: true,
+        messageId: 'already_sent',
+        provider: 'RESEND',
+      };
+    }
+  } catch (dbErr) {
+    console.warn('Notice in sendUserSignupWelcomeEmail DB check:', dbErr);
+  }
+
+  const { html, text } = generateWelcomeConfirmationHtml({
+    customerName: name || 'Athlete',
+    email: cleanEmail,
+  });
+
+  const subject = 'Welcome to CORE X FITNESS — Your Account is Ready';
+
+  const result = await sendEmail({
+    to: cleanEmail,
+    subject,
+    html,
+    text,
+    emailType: 'WELCOME_CONFIRMATION',
+    recipientName: name || 'Athlete',
+  });
+
+  // If email dispatch succeeded, record timestamp and upsert contact in MongoDB
+  if (result.success) {
+    try {
+      const db = await getDatabase();
+      const contactsCol = db.collection('marketing_contacts');
+      const now = new Date().toISOString();
+      await contactsCol.updateOne(
+        { email: cleanEmail },
+        {
+          $set: {
+            welcomeEmailSentAt: now,
+            lastActiveAt: now,
+            updatedAt: now,
+          },
+          $addToSet: {
+            sources: 'REGISTRATION',
+          },
+        },
+        { upsert: true }
+      );
+    } catch (err) {
+      console.warn('Failed to record welcomeEmailSentAt in MongoDB:', err);
+    }
+  }
+
+  return result;
+}
+
