@@ -134,19 +134,24 @@ export async function sendTestCampaign(
 }
 
 /**
- * Background Asynchronous Worker to dispatch campaign batches to ALL eligible recipients
+ * Dispatches campaign batches to ALL eligible recipients with throttled batching & live MongoDB updates
  */
-export async function dispatchCampaignInBackground(campaignId: string): Promise<void> {
+export async function dispatchCampaignInBackground(campaignId: string): Promise<{
+  success: boolean;
+  sentCount: number;
+  failedCount: number;
+  totalRecipients: number;
+}> {
   try {
     const db = await getDatabase();
     const campaignsCol = db.collection('email_campaigns');
 
     const campaign = await getEmailCampaignById(campaignId);
-    if (!campaign || campaign.status === 'SENDING') {
-      return;
+    if (!campaign) {
+      return { success: false, sentCount: 0, failedCount: 0, totalRecipients: 0 };
     }
 
-    // Mark as SENDING to prevent duplicate sends / concurrency races
+    // Mark as SENDING to prevent concurrent double-clicks
     await campaignsCol.updateOne(
       { _id: new ObjectId(campaignId) },
       {
@@ -169,9 +174,9 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
     if (recipients.length === 0) {
       await campaignsCol.updateOne(
         { _id: new ObjectId(campaignId) },
-        { $set: { status: 'SENT', updatedAt: new Date().toISOString() } }
+        { $set: { status: 'SENT', sentCount: 0, failedCount: 0, updatedAt: new Date().toISOString() } }
       );
-      return;
+      return { success: true, sentCount: 0, failedCount: 0, totalRecipients: 0 };
     }
 
     let sentCount = 0;
@@ -255,8 +260,15 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
         },
       }
     );
+
+    return {
+      success: true,
+      sentCount,
+      failedCount,
+      totalRecipients: recipients.length,
+    };
   } catch (error) {
-    console.error('Error dispatching campaign in background:', error);
+    console.error('Error dispatching campaign:', error);
     try {
       const db = await getDatabase();
       await db.collection('email_campaigns').updateOne(
@@ -269,6 +281,7 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
         }
       );
     } catch {}
+    return { success: false, sentCount: 0, failedCount: 0, totalRecipients: 0 };
   }
 }
 

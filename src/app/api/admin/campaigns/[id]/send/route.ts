@@ -19,22 +19,18 @@ export async function POST(
       return NextResponse.json({ error: 'Campaign not found.' }, { status: 404 });
     }
 
-    if (campaign.status === 'SENDING') {
-      return NextResponse.json(
-        { error: 'This campaign is already actively being dispatched in the background.' },
-        { status: 400 }
-      );
-    }
-
-    // Trigger asynchronous background dispatch without making the HTTP response block
-    dispatchCampaignInBackground(params.id).catch((err) => {
-      console.error('Campaign background worker error:', err);
-    });
+    // Await campaign dispatch to ensure all Resend network requests complete before response
+    const dispatchResult = await dispatchCampaignInBackground(params.id);
+    const updatedCampaign = await getEmailCampaignById(params.id);
 
     return NextResponse.json({
       success: true,
-      message: 'Campaign dispatch started in background. Real-time progress is logged.',
-      status: 'SENDING',
+      message: `Campaign broadcast completed. Sent: ${dispatchResult.sentCount}, Failed: ${dispatchResult.failedCount} out of ${dispatchResult.totalRecipients} recipients.`,
+      campaign: updatedCampaign,
+      sentCount: dispatchResult.sentCount,
+      failedCount: dispatchResult.failedCount,
+      totalRecipients: dispatchResult.totalRecipients,
+      status: updatedCampaign?.status || 'SENT',
     });
   } catch (error: any) {
     console.error('API /api/admin/campaigns/[id]/send error:', error);

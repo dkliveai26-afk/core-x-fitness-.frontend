@@ -399,20 +399,13 @@ export default function AdminCampaignsPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to initialize broadcast.');
+      if (!res.ok) throw new Error(data.error || 'Failed to dispatch broadcast.');
 
-      setSuccessMsg('Campaign broadcast dispatched in background. Reaching all eligible opted-in athletes.');
-      setTimeout(() => setSuccessMsg(''), 4500);
+      setSuccessMsg(data.message || 'Campaign broadcast dispatched. Reaching all eligible opted-in athletes.');
+      setTimeout(() => setSuccessMsg(''), 6000);
 
-      // Update local status to SENDING
-      setCampaigns((prev) =>
-        prev.map((c) => (c._id === campaignId ? { ...c, status: 'SENDING' } : c))
-      );
-
-      // Trigger periodic refreshes
-      setTimeout(fetchCampaignsAndStats, 2000);
-      setTimeout(fetchCampaignsAndStats, 5000);
-      setTimeout(fetchCampaignsAndStats, 10000);
+      // Refresh campaigns list immediately
+      fetchCampaignsAndStats();
     } catch (err: any) {
       alert(err.message || 'Broadcast error.');
     } finally {
@@ -658,6 +651,9 @@ export default function AdminCampaignsPage() {
                           }`}>
                             {c.status}
                           </span>
+                          <span className="text-[10px] font-mono text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                            ID: {c._id}
+                          </span>
                           <span className="text-[11px] font-mono text-slate-500">
                             Created: {new Date(c.createdAt).toLocaleDateString()}
                           </span>
@@ -667,6 +663,21 @@ export default function AdminCampaignsPage() {
                           <span>Subject:</span>
                           <span className="text-slate-200 font-semibold">{c.subject}</span>
                         </p>
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="px-2 py-0.5 rounded text-[9px] font-mono bg-white/[0.04] text-slate-400 border border-white/5">
+                            Audience: {c.targetAudience || 'ALL_OPTED_IN'}
+                          </span>
+                          {c.discountCode && (
+                            <span className="px-2 py-0.5 rounded text-[9px] font-mono bg-core-red/10 text-core-red border border-core-red/20 font-bold">
+                              CODE: {c.discountCode}
+                            </span>
+                          )}
+                          {c.expiryDate && (
+                            <span className="px-2 py-0.5 rounded text-[9px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                              EXP: {c.expiryDate}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Action Buttons */}
@@ -695,7 +706,7 @@ export default function AdminCampaignsPage() {
                         <button
                           onClick={() => {
                             setTestEmailModalCampaignId(c._id);
-                            setTestEmailInput(providerInfo?.fromAddress || 'dilkhushdeveloper@gmail.com');
+                            setTestEmailInput(providerInfo?.fromAddress || 'd.klive.ai26@gmail.com');
                           }}
                           className="px-3.5 py-2 rounded-xl bg-white/[0.03] hover:bg-white/10 border border-white/10 text-slate-200 text-xs font-mono uppercase flex items-center gap-1.5 transition-colors"
                           title="Send test email to your inbox"
@@ -1471,7 +1482,8 @@ export default function AdminCampaignsPage() {
                       <th className="px-6 py-4">Type</th>
                       <th className="px-6 py-4">Subject</th>
                       <th className="px-6 py-4">Status</th>
-                      <th className="px-6 py-4">Provider</th>
+                      <th className="px-6 py-4">Provider / Message ID</th>
+                      <th className="px-6 py-4">Delivery Details / Error</th>
                       <th className="px-6 py-4">Time</th>
                     </tr>
                   </thead>
@@ -1479,7 +1491,12 @@ export default function AdminCampaignsPage() {
                     {logs.map((log, idx) => (
                       <tr key={log._id || idx} className="hover:bg-white/[0.02] transition-colors">
                         <td className="px-6 py-4 text-white font-semibold">
-                          {log.recipient}
+                          <div>
+                            <span>{log.recipient}</span>
+                            {log.recipientName && (
+                              <span className="text-[10px] text-slate-500 block font-normal">{log.recipientName}</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <span className="px-2 py-0.5 rounded text-[10px] bg-white/5 text-slate-300">
@@ -1496,8 +1513,28 @@ export default function AdminCampaignsPage() {
                             {log.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-slate-400">
-                          {log.provider}
+                        <td className="px-6 py-4 text-slate-300">
+                          <div className="space-y-0.5">
+                            <span className="text-white font-bold text-[11px]">{log.provider}</span>
+                            {log.providerMessageId && (
+                              <span className="text-[9px] text-slate-500 block truncate max-w-[140px]" title={log.providerMessageId}>
+                                ID: {log.providerMessageId}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-xs max-w-xs">
+                          {log.errorMessage ? (
+                            <span className="text-rose-400 text-[11px] truncate block max-w-xs" title={log.errorMessage}>
+                              {log.errorMessage}
+                            </span>
+                          ) : log.status === 'SENT' ? (
+                            <span className="text-emerald-400 text-[11px] flex items-center gap-1">
+                              <span>✓</span> <span>Delivered via Resend API</span>
+                            </span>
+                          ) : (
+                            <span className="text-slate-500 text-[11px]">—</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-slate-500 text-[11px]">
                           {log.sentAt ? new Date(log.sentAt).toLocaleString() : 'N/A'}
