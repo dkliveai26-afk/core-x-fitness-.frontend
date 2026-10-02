@@ -6,10 +6,13 @@ import { DEFAULT_OFFER_BANNER } from './offer-banner-shared';
 
 export { DEFAULT_OFFER_BANNER };
 
+let defaultBannerEnsured = false;
+
 /**
  * Ensure initial offer banner exists in MongoDB
  */
 export async function ensureDefaultOfferBanner(): Promise<void> {
+  if (defaultBannerEnsured) return;
   try {
     const db = await getDatabase();
     const bannerCol = db.collection('offer_banners');
@@ -19,6 +22,7 @@ export async function ensureDefaultOfferBanner(): Promise<void> {
       await bannerCol.insertOne(DEFAULT_OFFER_BANNER);
       console.log('✅ Initialized default Core X offer banner in MongoDB.');
     }
+    defaultBannerEnsured = true;
   } catch (error) {
     console.error('Error ensuring default offer banner:', error);
   }

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     'Choose your CORE X FITNESS membership standard: Core Access, Performance Lab, or Elite Black Tier. Ultra-premium athletic facility with Eleiko platforms and biometric recovery.',
 };
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Instant client navigation via ISR prefetching + on-demand revalidatePath('/plans')
 
 export default async function PlansPage() {
   const [plans, offerBanner] = await Promise.all([

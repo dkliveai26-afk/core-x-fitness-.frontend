@@ -6,10 +6,13 @@ import { DEFAULT_PLANS, formatInrPrice, calculateDiscount } from './plans-shared
 
 export { DEFAULT_PLANS, formatInrPrice, calculateDiscount };
 
+let defaultPlansEnsured = false;
+
 /**
  * Ensure default plans exist in MongoDB if collection is empty
  */
 export async function ensureDefaultPlans(): Promise<void> {
+  if (defaultPlansEnsured) return;
   try {
     const db = await getDatabase();
     const plansCol = db.collection('plans');
@@ -19,6 +22,7 @@ export async function ensureDefaultPlans(): Promise<void> {
       await plansCol.insertMany(DEFAULT_PLANS);
       console.log('✅ Initialized default Core X membership plans in MongoDB.');
     }
+    defaultPlansEnsured = true;
   } catch (error) {
     console.error('Error ensuring default plans:', error);
   }

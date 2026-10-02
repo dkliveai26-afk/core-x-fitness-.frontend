@@ -16,36 +16,14 @@ export function Navbar() {
   const { openModal } = useAuthModal();
   const { user } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeItem, setActiveItem] = useState(
-    pathname === '/contact'
-      ? 'Contact'
-      : pathname === '/diet' || pathname === '/dite'
-      ? 'Diet'
-      : pathname === '/gallery'
-      ? 'Gallery'
-      : pathname === '/about'
-      ? 'About'
-      : pathname === '/plans'
-      ? 'Plans'
-      : 'Home'
-  );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    if (pathname === '/contact') {
-      setActiveItem('Contact');
-    } else if (pathname === '/diet' || pathname === '/dite') {
-      setActiveItem('Diet');
-    } else if (pathname === '/gallery') {
-      setActiveItem('Gallery');
-    } else if (pathname === '/about') {
-      setActiveItem('About');
-    } else if (pathname === '/plans') {
-      setActiveItem('Plans');
-    } else if (pathname === '/') {
-      setActiveItem('Home');
-    }
-  }, [pathname]);
+  const isContact = pathname === '/contact';
+  const isDiet = pathname === '/diet' || pathname === '/dite';
+  const isGallery = pathname === '/gallery';
+  const isAbout = pathname === '/about';
+  const isPlans = pathname === '/plans';
+  const isHome = pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,18 +62,17 @@ export function Navbar() {
             <ul className="flex items-center gap-1">
               {navigationItems.map((item) => {
                 const isActive =
-                  (pathname === '/contact' && item.label === 'Contact') ||
-                  ((pathname === '/diet' || pathname === '/dite') && item.label === 'Diet') ||
-                  (pathname === '/gallery' && item.label === 'Gallery') ||
-                  (pathname === '/about' && item.label === 'About') ||
-                  (pathname === '/plans' && item.label === 'Plans') ||
-                  (pathname === '/' && activeItem === item.label);
+                  (isContact && item.label === 'Contact') ||
+                  (isDiet && item.label === 'Diet') ||
+                  (isGallery && item.label === 'Gallery') ||
+                  (isAbout && item.label === 'About') ||
+                  (isPlans && item.label === 'Plans') ||
+                  (isHome && item.label === 'Home');
 
                 return (
                   <li key={item.label} className="relative">
                     <Link
                       href={item.href}
-                      onClick={() => setActiveItem(item.label)}
                       className={`relative px-5 py-2 text-xs uppercase font-heading font-bold tracking-widest transition-all duration-300 rounded-full block select-none ${
                         isActive
                           ? 'text-white'
@@ -236,12 +213,12 @@ export function Navbar() {
               <ul className="space-y-3">
                 {navigationItems.map((item, index) => {
                   const isActive =
-                    (pathname === '/contact' && item.label === 'Contact') ||
-                    ((pathname === '/diet' || pathname === '/dite') && item.label === 'Diet') ||
-                    (pathname === '/gallery' && item.label === 'Gallery') ||
-                    (pathname === '/about' && item.label === 'About') ||
-                    (pathname === '/plans' && item.label === 'Plans') ||
-                    (pathname === '/' && activeItem === item.label);
+                    (isContact && item.label === 'Contact') ||
+                    (isDiet && item.label === 'Diet') ||
+                    (isGallery && item.label === 'Gallery') ||
+                    (isAbout && item.label === 'About') ||
+                    (isPlans && item.label === 'Plans') ||
+                    (isHome && item.label === 'Home');
 
                   return (
                     <motion.li
@@ -253,7 +230,6 @@ export function Navbar() {
                       <Link
                         href={item.href}
                         onClick={() => {
-                          setActiveItem(item.label);
                           setMobileMenuOpen(false);
                         }}
                         className={`flex items-center justify-between py-3 text-xl font-display font-bold uppercase tracking-wider transition-colors border-b border-white/5 ${

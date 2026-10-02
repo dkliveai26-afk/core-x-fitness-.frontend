@@ -85,9 +85,9 @@ export function PlansPricingCards({
     }
   }, [plans]);
 
-  // Client-side synchronization if initial props were not passed
+  // Client-side fallback synchronization only if initial props were not passed
   useEffect(() => {
-    if (!initialPlans) {
+    if (!initialPlans || initialPlans.length === 0) {
       fetch('/api/plans')
         .then((res) => res.json())
         .then((data) => {
