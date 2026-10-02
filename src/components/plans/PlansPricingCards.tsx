@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthModal } from '@/context/AuthModalContext';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useAuth } from '@clerk/nextjs';
 import { Check, ArrowRight, Sparkles, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
 import { playSuccessSound } from '@/lib/sound';
 import { PlanItem, OfferBannerItem } from '@/types/database';
@@ -22,6 +23,7 @@ export function PlansPricingCards({
 }: PlansPricingCardsProps) {
   const { openModal } = useAuthModal();
   const { isSignedIn, user } = useUser();
+  const { getToken } = useAuth();
 
   const [plans, setPlans] = useState<PlanItem[]>(() => {
     if (initialPlans && initialPlans.length > 0) return initialPlans;
@@ -145,9 +147,24 @@ export function PlansPricingCards({
     setBookingError('');
 
     try {
+      let token: string | null = null;
+      try {
+        token = await getToken();
+      } catch (tokenErr) {
+        console.warn('Notice: getToken in PlansPricingCards:', tokenErr);
+      }
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch('/api/bookings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
+        credentials: 'same-origin',
         body: JSON.stringify({
           customerName: bookingForm.name.trim(),
           email: bookingForm.email.trim(),
@@ -567,12 +584,22 @@ export function PlansPricingCards({
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => setSelectedPlan(null)}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white font-heading font-bold uppercase tracking-widest text-xs shadow-[0_0_25px_rgba(16,185,129,0.35)] hover:shadow-[0_0_35px_rgba(16,185,129,0.55)] hover:brightness-110 transition-all"
-                  >
-                    Return to Plans
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+                    <Link
+                      href="/profile"
+                      onClick={() => setSelectedPlan(null)}
+                      className="flex-1 py-3.5 rounded-xl bg-red-gradient text-white font-heading font-bold uppercase tracking-widest text-xs shadow-glow-red hover:brightness-110 active:scale-95 transition-all text-center flex items-center justify-center gap-1.5"
+                    >
+                      <span>View in My Membership</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                    <button
+                      onClick={() => setSelectedPlan(null)}
+                      className="flex-1 py-3.5 rounded-xl bg-white/[0.05] border border-white/10 hover:bg-white/10 text-white font-heading font-bold uppercase tracking-widest text-xs transition-all"
+                    >
+                      Return to Plans
+                    </button>
+                  </div>
                 </div>
               )}
             </motion.div>

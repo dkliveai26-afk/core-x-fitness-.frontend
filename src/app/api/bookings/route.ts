@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
-import { auth } from '@clerk/nextjs/server';
+import { getAuthenticatedClerkUser } from '@/lib/server-auth';
+import { createClerkClient } from '@clerk/backend';
 import { upsertContact } from '@/lib/email/contacts-service';
 import {
   sendCustomerBookingConfirmation,
@@ -9,13 +10,8 @@ import {
 
 export async function POST(req: NextRequest) {
   try {
-    let clerkUserId: string | null = null;
-    try {
-      const authData = await auth();
-      clerkUserId = authData?.userId || null;
-    } catch {
-      // Clerk auth optional on booking form
-    }
+    // 1. Resolve Clerk User ID server-side via robust multi-layer auth
+    let { userId: clerkUserId } = await getAuthenticatedClerkUser(req);
 
     const body = await req.json().catch(() => ({}));
     const {
@@ -38,10 +34,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Valid email address is required' }, { status: 400 });
     }
 
-    const db = await getDatabase();
-    const collection = db.collection('bookings');
-
-    const now = new Date().toISOString();
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = customerName.trim();
     const cleanPhone = phone ? String(phone).trim() : '';
@@ -49,7 +41,45 @@ export async function POST(req: NextRequest) {
     const cleanPrice = planPrice?.trim() || 'Custom';
     const cleanPeriod = planPeriod?.trim() || '/month';
     const cleanBookingType = bookingType || 'MEMBERSHIP_ALLOCATION';
+    const now = new Date().toISOString();
     const cleanPreferredDate = preferredDate || now;
+
+    // If clerkUserId not from session header, check Clerk backend for verified matching email
+    if (!clerkUserId && process.env.CLERK_SECRET_KEY) {
+      try {
+        const clerk = createClerkClient({
+          secretKey: process.env.CLERK_SECRET_KEY.trim().replace(/^["']|["']$/g, ''),
+        });
+        const clerkUsers = await clerk.users.getUserList({ emailAddress: [cleanEmail] });
+        if (clerkUsers.data && clerkUsers.data.length > 0) {
+          clerkUserId = clerkUsers.data[0].id;
+        }
+      } catch (clerkErr) {
+        console.warn('Non-critical: Clerk user match lookup notice:', clerkErr);
+      }
+    }
+
+    const db = await getDatabase();
+    const collection = db.collection('bookings');
+
+    // 2. Duplicate booking protection: Prevent accidental rapid double-submissions within 30 seconds
+    const thirtySecondsAgo = new Date(Date.now() - 30 * 1000).toISOString();
+    const recentDuplicate = await collection.findOne({
+      email: cleanEmail,
+      planName: cleanPlan,
+      createdAt: { $gte: thirtySecondsAgo },
+    });
+
+    if (recentDuplicate) {
+      return NextResponse.json(
+        {
+          success: true,
+          message: 'Membership reservation already confirmed with VIP concierge.',
+          id: recentDuplicate._id.toString(),
+        },
+        { status: 200 }
+      );
+    }
 
     const newBooking = {
       customerName: cleanName,
@@ -71,8 +101,7 @@ export async function POST(req: NextRequest) {
     const result = await collection.insertOne(newBooking);
     const bookingId = result.insertedId.toString();
 
-    // 1. Asynchronously store / normalize customer in marketing contacts registry
-    // Non-blocking: failures in contact upsert or email dispatch must never fail the booking
+    // 3. Asynchronously store / normalize customer in marketing contacts registry
     try {
       await upsertContact({
         email: cleanEmail,
@@ -86,8 +115,7 @@ export async function POST(req: NextRequest) {
       console.error('Non-critical: Failed to upsert contact from booking:', contactErr);
     }
 
-    // 2. Asynchronously dispatch Customer Confirmation & Admin Notification
-    // Wrapped in Promise.allSettled so email server failure never crashes or blocks booking
+    // 4. Asynchronously dispatch Customer Confirmation & Admin Notification
     Promise.allSettled([
       sendCustomerBookingConfirmation({
         _id: bookingId,

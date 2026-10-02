@@ -8,8 +8,9 @@ import { useAuthModal } from '@/context/AuthModalContext';
 import { Logo } from '@/components/brand/Logo';
 import { Button } from '@/components/common/Button';
 import { navigationItems } from '@/data/site';
-import { Menu, X, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { Menu, X, ArrowUpRight, ShieldCheck, Dumbbell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MyMembershipSection } from '@/components/profile/MyMembershipSection';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -110,15 +111,19 @@ export function Navbar() {
               <SignedIn>
                 <div className="flex items-center gap-3">
                   {user && (
-                    <div className="hidden sm:flex flex-col items-end text-right leading-tight select-none">
-                      <span className="text-xs font-heading font-bold text-white uppercase tracking-wider truncate max-w-[150px]">
+                    <Link
+                      href="/profile"
+                      className="hidden sm:flex flex-col items-end text-right leading-tight select-none group focus:outline-none"
+                      title="View Athlete Profile & Membership"
+                    >
+                      <span className="text-xs font-heading font-bold text-white group-hover:text-core-red transition-colors uppercase tracking-wider truncate max-w-[150px]">
                         {user.fullName || user.firstName || 'Athlete'}
                       </span>
-                      <span className="text-[10px] font-mono text-core-red uppercase tracking-widest font-semibold flex items-center gap-1">
+                      <span className="text-[10px] font-mono text-core-red uppercase tracking-widest font-semibold flex items-center gap-1 group-hover:underline">
                         <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse" />
-                        Member Portal
+                        My Membership
                       </span>
-                    </div>
+                    </Link>
                   )}
                   <UserButton
                     userProfileMode="modal"
@@ -143,7 +148,24 @@ export function Navbar() {
                         userButtonPopoverFooter: 'hidden',
                       },
                     }}
-                  />
+                  >
+                    <UserButton.UserProfilePage
+                      label="My Membership"
+                      url="membership"
+                      labelIcon={<Dumbbell className="w-4 h-4 text-core-red" />}
+                    >
+                      <div className="p-4 sm:p-6 bg-[#0B0D11] min-h-full">
+                        <MyMembershipSection inClerkModal={true} showHeader={true} />
+                      </div>
+                    </UserButton.UserProfilePage>
+                    <UserButton.MenuItems>
+                      <UserButton.Link
+                        label="My Membership Portal"
+                        href="/profile"
+                        labelIcon={<Dumbbell className="w-4 h-4 text-core-red" />}
+                      />
+                    </UserButton.MenuItems>
+                  </UserButton>
                 </div>
               </SignedIn>
             </div>
@@ -174,7 +196,24 @@ export function Navbar() {
                         'bg-[#0B0D11]/95 backdrop-blur-2xl border border-white/12 text-white shadow-[0_25px_60px_rgba(0,0,0,0.95)] rounded-2xl p-2',
                     },
                   }}
-                />
+                >
+                  <UserButton.UserProfilePage
+                    label="My Membership"
+                    url="membership"
+                    labelIcon={<Dumbbell className="w-4 h-4 text-core-red" />}
+                  >
+                    <div className="p-3 sm:p-5 bg-[#0B0D11] min-h-full">
+                      <MyMembershipSection inClerkModal={true} showHeader={true} />
+                    </div>
+                  </UserButton.UserProfilePage>
+                  <UserButton.MenuItems>
+                    <UserButton.Link
+                      label="My Membership Portal"
+                      href="/profile"
+                      labelIcon={<Dumbbell className="w-4 h-4 text-core-red" />}
+                    />
+                  </UserButton.MenuItems>
+                </UserButton>
               </SignedIn>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -261,7 +300,12 @@ export function Navbar() {
                 </Button>
               </SignedOut>
               <SignedIn>
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/10">
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-core-red/50 active:scale-[0.99] transition-all group"
+                  title="View Athlete Profile & My Membership"
+                >
                   <div className="space-y-0.5">
                     <span className="text-[10px] font-mono tracking-widest text-core-red uppercase block font-bold flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-core-red animate-pulse" />
@@ -269,6 +313,9 @@ export function Navbar() {
                     </span>
                     <span className="text-sm font-heading font-bold text-white uppercase truncate block max-w-[200px]">
                       {user?.fullName || user?.firstName || 'Member'}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400 block group-hover:text-core-red transition-colors">
+                      My Membership & Bookings →
                     </span>
                   </div>
                   <div className="w-9 h-9 rounded-full ring-2 ring-core-red/80 overflow-hidden shadow-glow-red flex items-center justify-center">
@@ -284,7 +331,7 @@ export function Navbar() {
                       </div>
                     )}
                   </div>
-                </div>
+                </Link>
               </SignedIn>
               <div className="text-center text-xs font-mono text-core-muted uppercase tracking-widest">
                 24/7 Biometric Access • 740 Grand Avenue

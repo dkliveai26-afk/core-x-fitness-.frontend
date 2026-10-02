@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import { ADMIN_COOKIE_NAME } from "@/lib/admin-constants";
 
 /**
@@ -24,7 +25,7 @@ function isTokenStructureValid(token?: string): boolean {
   }
 }
 
-export function middleware(req: NextRequest) {
+export default clerkMiddleware((_auth, req) => {
   const { pathname } = req.nextUrl;
   const lowerPath = pathname.toLowerCase();
 
@@ -43,7 +44,7 @@ export function middleware(req: NextRequest) {
   }
 
   // Normalization for known public routes
-  const knownPages = ["/about", "/plans", "/gallery", "/diet", "/contact", "/sign-in", "/sign-up"];
+  const knownPages = ["/about", "/plans", "/gallery", "/diet", "/contact", "/profile", "/sign-in", "/sign-up"];
   if (pathname !== lowerPath && knownPages.includes(lowerPath)) {
     const url = req.nextUrl.clone();
     url.pathname = lowerPath;
@@ -92,7 +93,7 @@ export function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
