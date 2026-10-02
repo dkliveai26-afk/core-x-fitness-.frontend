@@ -247,8 +247,17 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
       );
     }
 
-    // Mark as completed
-    const finalStatus = sentCount > 0 ? 'SENT' : failedCount > 0 ? 'FAILED' : 'SENT';
+    // Mark as completed with exact status
+    const completedAt = new Date().toISOString();
+    const finalStatus: 'SENT' | 'PARTIALLY_FAILED' | 'FAILED' =
+      sentCount === recipients.length
+        ? 'SENT'
+        : sentCount > 0 && failedCount > 0
+        ? 'PARTIALLY_FAILED'
+        : failedCount > 0
+        ? 'FAILED'
+        : 'SENT';
+
     await campaignsCol.updateOne(
       { _id: new ObjectId(campaignId) },
       {
@@ -256,7 +265,8 @@ export async function dispatchCampaignInBackground(campaignId: string): Promise<
           status: finalStatus,
           sentCount,
           failedCount,
-          updatedAt: new Date().toISOString(),
+          completedAt,
+          updatedAt: completedAt,
         },
       }
     );

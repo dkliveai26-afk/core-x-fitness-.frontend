@@ -8,9 +8,11 @@ export type EmailType =
 
 export type EmailDeliveryStatus =
   | 'DRAFT'
+  | 'READY'
   | 'QUEUED'
   | 'SENDING'
   | 'SENT'
+  | 'PARTIALLY_FAILED'
   | 'FAILED'
   | 'CANCELLED';
 
@@ -75,7 +77,10 @@ export interface EmailCampaign {
   totalEligibleRecipients: number;
   sentCount: number;
   failedCount: number;
+  skippedCount?: number;
   scheduledAt?: string;
+  startedAt?: string;
+  completedAt?: string;
   sentAt?: string;
   createdBy?: {
     id: string;

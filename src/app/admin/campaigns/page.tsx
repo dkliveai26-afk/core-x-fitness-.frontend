@@ -643,13 +643,15 @@ export default function AdminCampaignsPage() {
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
                             c.status === 'SENT'
                               ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                              : c.status === 'PARTIALLY_FAILED'
+                              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                               : c.status === 'SENDING'
-                              ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse'
+                              ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30 animate-pulse'
                               : c.status === 'FAILED'
                               ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
                               : 'bg-slate-500/15 text-slate-400 border border-slate-500/30'
                           }`}>
-                            {c.status}
+                            {c.status.replace('_', ' ')}
                           </span>
                           <span className="text-[10px] font-mono text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
                             ID: {c._id}
