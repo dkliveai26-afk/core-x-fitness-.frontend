@@ -45,10 +45,14 @@ export async function getAuthenticatedClerkUser(
   let userId: string | null = null;
   const verifiedEmails: string[] = [];
 
-  const rawSecret = process.env.CLERK_SECRET_KEY || '';
+  const rawSecret =
+    process.env.CLERK_SECRET_KEY ||
+    'sk_test_fe4N9jHveG0FJ2ojRtKPNroBMtuk2TaHTQD5UZ9uL2';
   const secretKey = rawSecret.trim().replace(/^["']|["']$/g, '');
 
-  const rawPub = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '';
+  const rawPub =
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+    'pk_test_bmljZS1yaW5ndGFpbC05NzcyLmNsZXJrLmFjY291bnRzLmRldiQ';
   const publishableKey = rawPub.trim().replace(/^["']|["']$/g, '');
 
   // Layer 1: Next.js App Router auth()

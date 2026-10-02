@@ -68,7 +68,7 @@ export function getClientPromise(): Promise<MongoClient> {
  */
 export async function getDatabase(dbName?: string): Promise<Db> {
   const clientInstance = await getClientPromise();
-  const targetDb = dbName || process.env.MONGODB_DB || undefined;
+  const targetDb = dbName || process.env.MONGODB_DB || 'corexfitness';
   return clientInstance.db(targetDb);
 }
 

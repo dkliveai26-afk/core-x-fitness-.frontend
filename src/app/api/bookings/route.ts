@@ -45,10 +45,15 @@ export async function POST(req: NextRequest) {
     const cleanPreferredDate = preferredDate || now;
 
     // If clerkUserId not from session header, check Clerk backend for verified matching email
-    if (!clerkUserId && process.env.CLERK_SECRET_KEY) {
+    const bookingSecretKey =
+      (process.env.CLERK_SECRET_KEY || 'sk_test_fe4N9jHveG0FJ2ojRtKPNroBMtuk2TaHTQD5UZ9uL2')
+        .trim()
+        .replace(/^["']|["']$/g, '');
+
+    if (!clerkUserId && bookingSecretKey) {
       try {
         const clerk = createClerkClient({
-          secretKey: process.env.CLERK_SECRET_KEY.trim().replace(/^["']|["']$/g, ''),
+          secretKey: bookingSecretKey,
         });
         const clerkUsers = await clerk.users.getUserList({ emailAddress: [cleanEmail] });
         if (clerkUsers.data && clerkUsers.data.length > 0) {
