@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { clerkMiddleware } from "@clerk/nextjs/server";
 import { ADMIN_COOKIE_NAME } from "@/lib/admin-constants";
 
 /**
@@ -25,7 +24,7 @@ function isTokenStructureValid(token?: string): boolean {
   }
 }
 
-export default clerkMiddleware((_auth, req) => {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const lowerPath = pathname.toLowerCase();
 
@@ -93,7 +92,7 @@ export default clerkMiddleware((_auth, req) => {
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
