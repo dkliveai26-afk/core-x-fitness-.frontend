@@ -24,12 +24,12 @@ export const contactDetails = {
   description:
     'Whether booking an architectural facility tour, requesting biometric assessment data, or securing membership admission, our executive concierge responds within 2 hours.',
   facility: {
-    name: 'CORE X FITNESS FLAGSHIP',
-    address: '740 Grand Avenue, Metropolis Corridor',
-    area: 'Salt Lake Sector V, Kolkata, WB 700091',
-    landmark: 'Adjacent to Olympic Plaza & Technopolis',
-    coordinates: '22.5804° N, 88.4378° E',
-    mapUrl: 'https://maps.google.com/?q=Salt+Lake+Sector+V+Kolkata',
+    name: 'CORE X FITNESS',
+    address: 'Debaipukur, Bhadrakali',
+    area: 'Uttarpara, Hooghly, West Bengal 712232',
+    landmark: 'Bireswar Banerjee Street, Above HDFC Bank',
+    coordinates: '22.6869° N, 88.3470° E',
+    mapUrl: 'https://www.google.com/maps/search/?api=1&query=CORE+X+FITNESS,+Bhadrakali,+Uttarpara,+Debaipukur,+West+Bengal+712232',
   },
   channels: {
     phonePrimary: '+91 (033) 2460-CORE',
@@ -39,8 +39,8 @@ export const contactDetails = {
     emailAdmissions: 'admissions@corexfitness.com',
   },
   hours: {
-    weekdays: '05:00 — 23:00',
-    weekends: '06:00 — 21:00',
+    weekdays: '06:00 — 23:00',
+    weekends: '06:00 — 23:00',
     biometricAccess: '24/7 Continuous Access for Black Tier & Founders',
   },
 };
@@ -72,12 +72,12 @@ export const contactCards: ContactChannel[] = [
     id: 'location',
     iconName: 'map-pin',
     label: 'SANCTUARY // COORDINATES',
-    title: 'Kolkata Flagship',
-    primary: '740 Grand Avenue, Sector V',
-    secondary: 'Salt Lake, Kolkata 700091',
-    actionUrl: 'https://maps.google.com/?q=Salt+Lake+Sector+V+Kolkata',
+    title: 'Core X Facility',
+    primary: 'Bhadrakali, Uttarpara',
+    secondary: 'Debaipukur, West Bengal 712232',
+    actionUrl: 'https://www.google.com/maps/search/?api=1&query=CORE+X+FITNESS,+Bhadrakali,+Uttarpara,+Debaipukur,+West+Bengal+712232',
     actionLabel: 'View On Maps',
-    badge: 'VALET PARKING',
+    badge: 'OPEN 06:00-23:00',
   },
   {
     id: 'hours',

@@ -33,6 +33,8 @@ export async function GET() {
       'Athlete Name': b.customerName || 'N/A',
       'Email Address': b.email || 'N/A',
       'Phone Number': b.phone || 'N/A',
+      'State': b.state || 'West Bengal',
+      'City': b.city || 'Kolkata',
       'Selected Plan / Service': b.planName || 'N/A',
       'Price': b.planPrice || 'N/A',
       'Billing Period': b.planPeriod || 'N/A',

@@ -86,9 +86,13 @@ export function ClosingCTASection() {
         {/* Minimal Location & Contact Details with Staggered Entrance */}
         <div className="pt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 border-t border-white/10 text-xs font-mono text-core-muted uppercase tracking-widest max-w-3xl mx-auto">
           {[
-            { icon: MapPin, text: '740 GRAND AVE, KOLKATA' },
-            { icon: Phone, text: '+1 (800) 555-CORE' },
-            { icon: Mail, text: 'CONCIERGE@COREX.COM' },
+            {
+              icon: MapPin,
+              text: 'UTTARPARA, WEST BENGAL',
+              href: 'https://www.google.com/maps/search/?api=1&query=CORE+X+FITNESS,+Bhadrakali,+Uttarpara,+Debaipukur,+West+Bengal+712232',
+            },
+            { icon: Phone, text: '+91 98300 12345', href: 'tel:+919830012345' },
+            { icon: Mail, text: 'CONCIERGE@COREXFITNESS.COM', href: 'mailto:concierge@corexfitness.com' },
           ].map((item, idx) => (
             <motion.div
               key={item.text}
@@ -96,10 +100,17 @@ export function ClosingCTASection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.9, delay: 0.5 + idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-center justify-center gap-2"
+              className="flex items-center justify-center"
             >
-              <item.icon className="w-4 h-4 text-core-red" />
-              <span>{item.text}</span>
+              <a
+                href={item.href}
+                target={item.href.startsWith('http') ? '_blank' : undefined}
+                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="flex items-center justify-center gap-2 hover:text-white transition-colors"
+              >
+                <item.icon className="w-4 h-4 text-core-red shrink-0" />
+                <span>{item.text}</span>
+              </a>
             </motion.div>
           ))}
         </div>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthModal } from '@/context/AuthModalContext';
 import { useUser, useAuth } from '@clerk/nextjs';
-import { Check, ArrowRight, Sparkles, ShieldCheck, X, CheckCircle2 } from 'lucide-react';
+import { Check, ArrowRight, Sparkles, ShieldCheck, X, CheckCircle2, ChevronDown } from 'lucide-react';
 import { playSuccessSound } from '@/lib/sound';
 import { PlanItem, OfferBannerItem } from '@/types/database';
 import { formatInrPrice, calculateDiscount, DEFAULT_PLANS } from '@/lib/plans-shared';
@@ -43,6 +43,8 @@ export function PlansPricingCards({
     name: '',
     email: '',
     phone: '',
+    state: 'West Bengal',
+    city: 'Kolkata',
     preferredDate: '',
     marketingOptIn: true,
   });
@@ -121,6 +123,8 @@ export function PlansPricingCards({
         name: user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Athlete Member',
         email: user.primaryEmailAddress?.emailAddress || '',
         phone: user.primaryPhoneNumber?.phoneNumber || '',
+        state: 'West Bengal',
+        city: 'Kolkata',
         preferredDate: new Date().toISOString().split('T')[0],
         marketingOptIn: true,
       });
@@ -129,6 +133,8 @@ export function PlansPricingCards({
         name: '',
         email: '',
         phone: '',
+        state: 'West Bengal',
+        city: 'Kolkata',
         preferredDate: new Date().toISOString().split('T')[0],
         marketingOptIn: true,
       });
@@ -140,6 +146,14 @@ export function PlansPricingCards({
     if (!selectedPlan) return;
     if (!bookingForm.name.trim() || !bookingForm.email.trim()) {
       setBookingError('Name and email are required.');
+      return;
+    }
+    if (!bookingForm.state.trim()) {
+      setBookingError('State is required.');
+      return;
+    }
+    if (!bookingForm.city.trim()) {
+      setBookingError('City is required.');
       return;
     }
 
@@ -169,6 +183,8 @@ export function PlansPricingCards({
           customerName: bookingForm.name.trim(),
           email: bookingForm.email.trim(),
           phone: bookingForm.phone.trim(),
+          state: bookingForm.state.trim(),
+          city: bookingForm.city.trim(),
           planName: selectedPlan.name,
           planPrice: formatInrPrice(selectedPlan.price),
           planPeriod: selectedPlan.duration,
@@ -500,6 +516,44 @@ export function PlansPricingCards({
                       </div>
                     </div>
 
+                    {/* State & City Dropdown Selection */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="booking-state" className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                          State *
+                        </label>
+                        <div className="relative">
+                          <select
+                            id="booking-state"
+                            required
+                            value={bookingForm.state}
+                            onChange={(e) => setBookingForm({ ...bookingForm, state: e.target.value })}
+                            className="w-full px-3.5 py-2.5 pr-9 rounded-xl bg-[#0D1016] border border-white/10 text-white text-xs font-sans focus:outline-none focus:border-core-red cursor-pointer appearance-none"
+                          >
+                            <option value="West Bengal" className="bg-[#0D1016] text-white">West Bengal</option>
+                          </select>
+                          <ChevronDown className="w-4 h-4 text-white/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor="booking-city" className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                          City *
+                        </label>
+                        <div className="relative">
+                          <select
+                            id="booking-city"
+                            required
+                            value={bookingForm.city}
+                            onChange={(e) => setBookingForm({ ...bookingForm, city: e.target.value })}
+                            className="w-full px-3.5 py-2.5 pr-9 rounded-xl bg-[#0D1016] border border-white/10 text-white text-xs font-sans focus:outline-none focus:border-core-red cursor-pointer appearance-none"
+                          >
+                            <option value="Kolkata" className="bg-[#0D1016] text-white">Kolkata</option>
+                          </select>
+                          <ChevronDown className="w-4 h-4 text-white/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
                         Preferred Walkthrough / Start Date
@@ -575,8 +629,12 @@ export function PlansPricingCards({
                       <span className="text-white">{bookingForm.email}</span>
                     </div>
                     <div className="flex justify-between">
+                      <span className="text-core-muted">LOCATION:</span>
+                      <span className="text-white">{bookingForm.city}, {bookingForm.state}</span>
+                    </div>
+                    <div className="flex justify-between">
                       <span className="text-core-muted">FACILITY:</span>
-                      <span className="text-white">Core X Kolkata Sanctuary</span>
+                      <span className="text-white">Core X Fitness, Debaipukur, Uttarpara</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-core-muted">RESPONSE PROTOCOL:</span>

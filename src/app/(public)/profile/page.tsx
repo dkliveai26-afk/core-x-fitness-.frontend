@@ -153,7 +153,7 @@ export default function ProfilePage() {
                   Home Facility
                 </span>
                 <span className="text-xs font-mono font-bold text-white truncate block">
-                  740 Grand Avenue
+                  Uttarpara Facility
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">

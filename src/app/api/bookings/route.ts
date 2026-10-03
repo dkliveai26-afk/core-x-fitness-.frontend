@@ -18,6 +18,8 @@ export async function POST(req: NextRequest) {
       customerName,
       email,
       phone,
+      state,
+      city,
       planName,
       planPrice,
       planPeriod,
@@ -34,9 +36,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Valid email address is required' }, { status: 400 });
     }
 
+    // Validate State (Required & Enum: "West Bengal")
+    if (!state || typeof state !== 'string' || state.trim() !== 'West Bengal') {
+      return NextResponse.json(
+        { error: 'State is required and must be "West Bengal".' },
+        { status: 400 }
+      );
+    }
+
+    // Validate City (Required & Enum: "Kolkata")
+    if (!city || typeof city !== 'string' || city.trim() !== 'Kolkata') {
+      return NextResponse.json(
+        { error: 'City is required and must be "Kolkata".' },
+        { status: 400 }
+      );
+    }
+
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = customerName.trim();
     const cleanPhone = phone ? String(phone).trim() : '';
+    const cleanState = state.trim();
+    const cleanCity = city.trim();
     const cleanPlan = planName?.trim() || 'Apex Athletic Tier';
     const cleanPrice = planPrice?.trim() || 'Custom';
     const cleanPeriod = planPeriod?.trim() || '/month';
@@ -90,6 +110,8 @@ export async function POST(req: NextRequest) {
       customerName: cleanName,
       email: cleanEmail,
       phone: cleanPhone,
+      state: cleanState,
+      city: cleanCity,
       planName: cleanPlan,
       planPrice: cleanPrice,
       planPeriod: cleanPeriod,
@@ -127,6 +149,8 @@ export async function POST(req: NextRequest) {
         customerName: cleanName,
         email: cleanEmail,
         phone: cleanPhone,
+        state: cleanState,
+        city: cleanCity,
         planName: cleanPlan,
         planPrice: cleanPrice,
         planPeriod: cleanPeriod,
@@ -138,6 +162,8 @@ export async function POST(req: NextRequest) {
         customerName: cleanName,
         email: cleanEmail,
         phone: cleanPhone,
+        state: cleanState,
+        city: cleanCity,
         planName: cleanPlan,
         planPrice: cleanPrice,
         planPeriod: cleanPeriod,

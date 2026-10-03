@@ -38,6 +38,8 @@ export async function GET(req: NextRequest) {
         { customerName: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
         { phone: { $regex: search, $options: 'i' } },
+        { city: { $regex: search, $options: 'i' } },
+        { state: { $regex: search, $options: 'i' } },
         { planName: { $regex: search, $options: 'i' } },
         { bookingType: { $regex: search, $options: 'i' } },
       ];

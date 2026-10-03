@@ -27,6 +27,8 @@ export interface BookingSubmission {
   customerName: string;
   email: string;
   phone: string;
+  state: string;
+  city: string;
   planName: string;
   planPrice: string;
   planPeriod: string;
@@ -35,6 +37,7 @@ export interface BookingSubmission {
   status: BookingStatus;
   notes?: AdminInternalNote[];
   clerkUserId?: string;
+  marketingOptIn?: boolean;
   createdAt: string;
   updatedAt: string;
 }

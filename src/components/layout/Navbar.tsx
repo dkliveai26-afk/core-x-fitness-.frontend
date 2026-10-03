@@ -334,7 +334,7 @@ export function Navbar() {
                 </Link>
               </SignedIn>
               <div className="text-center text-xs font-mono text-core-muted uppercase tracking-widest">
-                24/7 Biometric Access • 740 Grand Avenue
+                Debaipukur, Bhadrakali, Uttarpara
               </div>
             </div>
           </motion.div>

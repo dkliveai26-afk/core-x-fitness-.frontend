@@ -1330,7 +1330,7 @@ export default function AdminCampaignsPage() {
 
                   {/* Footer & Unsubscribe */}
                   <div className="p-3 bg-[#090C10] border-t border-white/5 text-center text-[8px] font-mono text-slate-500 space-y-1">
-                    <p>CORE X FITNESS // NOIDA, UP</p>
+                    <p>CORE X FITNESS // UTTARPARA, WEST BENGAL</p>
                     <p className="text-slate-600">
                       You are receiving this because you opted in. <span className="underline text-slate-400">Unsubscribe</span>
                     </p>
@@ -1666,7 +1666,7 @@ export default function AdminCampaignsPage() {
                   </div>
 
                   <div className="p-4 bg-[#090C10] border-t border-white/5 text-center text-[10px] font-mono text-slate-500 space-y-1">
-                    <p>CORE X FITNESS // SECTOR 14, NOIDA, UP</p>
+                    <p>CORE X FITNESS // UTTARPARA, WEST BENGAL</p>
                     <p className="text-slate-600">
                       You are receiving this because you opted in. <span className="underline text-slate-400">Unsubscribe</span>
                     </p>

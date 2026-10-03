@@ -86,19 +86,19 @@ export function AboutClosingCTA() {
             {
               icon: MapPin,
               title: 'LOCATION',
-              line1: '740 Grand Avenue',
-              line2: 'Metropolis Corridor, Kolkata',
+              line1: 'Debaipukur, Bhadrakali',
+              line2: 'Uttarpara, WB 712232',
             },
             {
               icon: Clock,
               title: 'OPERATING HOURS',
-              line1: '05:00 - 23:00 Daily',
+              line1: '06:00 - 23:00 Daily',
               line2: '24/7 Keycard for Elite Tier',
             },
             {
               icon: Phone,
               title: 'CONCIERGE DESK',
-              line1: '+1 (800) 555-CORE',
+              line1: '+91 98300 12345',
               line2: 'concierge@corexfitness.com',
             },
             {

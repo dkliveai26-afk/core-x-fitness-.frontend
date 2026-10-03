@@ -224,7 +224,7 @@ export function generateWelcomeConfirmationHtml({
                 CORE X FITNESS // PREMIER HIGH-PERFORMANCE TRAINING
               </p>
               <p style="margin: 0 0 8px 0; font-size: 11px; color: #475569;">
-                Sector 14, Main Athletic Boulevard, Noida, UP, India
+                Debaipukur, Bhadrakali, Uttarpara, Hooghly, West Bengal 712232
               </p>
               <p style="margin: 0; font-size: 10px; color: #475569;">
                 This transactional email was sent to ${email} to confirm your Core X Fitness account creation.
@@ -262,7 +262,7 @@ Get Started: ${portalUrl}
 Need help? Contact our Concierge Desk at support@corexfitness.com or +91 98765 43210.
 
 — Core X Fitness
-Sector 14, Noida, UP, India
+Debaipukur, Bhadrakali, Uttarpara, West Bengal 712232
   `.trim();
 
   return { html, text };
@@ -275,6 +275,8 @@ export function generateBookingConfirmationHtml({
   customerName,
   email,
   phone,
+  state,
+  city,
   planName,
   planPrice,
   planPeriod,
@@ -285,6 +287,8 @@ export function generateBookingConfirmationHtml({
   customerName: string;
   email: string;
   phone?: string;
+  state?: string;
+  city?: string;
   planName: string;
   planPrice: string;
   planPeriod?: string;
@@ -369,6 +373,16 @@ export function generateBookingConfirmationHtml({
                           #${shortId}
                         </td>
                       </tr>
+                      ${city || state ? `
+                      <tr>
+                        <td style="padding-bottom: 12px; font-size: 11px; font-family: monospace; color: #64748B; text-transform: uppercase; letter-spacing: 0.1em;">
+                          LOCATION:
+                        </td>
+                        <td style="padding-bottom: 12px; text-align: right; font-size: 13px; font-weight: 600; color: #FFFFFF;">
+                          ${city || 'Kolkata'}, ${state || 'West Bengal'}
+                        </td>
+                      </tr>
+                      ` : ''}
                       <tr>
                         <td style="padding-bottom: 12px; font-size: 11px; font-family: monospace; color: #64748B; text-transform: uppercase; letter-spacing: 0.1em;">
                           SELECTED TIER / PLAN:
@@ -421,10 +435,10 @@ export function generateBookingConfirmationHtml({
           <tr>
             <td style="padding: 24px 36px; background-color: #090C10; border-top: 1px solid rgba(255,255,255,0.04); text-align: center;">
               <p style="margin: 0 0 6px 0; font-size: 11px; color: #64748B; font-family: monospace;">
-                CORE X FITNESS FLAGSHIP FACILITY // SECTOR 14, NOIDA, UP
+                CORE X FITNESS FACILITY // UTTARPARA, HOOGHLY, WEST BENGAL
               </p>
               <p style="margin: 0; font-size: 11px; color: #475569;">
-                This transactional email was sent regarding your membership reservation #${shortId}.
+                Bhadrakali, Uttarpara, Debaipukur, West Bengal 712232
               </p>
             </td>
           </tr>
@@ -447,6 +461,7 @@ Your athletic reservation for ${planName} has been logged directly with our VIP 
 
 RESERVATION DETAILS:
 - Reference ID: #${shortId}
+- Location: ${city || 'Kolkata'}, ${state || 'West Bengal'}
 - Selected Tier: ${planName}
 - Rate: ${planPrice} ${planPeriod || ''}
 - Orientation Date: ${formattedDate}
@@ -461,7 +476,7 @@ Next Steps:
 Need help? Contact concierge at +91 98765 43210 or reply to this email.
 
 CORE X FITNESS
-Sector 14, Noida, UP
+Debaipukur, Bhadrakali, Uttarpara, West Bengal 712232
   `.trim();
 
   return { html, text };
@@ -474,6 +489,8 @@ export function generateAdminBookingNotificationHtml({
   customerName,
   email,
   phone,
+  state,
+  city,
   planName,
   planPrice,
   planPeriod,
@@ -485,6 +502,8 @@ export function generateAdminBookingNotificationHtml({
   customerName: string;
   email: string;
   phone?: string;
+  state?: string;
+  city?: string;
   planName: string;
   planPrice: string;
   planPeriod?: string;
@@ -546,6 +565,10 @@ export function generateAdminBookingNotificationHtml({
                         <td style="padding-bottom: 10px; text-align: right; font-size: 13px; font-weight: 700; color: #FFFFFF;">${customerName}</td>
                       </tr>
                       <tr>
+                        <td style="padding-bottom: 10px; font-size: 12px; font-family: monospace; color: #64748B;">LOCATION:</td>
+                        <td style="padding-bottom: 10px; text-align: right; font-size: 13px; font-weight: 700; color: #FF2A2A;">${city || 'Kolkata'}, ${state || 'West Bengal'}</td>
+                      </tr>
+                      <tr>
                         <td style="padding-bottom: 10px; font-size: 12px; font-family: monospace; color: #64748B;">EMAIL:</td>
                         <td style="padding-bottom: 10px; text-align: right; font-size: 13px; font-mono; color: #38BDF8;">
                           <a href="mailto:${email}" style="color: #38BDF8; text-decoration: none;">${email}</a>
@@ -596,6 +619,7 @@ export function generateAdminBookingNotificationHtml({
 [NEW ATHLETE RESERVATION]
 ==========================
 Athlete: ${customerName}
+Location: ${city || 'Kolkata'}, ${state || 'West Bengal'}
 Plan: ${planName} (${planPrice} ${planPeriod || ''})
 Email: ${email}
 Phone: ${phone || 'N/A'}
@@ -892,7 +916,7 @@ export function generateMarketingCampaignHtml({
                 CORE X FITNESS // PREMIER HIGH-PERFORMANCE TRAINING
               </p>
               <p style="margin: 0 0 12px 0; font-size: 11px; color: #475569;">
-                Sector 14, Main Athletic Boulevard, Noida, UP, India
+                Debaipukur, Bhadrakali, Uttarpara, Hooghly, West Bengal 712232
               </p>
               <p style="margin: 0; font-size: 11px; color: #64748B;">
                 You received this offer because you are registered with Core X Fitness with marketing updates enabled. 
@@ -934,7 +958,7 @@ ${ctaText && ctaUrl ? `\n--> ${ctaText}: ${ctaUrl}\n` : ''}
 ${footerNote ? `\nNote: ${footerNote}\n` : ''}
 
 ==========================================
-Core X Fitness, Sector 14, Noida, UP, India
+Core X Fitness, Debaipukur, Bhadrakali, Uttarpara, West Bengal 712232
 To unsubscribe from marketing emails, visit:
 ${unsubscribeUrl}
   `.trim();

@@ -11,10 +11,10 @@ export function ContactQuickCards() {
       icon: MapPin,
       iconBg: 'bg-core-red text-white shadow-glow-red',
       title: 'Address',
-      line1: '740 Grand Avenue, Sector V',
-      line2: 'Salt Lake, Kolkata - 700091',
-      actionUrl: 'https://maps.google.com/?q=Salt+Lake+Sector+V+Kolkata',
-      actionLabel: 'View on Map',
+      line1: 'Debaipukur, Bhadrakali',
+      line2: 'Uttarpara, West Bengal - 712232',
+      actionUrl: 'https://www.google.com/maps/search/?api=1&query=CORE+X+FITNESS,+Bhadrakali,+Uttarpara,+Debaipukur,+West+Bengal+712232',
+      actionLabel: 'Open in Google Maps',
     },
     {
       id: 'contact',
@@ -31,10 +31,10 @@ export function ContactQuickCards() {
       icon: Clock,
       iconBg: 'bg-white/[0.08] text-white border border-white/10 group-hover:border-core-red/40 group-hover:text-core-red',
       title: 'Opening Hours',
-      line1: 'Mon to Sat: 05:00 - 23:00',
-      line2: 'Sunday: 06:00 - 21:00 (24/7 Access)',
-      actionUrl: '#hours',
-      actionLabel: 'Biometric Access',
+      line1: 'Mon to Sun: 06:00 - 23:00',
+      line2: 'Above HDFC Bank, Bireswar Banerjee St',
+      actionUrl: '#contact-form',
+      actionLabel: 'Send Inquiry',
     },
   ];
 
@@ -76,6 +76,19 @@ export function ContactQuickCards() {
                   <p className="text-xs font-mono text-core-muted tracking-wide break-words">
                     {card.line2}
                   </p>
+                  {card.actionUrl && (
+                    <div className="pt-2">
+                      <a
+                        href={card.actionUrl}
+                        target={card.actionUrl.startsWith('http') ? '_blank' : undefined}
+                        rel={card.actionUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className="inline-flex items-center gap-1.5 text-xs font-mono text-core-red hover:text-white uppercase tracking-wider font-bold transition-colors group/link cursor-pointer"
+                      >
+                        <span>{card.actionLabel}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                      </a>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );

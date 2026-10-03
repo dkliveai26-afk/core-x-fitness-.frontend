@@ -80,10 +80,17 @@ export function ContactClosing() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 1.0, delay: 0.45 }}
-          className="pt-6 flex items-center justify-center gap-2 text-xs font-mono text-core-muted tracking-widest uppercase"
+          className="pt-6 flex items-center justify-center"
         >
-          <MapPin className="w-3.5 h-3.5 text-core-red" />
-          <span>740 GRAND AVENUE // SALT LAKE SECTOR V, KOLKATA</span>
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=CORE+X+FITNESS,+Bhadrakali,+Uttarpara,+Debaipukur,+West+Bengal+712232"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-xs font-mono text-core-muted hover:text-white tracking-widest uppercase transition-colors"
+          >
+            <MapPin className="w-3.5 h-3.5 text-core-red" />
+            <span>BHADRAKALI, UTTARPARA, DEBAIPUKUR, WEST BENGAL 712232</span>
+          </a>
         </motion.div>
       </div>
     </section>

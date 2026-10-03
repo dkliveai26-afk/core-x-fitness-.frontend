@@ -10,6 +10,7 @@ import {
   User,
   Phone,
   Mail,
+  MapPin,
   Download,
   FileSpreadsheet,
 } from 'lucide-react';
@@ -19,6 +20,8 @@ interface BookingItem {
   customerName: string;
   email: string;
   phone: string;
+  state?: string;
+  city?: string;
   planName: string;
   planPrice: string;
   bookingType: string;
@@ -255,6 +258,10 @@ export default function AdminBookingsPage() {
                               {b.phone}
                             </p>
                           )}
+                          <p className="text-[11px] text-core-red font-mono font-semibold flex items-center gap-1.5 pt-0.5">
+                            <MapPin className="w-3 h-3 text-core-red shrink-0" />
+                            <span>{b.city || 'Kolkata'}, {b.state || 'West Bengal'}</span>
+                          </p>
                         </div>
                       </td>
 

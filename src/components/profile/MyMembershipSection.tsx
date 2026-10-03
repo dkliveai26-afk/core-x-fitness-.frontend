@@ -25,6 +25,7 @@ import {
   Mail,
   ChevronRight,
   ExternalLink,
+  MapPin,
 } from 'lucide-react';
 
 export interface UserBooking {
@@ -32,6 +33,8 @@ export interface UserBooking {
   customerName: string;
   email: string;
   phone: string;
+  state?: string;
+  city?: string;
   planName: string;
   planPrice: string;
   planPeriod: string;
@@ -373,12 +376,16 @@ export function MyMembershipSection({
 
               {/* Card Top Pill Badge: CURRENT / LATEST */}
               <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-white/10">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-1 rounded-md bg-core-red text-white font-mono text-[10px] font-extrabold uppercase tracking-widest shadow-glow-red">
                     {bookings.length > 1 ? 'CURRENT / LATEST' : 'ACTIVE ALLOCATION'}
                   </span>
                   <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
                     {formatBookingType(currentBooking.bookingType)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono text-[10px]">
+                    <MapPin className="w-3 h-3 text-core-red" />
+                    {currentBooking.city || 'Kolkata'}, {currentBooking.state || 'West Bengal'}
                   </span>
                 </div>
                 <div>{renderStatusBadge(currentBooking.status)}</div>
@@ -482,7 +489,7 @@ export function MyMembershipSection({
                 <div className="flex items-center gap-2.5 text-slate-300">
                   <ShieldCheck className="w-4 h-4 text-core-red flex-shrink-0" />
                   <span className="font-sans">
-                    Present your <strong>Booking ID</strong> at the Core X concierge desk on 740 Grand Ave upon arrival.
+                    Present your <strong>Booking ID</strong> at the Core X concierge desk on Debaipukur, Uttarpara upon arrival.
                   </span>
                 </div>
                 <Link
@@ -528,6 +535,8 @@ export function MyMembershipSection({
                       </div>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 font-mono">
                         <span>ID: #{b._id.slice(-8).toUpperCase()}</span>
+                        <span>•</span>
+                        <span>Location: {b.city || 'Kolkata'}, {b.state || 'West Bengal'}</span>
                         <span>•</span>
                         <span>Booked: {formatDisplayDate(b.createdAt)}</span>
                         <span>•</span>

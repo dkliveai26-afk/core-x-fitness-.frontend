@@ -7,18 +7,19 @@ export const siteConfig = {
   description: 'Ultra-premium athletic club, high-performance training facility, and recovery laboratory built for relentless athletes and leaders.',
   url: 'https://corexfitness.com',
   address: {
-    street: '740 Grand Avenue, Olympic District',
-    city: 'Metropolis',
-    state: 'NY',
-    zip: '10001',
+    street: 'Debaipukur, Bhadrakali',
+    city: 'Uttarpara',
+    state: 'West Bengal',
+    zip: '712232',
+    landmark: 'Bireswar Banerjee Street, Above HDFC Bank',
   },
   contact: {
-    phone: '+1 (800) 555-CORE',
+    phone: '+91 98300 12345',
     email: 'concierge@corexfitness.com',
   },
   hours: {
-    weekdays: '05:00 - 23:00',
-    weekends: '06:00 - 21:00',
+    weekdays: '06:00 - 23:00',
+    weekends: '06:00 - 23:00',
     members247: '24/7 Biometric Keycard Access for Elite Tier',
   },
 };

@@ -317,6 +317,8 @@ export async function sendCustomerBookingConfirmation(booking: {
   customerName: string;
   email: string;
   phone?: string;
+  state?: string;
+  city?: string;
   planName: string;
   planPrice: string;
   planPeriod?: string;
@@ -327,6 +329,8 @@ export async function sendCustomerBookingConfirmation(booking: {
     customerName: booking.customerName,
     email: booking.email,
     phone: booking.phone,
+    state: booking.state,
+    city: booking.city,
     planName: booking.planName,
     planPrice: booking.planPrice,
     planPeriod: booking.planPeriod,
@@ -355,6 +359,8 @@ export async function sendAdminBookingNotification(booking: {
   customerName: string;
   email: string;
   phone?: string;
+  state?: string;
+  city?: string;
   planName: string;
   planPrice: string;
   planPeriod?: string;
@@ -366,6 +372,8 @@ export async function sendAdminBookingNotification(booking: {
     customerName: booking.customerName,
     email: booking.email,
     phone: booking.phone,
+    state: booking.state,
+    city: booking.city,
     planName: booking.planName,
     planPrice: booking.planPrice,
     planPeriod: booking.planPeriod,

@@ -60,6 +60,8 @@ export async function GET(req: NextRequest) {
       customerName: doc.customerName || 'Athlete Member',
       email: doc.email || '',
       phone: doc.phone || '',
+      state: doc.state || 'West Bengal',
+      city: doc.city || 'Kolkata',
       planName: doc.planName || 'Apex Athletic Tier',
       planPrice: doc.planPrice || 'Custom',
       planPeriod: doc.planPeriod || '/month',
